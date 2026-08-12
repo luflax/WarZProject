@@ -8,7 +8,7 @@ extern r3dPoint3D Level_Center;
 extern r3dPoint3D Level_Size;
 extern r3dPoint3D Level_Org;
 
-#include "menu/ct_menu.h"
+#include "ct_menu.h"   // [PORT] lives in Sources/UI
 
 #define GUIMODE_MAIN	0
 #define GUIMODE_STATS	3

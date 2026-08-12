@@ -1,22 +1,22 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "menu/m_Launcher.h"
+#include "m_Launcher.h"   // [PORT] lives in Sources/UI, not menu/
 #include "UI/UIElements.h"
-#include "menu/m_gui.h"
+#include "m_gui.h"   // [PORT] lives in Sources/UI
 
 #include "GameCommon.h"
 
-  #include "menu/m_LightEditor.h"
+  #include "m_LightEditor.h"   // [PORT] lives in Sources/UI
   Menu_LightEditor*    menu_LE = NULL;
 
-  #include "menu/m_ObjectEditor.h"
+  #include "m_ObjectEditor.h"   // [PORT] lives in Sources/UI
   Menu_ObjectEditor*   menu_OE = NULL;
 
-  #include "menu/m_SkyEditor.h"
+  #include "m_SkyEditor.h"   // [PORT] lives in Sources/UI
   Menu_SkyEditor*   menu_SE = NULL;
 
-#include "menu/m_BakeTool.h"
+#include "m_BakeTool.h"   // [PORT] lives in Sources/UI
   Menu_BakeTool* menu_BT = NULL;
 
 

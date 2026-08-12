@@ -13,8 +13,17 @@ CXX=${CXX:-i686-w64-mingw32-g++}
 FILE="${1:?usage: check.sh <file.cpp> [-f]}"
 FULL="${2:-}"
 
-INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
-DEFINES="-DWIN32 -D_WINDOWS -DWO_SERVER -DPX_PHYSX_STATIC_LIB -DNDEBUG"
+INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/ChilKat/Include -Isrc/External/ts3_sdk_3/include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
+# Defines depend on WHICH BINARY the file belongs to. EclipseStudio is the client
+# and its headers hard-#error if WO_SERVER is set ("client weapon.h included in
+# SERVER"); server/src is the server. Getting this wrong accounted for 22 of the
+# first 94 EclipseStudio failures.
+case "${TARGET:-$FILE}" in
+  *EclipseStudio*) BINARY_DEFINES="-DVEHICLES_ENABLED" ;;
+  *server*)        BINARY_DEFINES="-DWO_SERVER" ;;
+  *)               BINARY_DEFINES="-DWO_SERVER" ;;   # Eternity/GameEngine: smallest surface
+esac
+DEFINES="-DWIN32 -D_WINDOWS $BINARY_DEFINES -DPX_PHYSX_STATIC_LIB -DNDEBUG"
 FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"
 
 out=$($CXX $FLAGS $INCLUDES $DEFINES "$FILE" 2>&1)

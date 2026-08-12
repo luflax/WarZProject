@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "menu/m_gui.h"
+#include "m_gui.h"   // [PORT] lives in Sources/UI, not menu/
 #include "GameCommon.h"
 #include "multiplayer/P2PMessages.h"
 #include "ObjectsCode/AI/obj_AI_Base.h"
@@ -28,12 +28,12 @@ extern	int		UI_bDisplayHUDText;
 #include "NewLogic/SpellScripts.h"
 //#include "NewLogic\SpellManager.h" 
 
-#include "menu/m_ItemShop.h"
-#include "menu/m_CharInfo.h"
+#include "m_ItemShop.h"   // [PORT] lives in Sources/UI
+#include "m_CharInfo.h"   // [PORT] lives in Sources/UI
 
 #define USE_PARTICLE_EDITOR
 #ifdef USE_PARTICLE_EDITOR
-  #include "menu/m_Launcher.h"
+  #include "m_Launcher.h"   // [PORT] lives in Sources/UI
   Menu_Launcher* menu_ToolsLauncher = NULL;
 #endif 
 

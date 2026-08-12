@@ -18,8 +18,8 @@ fork is deliberately cut.
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
 | Source copied | ✅ `tools/bootstrap.sh` |
 | **Eternity** (engine core) | ✅ **81/81 TUs compile** — strict C++20, no `-fpermissive` |
-| **GameEngine** | 🟡 **36/46 TUs compile** — PhysX 4.1 vendored and ported; 10 remain (below) |
-| EclipseStudio (client + editors) | ⬜ not started (~471 files) |
+| **GameEngine** | 🟢 **42/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
+| **EclipseStudio** (client + editors) | 🟡 **149/224 TUs compile** |
 | server/src | ⬜ not started (~156 files) |
 | Milestone B — links | ⬜ not started |
 | Milestone C — runs to a known point | ⬜ not started |

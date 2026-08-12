@@ -91,6 +91,17 @@ enum Events
 
 //////////////////////////////////////////////////////////////////////////
 
+// [PORT] EditorMode was defined in obj_MechEvents.cpp but used by a member
+// declaration in this header. MSVC accepted the elaborated type specifier.
+enum EditorMode
+{
+	EDITORMODE_EVENTS,
+	EDITORMODE_BONE_PICK,
+	EDITORMODE_PARTICLE_PICK,
+	EDITORMODE_ACTIONS_PICK,
+	EDITORMODE_ACTION_FROM_LIB_PICK,
+};
+
 class EventSystem
 {
 	obj_Mech *owner;
@@ -107,7 +118,7 @@ class EventSystem
 	r3dTL::TArray<r3dTL::TArray<bool> > editorEventsExpanded;
 
 	/** Editor related. */
-	enum EditorMode editorMode;
+	EditorMode editorMode;
 	stringlist_t boneNames;
 	int *boneIndexToSet;
 	int PickBoneEditor(float scrx, float &scry);

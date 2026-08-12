@@ -1,9 +1,28 @@
+// PORT NOTE: this header uses Microsoft STL internal macros. libstdc++ has no
+// equivalents, so define them here:
+//   _THROW0()  MSVC's empty exception specification. throw() was REMOVED in C++20,
+//              so it maps to noexcept, which is what it always meant.
+//   _FARQ      a far-pointer qualifier left over from 16-bit Windows; expands to
+//              nothing on every modern target, MSVC included.
+#ifndef _MSC_VER
+  #ifndef _THROW0
+    #define _THROW0() noexcept
+  #endif
+  #ifndef _FARQ
+    #define _FARQ
+  #endif
+  #ifndef _THROW
+    #define _THROW(x, y) noexcept(false)
+  #endif
+#endif
+
 //=========================================================================
 //    Module: r3dSTLAllocators.h
 //=========================================================================
 
 #if     _MSC_VER > 1000 /*IFSTRIP=IGN*/
 #pragma once
+
 #endif
 #ifdef  _MSC_VER
 #pragma pack(push,8)

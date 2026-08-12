@@ -36,14 +36,24 @@ case "${2:-}" in
   --triage) TRIAGE=1 ;;
   --failed) ONLY_FAILED=1 ;;
 esac
-CACHE=".probe-failed"
+# Per-target: a single shared cache replayed the wrong tree's failures.
+CACHE=".probe-failed.$(echo "$TARGET" | tr "/" "_")"
 
-INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
+INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/ChilKat/Include -Isrc/External/ts3_sdk_3/include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
 
 # WO_SERVER strips rendering. PhysX 4.1 is now vendored (BSD-3), so DISABLE_PHYSX is
 # no longer set -- the real SDK headers are used. PX_PHYSX_STATIC_LIB avoids dllimport
 # decoration, which matters for a headers-only compile check.
-DEFINES="-DWIN32 -D_WINDOWS -DWO_SERVER -DPX_PHYSX_STATIC_LIB -DNDEBUG"
+# Defines depend on WHICH BINARY the file belongs to. EclipseStudio is the client
+# and its headers hard-#error if WO_SERVER is set ("client weapon.h included in
+# SERVER"); server/src is the server. Getting this wrong accounted for 22 of the
+# first 94 EclipseStudio failures.
+case "${TARGET:-$FILE}" in
+  *EclipseStudio*) BINARY_DEFINES="-DVEHICLES_ENABLED" ;;
+  *server*)        BINARY_DEFINES="-DWO_SERVER" ;;
+  *)               BINARY_DEFINES="-DWO_SERVER" ;;   # Eternity/GameEngine: smallest surface
+esac
+DEFINES="-DWIN32 -D_WINDOWS $BINARY_DEFINES -DPX_PHYSX_STATIC_LIB -DNDEBUG"
 # No -fpermissive: it masked ~70 real conformance errors behind one root cause
 # (Tsg_stl/TString.h calling unqualified r3dTL::Max). Strict is the honest gate.
 FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"

@@ -28,14 +28,7 @@ void r3dDrawIcon3D(const r3dPoint3D& pos, r3dTexture *icon, const r3dColor &Col,
 namespace MechFXEvents
 {
 
-enum EditorMode
-{
-	EDITORMODE_EVENTS,
-	EDITORMODE_BONE_PICK,
-	EDITORMODE_PARTICLE_PICK,
-	EDITORMODE_ACTIONS_PICK,
-	EDITORMODE_ACTION_FROM_LIB_PICK,
-};
+// [PORT] moved to obj_MechEvents.h -- it is used by a member declaration there.
 
 //////////////////////////////////////////////////////////////////////////
 

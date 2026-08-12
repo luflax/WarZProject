@@ -1,6 +1,6 @@
 #include "r3dPCH.h"
 
-#include <WindowsX.h>
+#include <windowsx.h>
 
 #include "r3d.h"
 #include "r3dLight.h"

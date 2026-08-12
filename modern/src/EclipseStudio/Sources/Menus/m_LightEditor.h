@@ -1,7 +1,7 @@
 #pragma once
 
-#include "menu/ct_menu.h"
-#include "menu/Tool_AxisControl.h"
+#include "ct_menu.h"   // [PORT] lives in Sources/UI
+#include "Tool_AxisControl.h"   // [PORT] lives in Sources/UI
 
 class Menu_LightEditor : public MenuLayer2
 {
