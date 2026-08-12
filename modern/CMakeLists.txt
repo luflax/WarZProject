@@ -44,6 +44,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 option(WARZ_BUILD_CLIENT       "Build the game client"                     ON)
 option(WARZ_BUILD_SERVER       "Build the three server binaries"           ON)
+option(WARZ_BUILD_TESTS        "Build the test suites"                     ON)
 option(WARZ_WARNINGS_AS_ERRORS "Treat warnings as errors (not yet)"        OFF)
 
 # --------------------------------------------------------------------------
@@ -95,6 +96,15 @@ endif()
 
 if(WARZ_BUILD_SERVER)
     add_subdirectory(server/src)          # SupervisorServer / MasterServer / GameServer
+endif()
+
+# Tests. Two tiers here -- a compile-only one that needs no runtime at all, and a
+# PE32 one that runs under Wine when it is available. A third, host-native tier is
+# configured separately (`cmake -B build-host -S tests`) because it needs the host
+# compiler rather than the cross-toolchain. tests/CMakeLists.txt explains the split.
+if(WARZ_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
 endif()
 
 # --------------------------------------------------------------------------
