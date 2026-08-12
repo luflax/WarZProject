@@ -156,6 +156,10 @@
 #include "PxPhysicsAPI.h"
 #include "CharacterKinematic/PxControllerManager.h"
 using namespace physx;
+#else
+// PORT NOTE: engine headers name PhysX types unconditionally (PhysObj.h:188),
+// so forward declarations are still needed when the SDK is compiled out.
+#include "PhysX/include/PxForwardDecls.h"
 #endif
 
 #define ENABLE_RAGDOLL 1

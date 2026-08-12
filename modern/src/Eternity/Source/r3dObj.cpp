@@ -1,4 +1,5 @@
 #include	"r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 
 #include	"r3d.h"
 
@@ -1243,7 +1244,7 @@ void r3dMesh::FillBuffers_SaveVertexData()
 	DoFillBuffers( false );
 }
 
-static void DoFillBuffersMeshMainThread( void* Ptr )
+/* [PORT] not static: declared friend elsewhere */ void DoFillBuffersMeshMainThread( void* Ptr )
 {
 	static_cast< r3dMesh* >( Ptr )->DoFillBuffersMainThread() ;
 }

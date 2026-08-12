@@ -167,7 +167,7 @@ private:
 
 	void		AdjustRadius(float rd1, float rd2);
 	r3dColor	GetColor() const;
-	void		SetColor(r3dColor &clr);
+	void		SetColor(const r3dColor &clr);
 inline	void		SetColor(float _R, float _G, float _B);
 	void		AdjustColor(float _R, float _G, float _B);
 inline	void		SetPosition(const r3dPoint3D& Pos);

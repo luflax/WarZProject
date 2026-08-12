@@ -1,6 +1,12 @@
 #pragma once
 
 
+// PORT NOTE: Min/Max live in namespace r3dTL (THelpers.h), but this header neither
+// included it nor qualified the calls. MSVC's lax two-phase lookup resolved them at
+// instantiation time; ISO C++ requires a declaration to be visible at definition
+// time for non-dependent names.
+#include "THelpers.h"
+
 //#define STATISTIC_STRING
 
 #ifdef STATISTIC_STRING
@@ -331,7 +337,7 @@ public:
 	{
 		assert ( sNeedle != NULL );
 
-		iOffset = Max(Min(iOffset, Length()), 0);
+		iOffset = r3dTL::Max(r3dTL::Min(iOffset, Length()), 0);
 		const char * sHaystack = GetDataPtr();
 		const char * pMatch = strstr(sHaystack+iOffset, sNeedle);
 		return pMatch
@@ -482,7 +488,7 @@ public:
 	void Chop ( int iCount=1 )
 	{
 		int iLen = Length ();
-		iCount = Min ( Max ( iCount, 1 ), iLen );
+		iCount = r3dTL::Min( r3dTL::Max( iCount, 1 ), iLen );
 
 		assert ( (iLen-iCount)>=0 );
 		assert ( (iLen-iCount)<=iLength );

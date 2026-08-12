@@ -78,7 +78,7 @@ virtual	int		DoModal() = 0;
 
 	int		mAddZone(int zone_id, int x, int y, int w, int h);
 	int		mFindZone(int zone_id);
-	ZoneInfo&	MenuLayer::mGetZone(int zone_id);
+	ZoneInfo&	mGetZone(int zone_id);
 
 	void		DisableZone(int ZoneID = -1);
 	void		EnableZone(int ZoneID = -1);

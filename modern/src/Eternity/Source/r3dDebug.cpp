@@ -199,7 +199,7 @@ cleanup:
 	return bExitCode;
 }
 */
-BOOL CALLBACK r3dCrashRptCallback(__reserved LPVOID lpvState)
+BOOL CALLBACK r3dCrashRptCallback(/* __reserved */ LPVOID lpvState)
 {
 	r3dCloseLogFile();
 	return TRUE;

@@ -1,4 +1,5 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "JobChief.h"
@@ -179,7 +180,13 @@ static	int		NumParticleCache = 0;
 static	r3dPoint3D	camSavedU, camSavedR;
 static	r3dPoint3D	rotVecU[360], rotVecR[360];
 
-#ifdef _MSC_VER
+// PORT NOTE: this block was wrapped in "#ifdef _MSC_VER" in the original source,
+// but ~20 of the symbols it declares (_ParticleIB, _unifiedVB, hwPS_Init,
+// r3dParticleSystemReleaseCachedData, the shader IDs...) are used further down
+// OUTSIDE the guard, so the file could never actually compile with it inactive.
+// The guard was vestigial, not a working port. The code is plain D3D9 plus engine
+// types and compiles cleanly under MinGW-GCC, so it is simply enabled.
+#if 1
 
 static	r3dIBuffer16*			_ParticleIB = NULL;
 static	r3dD3DVertexBufferTunnel _unifiedVB ; // Buffer to hold vertices

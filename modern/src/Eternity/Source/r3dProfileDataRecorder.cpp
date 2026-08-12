@@ -4,6 +4,7 @@
 //=========================================================================
 
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 
 #if !DISABLE_PROFILER
 

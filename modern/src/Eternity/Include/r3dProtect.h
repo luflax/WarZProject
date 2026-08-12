@@ -1,5 +1,11 @@
 #pragma once
 
+
+// PORT NOTE: r3dError is called from the r3dSec_string template below but was never
+// declared in this header. MSVC resolved it at instantiation time; ISO C++ requires
+// a visible declaration for a non-dependent name at definition time.
+extern const char* r3dError(const char*, ...);   // matches r3d.h:108
+
 #ifndef USE_VMPROTECT
   //@uncomment for VMProtect testing
   //#define USE_VMPROTECT 1 

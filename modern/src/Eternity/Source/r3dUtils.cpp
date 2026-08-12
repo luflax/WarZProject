@@ -165,9 +165,9 @@ float r3dPerfCounter::GetDiff()
 
 void r3dPerfCounter::GetCurrent(long &Hi, long &Lo)
 {
-  __asm rdtsc
-  __asm mov Hi, edx
-  __asm mov Lo, eax
+  const unsigned long long tsc = __rdtsc();
+  Hi = (long)(unsigned long)(tsc >> 32);
+  Lo = (long)(unsigned long)(tsc & 0xFFFFFFFFull);
 }
 
 //C

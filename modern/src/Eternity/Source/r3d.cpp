@@ -1,4 +1,16 @@
 #include "r3dPCH.h"
+
+// PORT NOTE: "__asm int 3" replaced with a portable debug-break.
+#ifndef R3D_DEBUGBREAK
+  #if defined(_MSC_VER)
+    #define R3D_DEBUGBREAK() __debugbreak()
+  #elif defined(__GNUC__) || defined(__clang__)
+    #define R3D_DEBUGBREAK() __builtin_trap()
+  #else
+    #define R3D_DEBUGBREAK() ((void)0)
+  #endif
+#endif
+
 #include "r3d.h"
 
 #include "r3dBackgroundTaskDispatcher.h"
@@ -3225,16 +3237,6 @@ char* wideToUtf8(const wchar_t* str)
 #ifdef _DEBUG
 #include <DbgHelp.h>
 
-// PORT NOTE: "__asm int 3" replaced with a portable debug-break.
-#ifndef R3D_DEBUGBREAK
-  #if defined(_MSC_VER)
-    #define R3D_DEBUGBREAK() __debugbreak()
-  #elif defined(__GNUC__) || defined(__clang__)
-    #define R3D_DEBUGBREAK() __builtin_trap()
-  #else
-    #define R3D_DEBUGBREAK() ((void)0)
-  #endif
-#endif
 
 #endif
 

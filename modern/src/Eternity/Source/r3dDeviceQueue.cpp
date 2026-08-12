@@ -67,7 +67,7 @@ void UnblockDeviceQueue()
 	LeaveCriticalSection( &gDeviceQueueCS ) ;
 }
 
-static void ProcessItem( const DeviceQueueItem& item )
+/* [PORT] not static: declared friend elsewhere */ void ProcessItem( const DeviceQueueItem& item )
 {
 	switch( item.Type )
 	{

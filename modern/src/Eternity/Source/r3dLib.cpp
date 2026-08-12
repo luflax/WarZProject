@@ -1,3 +1,9 @@
+// PORT NOTE: this file overrides MSVC STL internals (std::_String_base::_Xlen,
+// _Xran, _Xlength_error) to trim CRT dependencies. Those symbols exist only in
+// Microsoft's STL; libstdc++ has no equivalent and needs no such override.
+#include "r3dPCH.h"
+#ifdef _MSC_VER
+
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dLib.h"
@@ -15,21 +21,21 @@ namespace std
 
 	public:
 
-		static void _cdecl _Xlen(void);
+		static void __cdecl _Xlen(void);
 
-		static void _cdecl _Xran(void);
+		static void __cdecl _Xran(void);
 
 	};
 
 };
 
-void _cdecl std::_String_base::_Xlen(void)
+void __cdecl std::_String_base::_Xlen(void)
 {   // report a length_error
 
 	_Xlength_error("string too long");
 }
 
-void _cdecl std::_String_base::_Xran(void)
+void __cdecl std::_String_base::_Xran(void)
 
 {   // report an out_of_range error
 
@@ -240,3 +246,6 @@ void checkLicenseKey()
 	}
 #endif
 }
+
+
+#endif // _MSC_VER

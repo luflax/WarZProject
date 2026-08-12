@@ -32,12 +32,19 @@ INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseSt
 # WO_SERVER + DISABLE_PHYSX give the smallest compile surface: no rendering, no
 # PhysX. Prove the core compiles before adding subsystems back.
 DEFINES="-DWIN32 -D_WINDOWS -DWO_SERVER -DDISABLE_PHYSX"
-FLAGS="-std=c++20 -fsyntax-only -w -fpermissive"
+# No -fpermissive: it masked ~70 real conformance errors behind one root cause
+# (Tsg_stl/TString.h calling unqualified r3dTL::Max). Strict is the honest gate.
+FLAGS="-std=c++20 -fsyntax-only -w"
+
+# Files present on disk but NOT listed in the original .vcxproj -- dead legacy that
+# was never compiled. Verified by diffing Eternity.vcxproj's <ClCompile> entries
+# against Source/: r3dObj_OLDRender.cpp is the only one in the engine.
+EXCLUDE_RE='r3dObj_OLDRender\.cpp'
 
 if [[ -d "$TARGET" ]]; then
-  mapfile -t FILES < <(find "$TARGET" -name '*.cpp' -o -name '*.CPP' | sort)
+  mapfile -t FILES < <(find "$TARGET" -name '*.cpp' -o -name '*.CPP' | grep -Ev "$EXCLUDE_RE" | sort)
 else
-  mapfile -t FILES < <(compgen -G "$TARGET" || true)
+  mapfile -t FILES < <(compgen -G "$TARGET" | grep -Ev "$EXCLUDE_RE" || true)
 fi
 
 OUT=$(mktemp -d)

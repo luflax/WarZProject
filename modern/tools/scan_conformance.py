@@ -11,6 +11,11 @@ Two categories:
   MSVC   -- non-ISO constructs MSVC accepts
   CXX20  -- things removed or changed by C++17/C++20
 
+Checks marked HEURISTIC in their note are pattern-matches that cannot distinguish
+legal from illegal usage without semantic analysis. Eternity compiles 100% clean
+under strict GCC while still producing hits on those, so treat them as leads and
+confirm with tools/probe.sh -- never mass-apply a fix based on them alone.
+
 Usage:
     ./tools/scan_conformance.py                # summary counts
     ./tools/scan_conformance.py --detail       # every hit with file:line
@@ -92,6 +97,30 @@ CHECKS = [
     ("null-pure-specifier", "MSVC",
      r'^\s*virtual\b[^;=]*=\s*NULL\s*;',
      "'= NULL' as a pure specifier; ISO C++ requires the literal 0"),
+
+    # Found while driving Eternity to a clean strict build.
+    ("bare-sizeof-type", "MSVC",
+     r'\bsizeof\s+[A-Za-z_]\w*\s*[),;]',
+     "HEURISTIC: sizeof without parens. Legal on an expression, illegal on a "
+     "type name -- the regex cannot tell them apart. Verify with the compiler."),
+
+    ("single-underscore-cdecl", "MSVC",
+     r'(?<![_\w])_cdecl\b',
+     "pre-standard MSVC spelling; use __cdecl"),
+
+    ("extra-qualification", "MSVC",
+     r'^[ \t]+[\w:]+[ \t]*&?[ \t]*(\w+)::\w+[ \t]*\(',
+     "HEURISTIC: also matches legal indented out-of-line definitions. "
+     "Verify with the compiler before touching."),
+
+    ("msvc-stl-internals", "MSVC",
+     r'std::_(?:String_base|Xlen|Xran|Xlength_error|Container_base)',
+     "Microsoft STL internals; no libstdc++ equivalent"),
+
+    ("friend-then-static", "MSVC",
+     r'^\s*friend\s+(?:void|int|bool)\s+\w+\s*\(',
+     "HEURISTIC: friend gives external linkage; only a conflict if the "
+     "definition is later marked static."),
 
     ("friend-only-decl", "MSVC",
      r'^\s*friend\s+class\s+(\w+)\s*;',

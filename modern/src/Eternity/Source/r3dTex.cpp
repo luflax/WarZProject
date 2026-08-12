@@ -1900,7 +1900,7 @@ void r3dThumbnailTexture::LoadFullSizeTexture()
 
 //------------------------------------------------------------------------
 
-static void MakeThumbNailInMainThread( void * param )
+/* [PORT] not static: declared friend elsewhere */ void MakeThumbNailInMainThread( void * param )
 {
 	((r3dThumbnailTexture*)param)->DoMakeThumbnail();
 }

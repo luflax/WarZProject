@@ -32,6 +32,7 @@
 #include "d3dx9core.h"   // COM interface types (ID3DXBuffer, ID3DXInclude, ...)
 #include <cmath>
 #include <cstring>
+#include <utility>   // std::declval
 
 // ===========================================================================
 // Constants
@@ -77,7 +78,7 @@ struct D3DXVECTOR2
 
     D3DXVECTOR2() = default;
     D3DXVECTOR2(float x_, float y_) : x(x_), y(y_) {}
-    explicit D3DXVECTOR2(const float* p) : x(p[0]), y(p[1]) {}
+    D3DXVECTOR2(const float* p) : x(p[0]), y(p[1]) {}
 
     operator float*()             { return &x; }
     operator const float*() const { return &x; }
@@ -87,13 +88,24 @@ struct D3DXVECTOR2
     D3DXVECTOR2 operator*(float s) const              { return D3DXVECTOR2(x * s, y * s); }
 };
 
-struct D3DXVECTOR3
+// Derives from D3DVECTOR exactly as the real D3DX does, so D3DXVECTOR3 converts
+// to D3DVECTOR and the float* constructor is implicit (r3dPoint3D relies on it).
+struct D3DXVECTOR3 : public D3DVECTOR
 {
-    float x, y, z;
-
     D3DXVECTOR3() = default;
-    D3DXVECTOR3(float x_, float y_, float z_) : x(x_), y(y_), z(z_) {}
-    explicit D3DXVECTOR3(const float* p) : x(p[0]), y(p[1]), z(p[2]) {}
+    D3DXVECTOR3(float x_, float y_, float z_) { x = x_; y = y_; z = z_; }
+    D3DXVECTOR3(const float* p) { x = p[0]; y = p[1]; z = p[2]; }
+    D3DXVECTOR3(const D3DVECTOR& v) { x = v.x; y = v.y; z = v.z; }
+
+    // Accepts any type with operator const float*() -- e.g. r3dPoint3D -- as a
+    // single user-defined conversion.
+    template <class T, class = decltype(static_cast<const float*>(
+                                            std::declval<const T&>()))>
+    D3DXVECTOR3(const T& v)
+    {
+        const float* p = static_cast<const float*>(v);
+        x = p[0]; y = p[1]; z = p[2];
+    }
 
     operator float*()             { return &x; }
     operator const float*() const { return &x; }
@@ -118,7 +130,7 @@ struct D3DXVECTOR4
 
     D3DXVECTOR4() = default;
     D3DXVECTOR4(float x_, float y_, float z_, float w_) : x(x_), y(y_), z(z_), w(w_) {}
-    explicit D3DXVECTOR4(const float* p) : x(p[0]), y(p[1]), z(p[2]), w(p[3]) {}
+    D3DXVECTOR4(const float* p) : x(p[0]), y(p[1]), z(p[2]), w(p[3]) {}
 
     operator float*()             { return &x; }
     operator const float*() const { return &x; }
@@ -134,6 +146,21 @@ struct D3DXQUATERNION
 
     D3DXQUATERNION() = default;
     D3DXQUATERNION(float x_, float y_, float z_, float w_) : x(x_), y(y_), z(z_), w(w_) {}
+
+    // Hamilton product, D3DX argument order (this * rhs).
+    D3DXQUATERNION operator*(const D3DXQUATERNION& q) const
+    {
+        return D3DXQUATERNION(
+            w*q.x + x*q.w + y*q.z - z*q.y,
+            w*q.y - x*q.z + y*q.w + z*q.x,
+            w*q.z + x*q.y - y*q.x + z*q.w,
+            w*q.w - x*q.x - y*q.y - z*q.z);
+    }
+    D3DXQUATERNION& operator*=(const D3DXQUATERNION& q) { *this = *this * q; return *this; }
+    D3DXQUATERNION operator+(const D3DXQUATERNION& q) const
+    { return D3DXQUATERNION(x+q.x, y+q.y, z+q.z, w+q.w); }
+    D3DXQUATERNION operator*(float s) const
+    { return D3DXQUATERNION(x*s, y*s, z*s, w*s); }
 
     operator float*()             { return &x; }
     operator const float*() const { return &x; }
@@ -158,31 +185,24 @@ struct D3DXPLANE
 // which pokes ToExtrusionBox.m[3][0] directly.
 // ===========================================================================
 
-struct D3DXMATRIX
+// Derives from D3DMATRIX exactly as the real D3DX does. D3DMATRIX already supplies
+// the _11.._44 / m[4][4] anonymous union, and inheriting it is what allows a
+// D3DXMATRIX* to be passed to D3D9 entry points taking a const D3DMATRIX*.
+struct D3DXMATRIX : public D3DMATRIX
 {
-    union
-    {
-        struct
-        {
-            float _11, _12, _13, _14;
-            float _21, _22, _23, _24;
-            float _31, _32, _33, _34;
-            float _41, _42, _43, _44;
-        };
-        float m[4][4];
-    };
-
     D3DXMATRIX() = default;
+    D3DXMATRIX(const D3DMATRIX& o) : D3DMATRIX(o) {}
 
     D3DXMATRIX(float m11, float m12, float m13, float m14,
                float m21, float m22, float m23, float m24,
                float m31, float m32, float m33, float m34,
                float m41, float m42, float m43, float m44)
-        : _11(m11), _12(m12), _13(m13), _14(m14)
-        , _21(m21), _22(m22), _23(m23), _24(m24)
-        , _31(m31), _32(m32), _33(m33), _34(m34)
-        , _41(m41), _42(m42), _43(m43), _44(m44)
-    {}
+    {
+        _11 = m11; _12 = m12; _13 = m13; _14 = m14;
+        _21 = m21; _22 = m22; _23 = m23; _24 = m24;
+        _31 = m31; _32 = m32; _33 = m33; _34 = m34;
+        _41 = m41; _42 = m42; _43 = m43; _44 = m44;
+    }
 
     explicit D3DXMATRIX(const float* p) { std::memcpy(m, p, sizeof(m)); }
 
@@ -817,13 +837,6 @@ struct D3DXMACRO
     LPCSTR Definition;
 };
 
-enum D3DXINCLUDE_TYPE
-{
-    D3DXINC_LOCAL  = 0,
-    D3DXINC_SYSTEM = 1,
-    D3DXINC_FORCE_DWORD = 0x7fffffff
-};
-
 // --- image info -----------------------------------------------------------
 
 inline HRESULT D3DXGetImageInfoFromFileA(LPCSTR, D3DXIMAGE_INFO*)                 { return E_NOTIMPL; }
@@ -853,9 +866,13 @@ inline HRESULT D3DXCreateCubeTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9, LPCVOI
 { if (t) *t = nullptr; return E_NOTIMPL; }
 
 inline HRESULT D3DXCreateVolumeTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9, LPCVOID, UINT, UINT, UINT, UINT,
-                                                         DWORD, D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR,
+                                                         UINT, DWORD, D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR,
                                                          D3DXIMAGE_INFO*, PALETTEENTRY*, LPDIRECT3DVOLUMETEXTURE9* t)
 { if (t) *t = nullptr; return E_NOTIMPL; }
+
+inline HRESULT D3DXCreateBox(LPDIRECT3DDEVICE9, FLOAT, FLOAT, FLOAT,
+                             LPD3DXMESH* mesh, LPD3DXBUFFER* adjacency)
+{ if (mesh) *mesh = nullptr; if (adjacency) *adjacency = nullptr; return E_NOTIMPL; }
 
 inline HRESULT D3DXCreateCubeTexture(LPDIRECT3DDEVICE9, UINT, UINT, DWORD, D3DFORMAT, D3DPOOL,
                                      LPDIRECT3DCUBETEXTURE9* t)
