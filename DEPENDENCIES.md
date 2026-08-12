@@ -103,11 +103,22 @@ server-side statistical approach already present in the FairFight aimbot detecto
 **GLM over DirectXMath** if you want the math layer to outlive the graphics API — relevant
 given the planned Vulkan backend.
 
-**PhysX staging.** PhysX 3.4's source was published under NVIDIA's GameWorks terms, which
-are *not* clean BSD; **PhysX 4.1 and later are BSD-3**. For a compile-first milestone,
-vendor PhysX 4.1 behind a thin 3.x→4.x compatibility header (the renames are moderate:
-`PxSceneQuery*` → `PxQuery*`, some flag reshuffling). Migrate to Jolt in the performance
-phase, not the build phase.
+**PhysX staging — done.** PhysX 3.4's source was published under NVIDIA's GameWorks terms,
+which are *not* clean BSD; **PhysX 4.1 and later are BSD-3**. PhysX 4.1 is now vendored
+and **built from source** behind a thin 3.x→4.x compatibility header
+(`modern/src/External/PhysX/compat/Px3xCompat.h`) — 403 translation units, 15 static
+libraries, targeting **i686-w64-mingw32**.
+
+That target is worth flagging for anyone picking this up: NVIDIA builds Windows with MSVC
+and Linux with GCC, and ships neither the configuration nor a build system that can
+produce it. `modern/cmake/BuildPhysX.cmake` replaces their harness;
+`modern/tools/gen_physx_sources.py` derives the source lists from their module files so
+the two cannot drift. Six source changes were needed — the notable one being that
+`PX_ALIGN` expands to `__declspec(align(N))` whenever the *platform* is Windows, which
+GCC silently discards, quietly changing structure layout. Full account in
+[`modern/src/External/PhysX/README.md`](modern/src/External/PhysX/README.md).
+
+Migrate to Jolt in the performance phase, not the build phase.
 
 ---
 

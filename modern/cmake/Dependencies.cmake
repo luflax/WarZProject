@@ -96,24 +96,15 @@ endif()
 # PhysX 4.1 (BSD-3) -- interim replacement for PhysX 3.x. Jolt (MIT) is the eventual
 # target; see ../../PERFORMANCE-OPTIMIZATION-PLAN.md.
 #
-# HEADERS ONLY in this tree: src/External/PhysX has 195 headers and zero sources, so
-# there is nothing to link yet. Building it is the largest open item in Milestone B and
-# the one real risk -- NVIDIA's build system targets MSVC, not MinGW. See
-# ../../MILESTONE-B-PLAN.md section 4 for the fallbacks.
-#
-# Until then WARZ_PHYSX_LIBS is empty and the PhysX entry points stay unresolved. The
-# two small servers build with DISABLE_PHYSX and link regardless, which is exactly why
-# Milestone B orders the binaries the way it does.
+# Built from source by BuildPhysX.cmake rather than by NVIDIA's own harness, which
+# cannot run here: it targets MSVC and depends on a packman-fetched CMakeModules package
+# that is not in the repository. That file is where the MinGW-i686 configuration lives.
 # ---------------------------------------------------------------------------
 
 set(WARZ_PHYSX_LIBS "" CACHE INTERNAL "")
 
 if(EXISTS "${WARZ_ROOT}/src/External/PhysX/physx-source")
-    message(STATUS "PhysX sources found -- building PhysX 4.1")
-    add_subdirectory("${WARZ_ROOT}/src/External/PhysX/physx-source"
-                     "${CMAKE_BINARY_DIR}/External/PhysX")
-    set(WARZ_PHYSX_LIBS PhysX PhysXExtensions PhysXVehicle PhysXCharacterKinematic
-                        PhysXCooking PhysXCommon PhysXFoundation CACHE INTERNAL "")
+    include(BuildPhysX)
 else()
     message(STATUS "PhysX: headers only, no sources -- GameServer and WarZ.exe will not "
                    "link until these are vendored. SupervisorServer and MasterServer "

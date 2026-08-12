@@ -33,3 +33,6 @@ server/GameBlocksSDK
 
 # CMake build output for the C++20 port
 modern/build/
+
+# Python bytecode from the source-list generators in modern/tools/
+__pycache__/

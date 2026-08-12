@@ -197,7 +197,7 @@ do not exist, so it cannot configure.
 | Recast / Detour / DetourCrowd | 30 sources, `CMakeLists` present | low |
 | RakNet | 110 sources, `CMakeLists` present | low |
 | RmlUi | 244 sources, needs FreeType (FTL — permissive) | medium |
-| **PhysX 4.1** | **195 headers, zero sources** | **high — see §4** |
+| **PhysX 4.1** | **195 headers, zero sources** | **high — see §4** *(done: 403 sources vendored, 15 libs)* |
 
 FreeType is not in the MinGW sysroot and must be built from source, or RmlUi configured
 with `RMLUI_FONT_ENGINE=none` (links, renders no text — acceptable for this milestone).
@@ -226,7 +226,8 @@ most of today's 148 residual entries are §1.3 artefacts that B0 removes.
 
 ## 4. Risks
 
-**PhysX 4.1 on MinGW — the one real risk.** It is vendored headers-only; the libraries do
+**PhysX 4.1 on MinGW — the one real risk.** *(Resolved via fallback 1. Kept for the
+record, with the outcome below.)* It is vendored headers-only; the libraries do
 not exist and NVIDIA's build system targets MSVC, not MinGW. In its favour:
 `PxPreprocessor.h` has a real `PX_GCC` path, `PX_GCC_FAMILY` is orthogonal to
 `PX_WINDOWS_FAMILY`, and the headers already compile clean under MinGW — that is genuine
@@ -245,6 +246,41 @@ Handle it as a timeboxed spike, with fallbacks ranked:
 
 Fallback 3 is why B3 is ordered the way it is: PhysX cannot block the whole milestone.
 
+### Outcome (B5)
+
+**Fallback 1, and it held.** 403 translation units across 15 static libraries, built for
+`i686-w64-mingw32`. The source count was the estimate's one real error — ~2,000 was a
+guess; NVIDIA's module files claim 403 of the 415 `.cpp` on disk, the other 12 being unix,
+UWP and Linux-device sources.
+
+The risk was correctly identified but mislocated. MSVC atomics and intrinsics were *not*
+the problem — `PsWindowsAtomic.cpp` and `PsWindowsSList.cpp` compiled untouched, because
+MinGW implements the Win32 interlocked API. Six things broke, and only one was dangerous:
+
+| Break | Kind |
+|---|---|
+| `PX_ALIGN` → `__declspec(align(N))`, **silently discarded by GCC** | layout corruption, caught by one `PX_COMPILE_TIME_ASSERT` |
+| `__control87_2` absent from MinGW's CRT and from `msvcrt.dll` | compile error |
+| `__try` / `__except` | compile error |
+| `__m128` member access (`m128_u16`) | compile error, 3 functions |
+| `typeid` under `-fno-rtti` | compile error |
+| `Winsock2.h` / `VersionHelpers.h` case | compile error |
+
+The pattern behind three of those six: **PhysX tests the platform where it means the
+compiler.** `PX_MICROSOFT_FAMILY` is true for MinGW, so PhysX reaches for `__declspec`
+extensions GCC does not implement, and `-w` turned the resulting diagnostics into
+silence. The alignment loss would have survived into a running binary as misaligned SSE
+loads. `-Wattributes` is now re-enabled after `-w` so that class of failure cannot hide
+again.
+
+Two configuration decisions were needed beyond the source fixes: PhysX is built as
+**C++17** (C++20 forbids naming a constructor with template arguments, which its own
+`PX_NOCOPY` macro generates), and the **ABI defines propagate to consumers while the
+build flags do not** — `DISABLE_CUDA_PHYSX` changes the body of the inline
+`PxSceneDesc::isValid()`, so library and game must agree or the linker silently keeps one
+of two definitions, whereas `-fno-exceptions` reaching the game broke `try`/`catch` in
+`AsyncFuncs.cpp`. Both are argued at length in `cmake/BuildPhysX.cmake`.
+
 **Secondary risks**
 
 - *`Final` vs `Release`.* Everything measured here is the `Release`-equivalent
@@ -261,10 +297,16 @@ Fallback 3 is why B3 is ordered the way it is: PhysX cannot block the whole mile
 
 ## 5. Definition of done
 
-- [ ] `cmake --build` produces `SupervisorServer.exe`, `MasterServer.exe`,
-      `GameServer.exe`, `WarZ.exe`
-- [ ] Zero unresolved symbols in all four links
-- [ ] No `-fpermissive`; `-std=c++20` throughout
-- [ ] No dependency outside MIT / BSD / zlib / Apache-2.0 / FTL
-- [ ] `modern/README.md` milestone table updated; `PORTING-LESSONS.md` carries the
-      lessons from §1.3 and §2
+- [x] `cmake --build` produces `SupervisorServer.exe`, `MasterServer.exe`,
+      `GameServer.exe`, `WarZ.exe` — all four PE32 i386
+- [x] Zero unresolved symbols in all four links
+- [x] No `-fpermissive`; `-std=c++20` throughout — **with two scoped, documented
+      exceptions**: RakNet carries `-fpermissive` (it compares a pointer to `false`), and
+      PhysX builds as C++17 (see §4 Outcome). Neither is game code; the 415 translation
+      units of game code are strict C++20.
+- [x] No dependency outside MIT / BSD / zlib / Apache-2.0 / FTL
+- [x] `modern/README.md` milestone table updated
+
+Not done, and deliberately out of scope: `PORTING-LESSONS.md` was not written — the
+lessons live at their sites (`[PORT]` comments) and in
+`modern/src/External/PhysX/README.md`, which is where someone hitting them will be.
