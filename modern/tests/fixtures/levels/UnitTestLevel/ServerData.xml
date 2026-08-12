@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Server-side half of the synthetic level.
+
+  LoadLevel_Objects reads three files out of the level directory (GameLevel_IO.cpp:159):
+  LevelData.xml always, SoundData.xml only when WO_SERVER is NOT defined, and this one
+  under the SF_ServerData tag. There is deliberately no SoundData.xml in this fixture --
+  the server never opens it, and its absence is itself worth exercising.
+
+  The root element is <server_objects>, not <level>.
+-->
+<server_objects>
+
+  <!-- Spawn points are among the few server-only object classes that carry no asset
+       dependency at all, which makes them the right thing to put here. Both names
+       below are real registrations in server/src/WO_GameServer (AUTOREGISTER_CLASS);
+       they are also the classes a real level is densest in, so if the server class
+       table failed to link, this is where it shows first. -->
+  <object className="obj_ServerPlayerSpawnPoint" fileName="unit_test_pspawn">
+    <position x="100.0" y="0.0" z="100.0"/>
+  </object>
+
+  <object className="obj_ZombieSpawn" fileName="unit_test_zspawn">
+    <position x="-100.0" y="0.0" z="-100.0"/>
+  </object>
+
+</server_objects>

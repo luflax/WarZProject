@@ -39,6 +39,14 @@ function(warz_add_server name)
         CXX_EXTENSIONS OFF
         OUTPUT_NAME ${name}
     )
+    warz_configure_server_target(${name} "${ARG_DEFINES}" "${ARG_INCLUDES}" "${ARG_LIBS}")
+endfunction()
+
+# The compile/link configuration shared by a server binary and by anything else built
+# from the same sources -- currently the GameServer test harness. Split out of
+# warz_add_server so the two cannot drift: a test compiled with different defines than
+# the binary it is testing is testing a different program.
+function(warz_configure_server_target name ARG_DEFINES ARG_INCLUDES ARG_LIBS)
     # Each server project puts its OWN Sources/ on the include path (".\Sources" in the
     # vcxproj), so "ServerGameLogic.h" and friends resolve unqualified.
     target_include_directories(${name} PRIVATE ${ARG_INCLUDES})
@@ -88,3 +96,51 @@ warz_add_server(GameServer
     INCLUDES ${WARZ_ROOT}/server/src/WO_GameServer/Sources
     LIBS     ${WARZ_RECAST_LIBS} ${WARZ_PHYSX_LIBS}
 )
+
+# ---------------------------------------------------------------------------
+# The GameServer's sources, minus its entry point, exported for the test harness.
+#
+# WHY A VARIABLE AND NOT A STATIC LIBRARY
+#
+# The obvious shape is a GameServerLib that both GameServer.exe and the tests link.
+# It is the wrong one here: this codebase registers its object classes from static
+# initialisers (AUTOREGISTER_CLASS, AObject.h:22-49), and a linker pulls an object file
+# out of an archive only when something already references a symbol in it. Nothing
+# references obj_ServerZombie by name -- LevelData.xml names it as a STRING and the
+# class table resolves it at load. So an archive link silently drops most of the game's
+# classes and the world comes up empty, with no diagnostic anywhere.
+#
+# --whole-archive would solve that, and is what a library version of this would need.
+# Compiling the sources into each target directly sidesteps the question entirely, and
+# costs only build time -- which ccache already absorbs, since the two targets compile
+# the same files with the same flags.
+#
+# ServerMain.cpp is excluded because it defines main(). The test harness brings its own
+# entry point and stubs the handful of globals ServerMain.cpp uniquely owns; see
+# tests/world/server_entry_stubs.cpp.
+# ---------------------------------------------------------------------------
+set(_gameserver_entry ${WARZ_ROOT}/server/src/WO_GameServer/Sources/ServerMain.cpp)
+
+set(_gameserver_testable
+    ${WARZ_WO_GAMESERVER_SOURCES}
+    ${WARZ_WO_GAMESERVER_SHARED_SOURCES}
+)
+list(REMOVE_ITEM _gameserver_testable ${_gameserver_entry})
+
+# REMOVE_ITEM matches by exact string, so a path that stopped being spelled the way
+# gen_sources.py spells it would silently remove nothing -- and the failure would be a
+# duplicate-symbol link error 100 files later. Fail here instead, where the cause is
+# still visible.
+list(LENGTH WARZ_WO_GAMESERVER_SOURCES _n_own)
+list(LENGTH WARZ_WO_GAMESERVER_SHARED_SOURCES _n_shared)
+list(LENGTH _gameserver_testable _n_testable)
+math(EXPR _n_expected "${_n_own} + ${_n_shared} - 1")
+if(NOT _n_testable EQUAL _n_expected)
+    message(FATAL_ERROR
+        "Failed to exclude ServerMain.cpp from the testable GameServer sources.\n"
+        "Expected ${_n_expected} sources, got ${_n_testable}.\n"
+        "The entry-point path below must match cmake/sources/WO_GameServer.cmake exactly:\n"
+        "  ${_gameserver_entry}")
+endif()
+
+set(WARZ_GAMESERVER_TESTABLE_SOURCES ${_gameserver_testable} PARENT_SCOPE)

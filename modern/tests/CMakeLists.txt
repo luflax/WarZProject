@@ -198,6 +198,52 @@ if(NOT WARZ_EMULATOR_WORKS)
     set_tests_properties(warz_tests PROPERTIES DISABLED TRUE)
 endif()
 
+# ---------------------------------------------------------------------------
+# The engine-linked suite
+#
+# ObjectManager lifecycle and level loading cannot be tested without the engine, and the
+# engine is Win32 to its core -- so unlike the portable tests there is no host-native
+# version of these. They are PE32 or nothing.
+#
+# Built from the GameServer's own sources (exported by server/src/CMakeLists.txt) minus
+# ServerMain.cpp, which defines main(); server_entry_stubs.cpp re-provides the globals
+# and game:: entry points that file uniquely owned. Compiling the sources in rather than
+# linking an archive is deliberate -- see the long note at the export site about
+# AUTOREGISTER_CLASS and what a linker does to unreferenced object files.
+#
+# This target is worth building even where it cannot run: compiling and linking it
+# proves the API usage is real and, more importantly, that the class table links -- and
+# it is ready to report the moment a working emulator exists.
+# ---------------------------------------------------------------------------
+
+if(WARZ_BUILD_SERVER AND WARZ_GAMESERVER_TESTABLE_SOURCES)
+    add_executable(warz_tests_server
+        ${WARZ_TEST_FRAMEWORK}
+        world/test_objectmanager.cpp
+        world/test_level_load.cpp
+        world/server_entry_stubs.cpp
+        ${WARZ_GAMESERVER_TESTABLE_SOURCES}
+    )
+    # Exactly the GameServer's own configuration. A test compiled with different defines
+    # than the binary it exercises is testing a different program -- WO_SERVER alone
+    # changes which #ifdef branch half these files take.
+    warz_configure_server_target(warz_tests_server
+        "_CRT_SECURE_NO_WARNINGS;KY_BUILD_SHIPPING"
+        "${WARZ_ROOT}/server/src/WO_GameServer/Sources"
+        "${WARZ_RECAST_LIBS};${WARZ_PHYSX_LIBS}")
+
+    target_include_directories(warz_tests_server PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/framework)
+
+    # Absolute path, so the tests do not depend on which directory ctest runs them from.
+    target_compile_definitions(warz_tests_server PRIVATE
+        WARZ_TEST_FIXTURE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/fixtures")
+
+    add_test(NAME warz_tests_server COMMAND warz_tests_server)
+    if(NOT WARZ_EMULATOR_WORKS)
+        set_tests_properties(warz_tests_server PROPERTIES DISABLED TRUE)
+    endif()
+endif()
+
 if(WARZ_EMULATOR_WORKS)
     set(_emu_status "${CMAKE_CROSSCOMPILING_EMULATOR} (verified: runs PE32)")
 elseif(CMAKE_CROSSCOMPILING_EMULATOR)

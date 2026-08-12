@@ -14,6 +14,7 @@
 #define WARZ_TEST_H
 
 #include <cmath>
+#include <concepts>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -79,6 +80,30 @@ inline std::string to_string(unsigned long v)      { return to_string(static_cas
 inline std::string to_string(float v)              { return to_string(static_cast<double>(v)); }
 inline std::string to_string(bool v)               { return v ? "true" : "false"; }
 template <typename T> std::string to_string(T* v)  { return v ? "<non-null pointer>" : "nullptr"; }
+
+// Fallback for everything else.
+//
+// A test framework must never fail to COMPILE because someone compared two values of a
+// domain type -- the whole point is to make writing a test cheap. The engine is full of
+// small wrapper types that a naive overload set does not cover: gobjid_t (GameObj.h:169)
+// wraps a DWORD, and r3dSec_type wraps whatever it is protecting.
+//
+// Wrappers exposing an integral get() are printed by their value, which is what makes a
+// failure message about object ids readable. Anything else degrades to a placeholder --
+// the comparison still runs and still reports, it just cannot say what the values were.
+template <typename T>
+concept HasIntegralGet = requires(const T& t) {
+    { t.get() } -> std::convertible_to<long long>;
+};
+
+template <typename T>
+std::string to_string(const T& v)
+{
+    if constexpr (HasIntegralGet<T>)
+        return to_string(static_cast<long long>(v.get()));
+    else
+        return "<value of a type the harness cannot print>";
+}
 
 // Absolute-or-relative tolerance. A pure absolute epsilon is wrong for matrix entries
 // that legitimately reach into the thousands (a far plane, a world-space translation);
