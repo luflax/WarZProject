@@ -30,7 +30,7 @@ fork is deliberately cut.
 | ↳ B3 link the binaries | ✅ **4 of 4** |
 | ↳ B4 residual symbols | ✅ **done** — zero own-code symbols left |
 | ↳ B5 PhysX for MinGW-i686 | ✅ **done** — 403 TUs, 15 static libs |
-| **Milestone C — runs to a known point** | ⬜ not started |
+| **Milestone C — runs to a known point** | ⬜ not started — pre-work in [`../MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md) |
 
 ### Binaries
 
@@ -131,8 +131,15 @@ PhysX 3 → 4 was the largest single piece of work. Renames that could be aliase
 
 ## Quick start
 
+> ⚠️ **Do not run `tools/bootstrap.sh` on this tree.** It `rm -rf`s the five copied
+> source trees before re-copying, and 348 files in them now carry Milestone A/B port
+> work that exists nowhere else — `../src/` and `../server/` have none of it. The fork
+> was cut in practice at Milestone B; the script has not caught up. See
+> [`../MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md) §1.1.
+
 ```bash
 # 1. Copy source from the original tree (idempotent; never writes to it)
+#    -- SUPERSEDED, see the warning above
 ./tools/bootstrap.sh
 
 # 2. Configure and build
@@ -342,4 +349,5 @@ Full audit: [`../DEPENDENCIES.md`](../DEPENDENCIES.md).
 | [`../DEPENDENCIES.md`](../DEPENDENCIES.md) | Dependency audit and replacement choices |
 | [`../PHASE1-BUILD-PLAN.md`](../PHASE1-BUILD-PLAN.md) | This phase — milestones, work breakdown, risks |
 | [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) | Milestone B (linking) — measured work list, ordering, risks |
+| [`../MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md) | Milestone C (running) — blockers, which stubs can be completed, ordering |
 | [`../PERFORMANCE-OPTIMIZATION-PLAN.md`](../PERFORMANCE-OPTIMIZATION-PLAN.md) | The performance work this unblocks |
