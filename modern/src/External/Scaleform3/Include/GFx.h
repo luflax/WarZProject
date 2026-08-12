@@ -1,9 +1,17 @@
-// SHIM: Scaleform GFx
+// COMPAT: Scaleform GFx -> RmlUi
 //
 // Replaces:  GFx.h from Scaleform GFx (Autodesk, discontinued 2018 -- cannot be
 //            licensed at any price). See ../../../../DEPENDENCIES.md.
-// Status:    TYPE SURFACE ONLY. No Flash renders.
-// Later:     RmlUi (MIT). Every screen must be re-authored; nothing imports Flash.
+// Backed by: RmlUi (MIT). Movie -> Rml::Context + Rml::ElementDocument.
+//
+// The Scaleform TYPE NAMES are kept because 37 files across GameEngine and
+// EclipseStudio reference them, and AI_Player.H holds a GFx::Value by value.
+// GFx::Value stays a tagged variant -- it is a perfectly good interchange type and
+// maps onto Rml::Variant.
+//
+// WHAT DOES NOT CARRY OVER: the content. Every screen is authored as .swf
+// (data/menu/Frontend.swf and friends) and nothing imports Flash into RML. Screens
+// must be re-authored; that is UI work, not porting work.
 //
 // Scope: enough of the type surface for headers that DECLARE Scaleform members to
 // compile -- GameEngine/APIScaleformGfx.h, and AI_Player.H which holds a
@@ -29,8 +37,6 @@ namespace Render { namespace D3D9 { class Texture; } }
 namespace GFx
 {
 
-class MovieDef;
-class Movie;
 
 // Held by value (AI_Player.H m_CharIcon), so this needs a definition rather than a
 // forward declaration. Modelled as a tagged variant, which is what GFx::Value is.
@@ -93,6 +99,9 @@ public:
     bool NextCapture(void* = nullptr) { return false; }
 };
 
+// Movie wraps an RmlUi context + its loaded document. Declared opaquely here so
+// this header does not drag RmlUi into every translation unit that merely names
+// the type; the definition lives in GameEngine/RmlUiIntegration/RmlUiMovie.h.
 class Movie
 {
 public:
@@ -105,12 +114,20 @@ public:
     };
 
     virtual ~Movie() = default;
+
+    // Backing objects, filled in by the RmlUi integration layer.
+    void* rmlContext  = nullptr;   // Rml::Context*
+    void* rmlDocument = nullptr;   // Rml::ElementDocument*
 };
 
+// MovieDef was Scaleform's parsed-but-not-instantiated .swf. RmlUi has no direct
+// equivalent -- documents are loaded straight into a context -- so this carries
+// only the source path.
 class MovieDef
 {
 public:
     virtual ~MovieDef() = default;
+    char sourcePath[260] = {0};
 };
 
 } // namespace GFx

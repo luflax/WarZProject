@@ -10,7 +10,13 @@
 # minutes, which is too slow to iterate against.
 #
 # Usage:
-#   ./tools/probe.sh <dir-or-glob> [-v]     # -v prints the first error per file
+#   ./tools/probe.sh <dir-or-glob> [-v|--triage|--failed]
+#
+#     -v         print the first error per failing file
+#     --triage   group failures by the file:line that ACTUALLY errored -- the
+#                root-cause view. Fix N root causes per probe instead of one.
+#     --failed   re-probe only the files that failed last run (cached in
+#                .probe-failed). A full sweep is for checkpoints, not iteration.
 #
 # Env:
 #   CXX=<compiler>   default i686-w64-mingw32-g++
@@ -24,10 +30,15 @@ cd "$MODERN_DIR"
 CXX=${CXX:-i686-w64-mingw32-g++}
 JOBS=${JOBS:-$(nproc 2>/dev/null || echo 4)}
 TARGET="${1:-src/Eternity/Source}"
-VERBOSE=0
-[[ "${2:-}" == "-v" ]] && VERBOSE=1
+VERBOSE=0; TRIAGE=0; ONLY_FAILED=0
+case "${2:-}" in
+  -v)       VERBOSE=1 ;;
+  --triage) TRIAGE=1 ;;
+  --failed) ONLY_FAILED=1 ;;
+esac
+CACHE=".probe-failed"
 
-INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat"
+INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
 
 # WO_SERVER strips rendering. PhysX 4.1 is now vendored (BSD-3), so DISABLE_PHYSX is
 # no longer set -- the real SDK headers are used. PX_PHYSX_STATIC_LIB avoids dllimport
@@ -40,9 +51,14 @@ FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"
 # Files present on disk but NOT listed in the original .vcxproj -- dead legacy that
 # was never compiled. Verified by diffing Eternity.vcxproj's <ClCompile> entries
 # against Source/: r3dObj_OLDRender.cpp is the only one in the engine.
-EXCLUDE_RE='r3dObj_OLDRender\.cpp'
+# Kynapse wrapper implementations, superseded by ai/RecastNav/. Their headers remain
+# as forwarding shims so call sites compile; the .cpp files have no counterpart.
+EXCLUDE_RE='r3dObj_OLDRender\.cpp|AutodeskNav/Autodesk.*\.cpp'
 
-if [[ -d "$TARGET" ]]; then
+if [[ $ONLY_FAILED == 1 && -s "$CACHE" ]]; then
+  mapfile -t FILES < "$CACHE"
+  echo "Re-probing ${#FILES[@]} previously-failing file(s) from $CACHE"
+elif [[ -d "$TARGET" ]]; then
   mapfile -t FILES < <(find "$TARGET" -name '*.cpp' -o -name '*.CPP' | grep -Ev "$EXCLUDE_RE" | sort)
 else
   mapfile -t FILES < <(compgen -G "$TARGET" | grep -Ev "$EXCLUDE_RE" || true)
@@ -87,8 +103,31 @@ printf "  pass: %3d   fail: %3d   total: %3d  (%d%% passing)\n" \
        "$pass" "$fail" "${#FILES[@]}" $(( ${#FILES[@]} ? pass*100/${#FILES[@]} : 0 ))
 echo "======================================================"
 
+# Cache the failure list so --failed can reuse it.
+: > "$CACHE"
+for r in "$OUT"/*; do
+  [[ -f "$r" ]] || continue
+  head -1 "$r" | grep -q '^FAIL' && head -1 "$r" | cut -d' ' -f2- >> "$CACHE"
+done
+
 if (( fail > 0 )); then
   echo
-  echo "Distinct blockers (count, first error):"
-  for k in "${!ERRKIND[@]}"; do printf '%4d  %s\n' "${ERRKIND[$k]}" "$k"; done | sort -rn | head -25
+  if (( TRIAGE )); then
+    # Group by the file:line that actually errored. One entry here is one fix,
+    # however many TUs it takes down -- this is the view worth acting on.
+    echo "ROOT CAUSES (files affected, location, message):"
+    for r in "$OUT"/*; do
+      [[ -f "$r" ]] || continue
+      head -1 "$r" | grep -q '^FAIL' || continue
+      sed -n '2p' "$r"
+    done \
+      | sed -E 's/^([^:]+:[0-9]+):[0-9]+: (fatal )?error: /\1 | /' \
+      | sed -E "s/'[^']*'/X/g" \
+      | sort | uniq -c | sort -rn | head -30
+    echo
+    echo "Fix the top entries first: each is ONE change."
+  else
+    echo "Distinct blockers (count, first error):"
+    for k in "${!ERRKIND[@]}"; do printf '%4d  %s\n' "${ERRKIND[$k]}" "$k"; done | sort -rn | head -25
+  fi
 fi

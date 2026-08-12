@@ -1,24 +1,7 @@
-//=========================================================================
-//	Module: AutodeskNavProfile.h
-//	Copyright (C) Online Warmongers Group Inc. 2013.
-//=========================================================================
-
+// COMPAT: Autodesk Navigation -> Recast & Detour.
+//
+// Kynapse nav profiles map onto dtQueryFilter (area costs + include/exclude flags).
+// Only the super-zombie profile id is referenced by game code, and that lives on
+// RecastNavMesh as m_NavProfileIdSuperZombie.
 #pragma once
-
-#if ENABLE_AUTODESK_NAVIGATION
-
-//////////////////////////////////////////////////////////////////////////
-
-#include "gwnavruntime/world/navigationprofile.h"
-#include "gwnavruntime/pathfollower/iavoidancefilter.h"
-#include "gwnavruntime/navmesh/traverselogic.h"
-
-class AutodeskNavProfileSuperZombie : public Kaim::NavigationProfile<Kaim::DefaultTraverseLogic>
-{
-public:
-	virtual Kaim::Ptr<Kaim::IAvoidanceFilter> GetSharedAvoidanceFilter();
-
-	Kaim::Ptr<Kaim::IAvoidanceFilter> m_sharedAvoidanceFilter;
-};
-
-#endif // ENABLE_AUTODESK_NAVIGATION
+#include "AutodeskNavMesh.h"
