@@ -79,17 +79,19 @@ target_include_directories(physx_abi INTERFACE
     "${PHYSX_DIR}/physx-source/foundation/include")
 
 target_compile_definitions(physx_abi INTERFACE
-    # windows/CMakeLists.txt release configuration. PVD is off because the port leaves
-    # the debugger disconnected anyway (PhysX 4 wants the PxPvd created before
-    # PxCreatePhysics, which would mean restructuring PhysXWorld::Init) -- see
-    # modern/README.md.
+    # PVD is ON. It was 0 while PhysXWorld::Init left the debugger disconnected;
+    # Init now creates the PxPvd ahead of PxCreatePhysics and threads it through, so
+    # the instrumentation this define guards is what makes that connection carry data
+    # rather than an empty stream. It costs nothing when nothing is listening --
+    # PxPvdImpl short-circuits on a transport that never connected.
     #
-    # These two are strictly internal today: neither appears in any header this target
-    # exports, only in physx-source/*.cpp. They sit here rather than in physx_flags
-    # because the exported include list is not purely public -- it carries
-    # physx-source/foundation/include -- and a define that could change a shared header's
-    # meaning is safer identical on both sides than merely believed not to matter.
-    PX_SUPPORT_PVD=0
+    # This and PX_NVTX are strictly internal: neither appears in any header this target
+    # exports, only in physx-source/*.cpp (44 files for PVD, verified by grep). They sit
+    # here rather than in physx_flags because the exported include list is not purely
+    # public -- it carries physx-source/foundation/include -- and a define that could
+    # change a shared header's meaning is safer identical on both sides than merely
+    # believed not to matter.
+    PX_SUPPORT_PVD=1
     PX_NVTX=0
 
     # Static libraries: suppresses the __declspec(dllimport) decoration on every PhysX
@@ -202,6 +204,19 @@ target_compile_definitions(PhysXTask    PRIVATE _LIB)
 # PUBLIC so that a consumer naming only PhysXVehicle still gets the transitive archives,
 # in an order CMake computes -- the same fix that took SupervisorServer from 62 undefined
 # symbols to 3 in B3.
+# Winsock, for PhysXFoundation.
+#
+# PsWindowsSocket.cpp is compiled unconditionally but its body is behind
+# PX_SUPPORT_PVD -- with PVD off it is an empty translation unit and nothing here was
+# needed. Turning PVD on makes the socket real, and with it WSASendDisconnect,
+# WSAGetLastError and gethostbyaddr.
+#
+# Eternity already lists ws2_32, but that does not help: GNU ld walks the link line
+# left to right and never revisits an archive, and PhysXFoundation lands to the RIGHT
+# of Eternity's -lws2_32. Declaring the edge here is what lets CMake put ws2_32 after
+# the archive that needs it. Same failure mode, and same fix, as the PUBLIC edges below.
+target_link_libraries(PhysXFoundation       PUBLIC ws2_32)
+
 target_link_libraries(PhysXTask             PUBLIC PhysXFoundation)
 target_link_libraries(FastXml               PUBLIC PhysXFoundation)
 target_link_libraries(PhysXPvdSDK           PUBLIC PhysXFoundation)

@@ -1,10 +1,20 @@
-// SHIM: CrashRpt
+// COMPAT LAYER: CrashRpt
 //
 // Replaces:  CrashRpt (crash reporting)
-// Status:    NO-OP. No crash reports are generated.
-// Later:     Crashpad (Apache-2.0) or Sentry Native (MIT) -- see DEPENDENCIES.md.
+// Status:    FUNCTIONAL, local only. crInstall installs a real unhandled-exception
+//            filter that writes a minidump plus a text report and copies the files
+//            registered with crAddFile2 alongside it. What it does NOT do is UPLOAD:
+//            CrashRpt shipped a separate CrashSender.exe that posted the report to
+//            pszUrl, and there is no such uploader here. Reports accumulate on disk.
 //
-// Clean-room declarations derived from call sites in src/Eternity/Source/r3dDebug.cpp.
+// Implementation: compat/CrashReport.cpp. Declarations here are clean-room, derived
+// from call sites in src/Eternity/Source/r3dDebug.cpp -- no vendor code.
+//
+// Note that r3dDebug.cpp already carries a complete minidump writer of its own,
+// behind #ifdef DISABLE_CRASHRPT. That path is not the one taken by this build (the
+// define is not set), and it only covers SetUnhandledExceptionFilter. This layer
+// covers the same ground plus terminate/abort, the attached-file list, and the
+// on-demand crGenerateErrorReport, so the two do not need to be reconciled.
 
 #pragma once
 #include <windows.h>
@@ -79,17 +89,20 @@ typedef struct tagCR_INSTALL_INFOW
     LPCWSTR pszCustomSenderIcon;
 } CR_INSTALL_INFOW, *PCR_INSTALL_INFOW;
 
-inline int crInstallA(PCR_INSTALL_INFOA)                 { return 0; }
-inline int crInstallW(PCR_INSTALL_INFOW)                 { return 0; }
-inline int crAddFile2W(LPCWSTR, LPCWSTR, LPCWSTR, DWORD) { return 0; }
-inline int crGetLastErrorMsgW(LPWSTR, UINT)              { return 0; }
-inline int crUninstall()                                 { return 0; }
-inline int crInstallToCurrentThread2(DWORD)              { return 0; }
-inline int crUninstallFromCurrentThread()                { return 0; }
-inline int crAddFile2A(LPCSTR, LPCSTR, LPCSTR, DWORD)    { return 0; }
-inline int crAddScreenshot2(DWORD, int)                  { return 0; }
-inline int crGenerateErrorReport(LPVOID)                 { return 0; }
-inline int crGetLastErrorMsgA(LPSTR, UINT)               { return 0; }
+// CrashRpt's convention throughout: 0 is success, non-zero is failure, and the reason
+// is retrievable with crGetLastErrorMsg. r3dDebug.cpp relies on exactly that.
+
+int crInstallA(PCR_INSTALL_INFOA pInfo);
+int crInstallW(PCR_INSTALL_INFOW pInfo);
+int crAddFile2W(LPCWSTR pszFile, LPCWSTR pszDestFile, LPCWSTR pszDesc, DWORD dwFlags);
+int crGetLastErrorMsgW(LPWSTR pszBuffer, UINT uBuffSize);
+int crUninstall();
+int crInstallToCurrentThread2(DWORD dwFlags);
+int crUninstallFromCurrentThread();
+int crAddFile2A(LPCSTR pszFile, LPCSTR pszDestFile, LPCSTR pszDesc, DWORD dwFlags);
+int crAddScreenshot2(DWORD dwFlags, int nJpegQuality);
+int crGenerateErrorReport(LPVOID pExceptionInfo);
+int crGetLastErrorMsgA(LPSTR pszBuffer, UINT uBuffSize);
 
 #define crInstall           crInstallA
 #define crAddFile2          crAddFile2A

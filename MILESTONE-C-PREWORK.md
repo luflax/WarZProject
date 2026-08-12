@@ -72,9 +72,10 @@ installs `g++-mingw-w64-i686` and `wine32`, then verifies with a one-line PE32 h
 world under Wine. Confirm `wine` can actually run a 32-bit PE here (needs i386
 multiarch) before relying on it.
 
-**Also unverified:** that the four binaries still link. The last successful link was
-commit `bd19032`; `b559b4c` then changed the build (PCH, ccache, Ninja). Re-establish
-the green build before treating anything else as a Milestone C problem.
+**Partly resolved.** `g++-mingw-w64-i686` installs cleanly from apt and the four
+binaries do still link on the current tree — that much is now confirmed rather than
+assumed. **Wine is still not installed**, so nothing has been *run*, and every claim
+about runtime behaviour in this document remains static analysis.
 
 ### 1.3 There is no game data in the repository
 
@@ -139,14 +140,14 @@ AsyncFuncs.cpp            api_SrvUserGame.aspx, api_SrvBanUser.aspx,
 Backend/ServerUserProfile.cpp
 ```
 
-`CWOBackendReq` is built on Chilkat, which is a no-op shim (§2.1), so all of these fail
-today. A server that boots and ticks satisfies Milestone C's letter; a player who
-connects and gets a character does not, and that is the first thing anyone will try.
+`CWOBackendReq` is built on Chilkat. A server that boots and ticks satisfies Milestone
+C's letter; a player who connects and gets a character does not, and that is the first
+thing anyone will try.
 
 Two dependencies here, and they are separable:
 
-- **The Chilkat shim** — completable, and the highest-leverage item in this document.
-  See §2.1.
+- **The Chilkat shim** — **done** (§2.1). Requests are now really issued, over WinHTTP.
+  What that buys is that the transport is no longer the reason these fail.
 - **The backend itself** — `web/WZBackend-ASP.NET/` plus the MSSQL schema in `db/`.
   Needs a Windows/IIS + SQL Server host, or a stand-in service that answers the ~10
   `api_Srv*.aspx` endpoints above with the response format `ParseResult`
@@ -182,7 +183,14 @@ defaults.
 
 Ordered by leverage. Sizes are S / M / L in the same spirit as the Milestone B plan.
 
-### 2.1 Chilkat → WinHTTP + zlib — **the one to do first** (M)
+> **Status: §2.1, §2.2, §2.3, §2.5 and §2.6 are done.** The implementations live in
+> `modern/src/External/compat/` (HTTP, DDS loading, shader compilation, crash dumps)
+> and in `PhysXWorld::Init` (PVD). All four binaries still link; sizes and the
+> remaining limits are recorded in `modern/README.md`. §2.4 (RmlUi rendering), §2.7
+> (Recast navmesh) and §2.8 remain, as does everything in §1 — which is still what
+> actually gates the milestone.
+
+### 2.1 Chilkat → WinHTTP + zlib — **the one to do first** (M) — ✅ done
 
 **Why it is first:** it is the only stub that blocks *both* binaries' real work. The
 client's entire login and menu flow runs through `CWOBackendReq`
@@ -212,7 +220,7 @@ where the real library would do meaningful work". Completing this stub means it 
 being a shim. Move it out of the no-op table in that README and in
 `modern/README.md`'s shim table when it lands.
 
-### 2.2 D3DX texture loading (M) — client only
+### 2.2 D3DX texture loading (M) — client only — ✅ done
 
 `src/External/dxsdk/Include/d3dx9.h:854-923` — every image entry point returns
 `E_NOTIMPL`. The math half of this shim is real; the imaging half is not.
@@ -237,7 +245,7 @@ editor paths.
 Milestone C is unaffected by this gap — which is a good argument for doing the server
 half of Milestone C first.
 
-### 2.3 D3DXCompileShader → `D3DCompile` (S) — better than it looks
+### 2.3 D3DXCompileShader → `D3DCompile` (S) — better than it looks — ✅ done
 
 `d3dx9.h:983-1001` stubs the compiler. The replacement is nearly a drop-in:
 
@@ -253,9 +261,13 @@ half of Milestone C first.
   onto `ID3DInclude` unchanged.
 - `D3DXMACRO` → `D3D_SHADER_MACRO`, layout-identical.
 
-Two things to verify rather than assume: that MinGW-w64 ships a `d3dcompiler` import
-library, and whether `D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY` is needed for the
-2013-era HLSL in `Data/Shaders`.
+Both open questions resolved during implementation. MinGW-w64 does ship
+`libd3dcompiler.a` — but it is not used: the DLL is loaded with `LoadLibrary` at first
+use, probing `_47` down to `_42`, so the binary carries no import for it and a missing
+DLL becomes a logged error rather than a process that will not start.
+`D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY` is set unconditionally, on the assumption
+that 2013-vintage HLSL needs it; that assumption is unverified until real shaders are
+compiled.
 
 There is also a **shader binary cache** already in the engine
 (`VShader.cpp:176` `LoadBinaryCache`, `:276` `SaveBinaryCache`). Once the compiler
@@ -282,13 +294,13 @@ through the front end. Plan on a direct-connect bypass — a command-line flag t
 the menu and calls into `PlayNetworkGame` with a server address — as part of Milestone C
 itself, not as a workaround.
 
-### 2.5 CrashRpt (S) — small, and it pays for itself immediately
+### 2.5 CrashRpt (S) — small, and it pays for itself immediately — ✅ done
 
 96-line shim. `MiniDumpWriteDump` from `dbghelp`, which is already in the link line.
 A milestone whose whole purpose is running binaries that have never run wants crash
 dumps on day one.
 
-### 2.6 PhysX PVD (S)
+### 2.6 PhysX PVD (S) — ✅ done
 
 `modern/README.md` records it: PhysX 4 requires `PxPvd` to exist *before*
 `PxCreatePhysics`, so restoring it means reordering `PhysXWorld::Init()`. The exact
@@ -355,17 +367,19 @@ touching anything client-side.** The server needs no textures, no shaders and no
    step produces a log.*
 
 **Phase 2 — the server is actually usable (weeks)**
-8. Complete the Chilkat shim (§2.1)
+8. ~~Complete the Chilkat shim (§2.1)~~ — **done**
 9. Stand up a backend, real or stand-in (§1.5)
 
 **Phase 3 — client (weeks)**
-10. D3DX texture loading (§2.2)
-11. `D3DXCompileShader` → `D3DCompile` (§2.3)
+10. ~~D3DX texture loading (§2.2)~~ — **done**
+11. ~~`D3DXCompileShader` → `D3DCompile` (§2.3)~~ — **done**
 12. Direct-connect bypass around the front end (§2.4)
 13. RmlUi render interface (§2.4) — only once there is something to draw
 
-Items 8 and 10–11 are independent of each other and of item 7's outcome; they can run
-in parallel with anything.
+Items 8 and 10–11 were the ones independent of item 7's outcome, which is why they were
+taken first: none of them needed a running binary to write, and all four binaries still
+link with them in. **Everything still outstanding needs something that cannot be
+written** — a Windows runtime, game data, or a backend.
 
 ## 5. Ready-to-start-C checklist
 

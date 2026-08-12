@@ -54,6 +54,17 @@ set(WARZ_PCH_EXCLUDED_SOURCES
     ${WARZ_ROOT}/src/Eternity/Source/AtlasComposer/RectPlacement.cpp
     ${WARZ_ROOT}/src/Eternity/Source/r3dVCacheAnalyze.cpp
     ${WARZ_ROOT}/src/Eternity/Source/r3dVCacheOptimize.cpp
+
+    # The compat layer (src/External/compat). These implement shim APIs rather than
+    # engine ones, and they talk to winhttp.h, dbghelp.h and d3dcompiler.h -- headers
+    # that are better off meeting the plain Windows environment than r3dPCH.h's, which
+    # sets NOMINMAX and STRICT, pins a Windows version and can redefine `new`. They
+    # take the engine's log through a single extern in compat/WarzCompat.h and nothing
+    # else, so there is no cost to leaving them out.
+    ${WARZ_ROOT}/src/External/compat/CrashReport.cpp
+    ${WARZ_ROOT}/src/External/compat/ChilkatHttp.cpp
+    ${WARZ_ROOT}/src/External/compat/D3DXImage.cpp
+    ${WARZ_ROOT}/src/External/compat/D3DXShaderCompile.cpp
 )
 
 if(WARZ_PCH)

@@ -15,11 +15,11 @@ add_library(warz_shims INTERFACE)
 target_include_directories(warz_shims INTERFACE
     ${CMAKE_CURRENT_SOURCE_DIR}                      # "External/<name>/..." relative forms
     ${CMAKE_CURRENT_SOURCE_DIR}/dxsdk/Include        # d3dx9.h  -> DirectXMath (FUNCTIONAL)
-    ${CMAKE_CURRENT_SOURCE_DIR}/ChilKat/Include      # CkHttp.h etc. (no-op)
+    ${CMAKE_CURRENT_SOURCE_DIR}/ChilKat/Include      # CkHttp.h etc. -> WinHTTP (FUNCTIONAL)
     ${CMAKE_CURRENT_SOURCE_DIR}/Scaleform3/Include   # GFx.h etc.    (no-op)
     ${CMAKE_CURRENT_SOURCE_DIR}/ts3_sdk_3/include    # ts3client_*   (no-op)
-    ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/include        # Px*           (no-op until PhysX 4.1)
-    ${CMAKE_CURRENT_SOURCE_DIR}/CrashRpt/include     # CrashRpt.h    (no-op)
+    ${CMAKE_CURRENT_SOURCE_DIR}/PhysX/include        # Px*           (superseded: PhysX 4.1 is built from source)
+    ${CMAKE_CURRENT_SOURCE_DIR}/CrashRpt/include     # CrashRpt.h    -> dbghelp (FUNCTIONAL)
     ${CMAKE_CURRENT_SOURCE_DIR}/GameBlocks/include   # FairFight     (no-op)
 )
 

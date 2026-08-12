@@ -8,7 +8,14 @@
 #endif
 //////////////////////////////////////////////////////////////////////////
 
-class MyPhysXAllocator : public PxAllocatorCallback 	
+// This header assumes its includer has already pulled in the PhysX headers -- it names
+// PxAllocatorCallback, PxFoundation and PVD::PvdConnection without including anything.
+// PxPvdTransport is only reached through pvd/PxPvdTransport.h, which PhysXWorld.cpp
+// includes but the header's other includers do not, so it is forward-declared rather
+// than added to that assumption.
+namespace physx { class PxPvdTransport; }
+
+class MyPhysXAllocator : public PxAllocatorCallback
 {
 public:
 	virtual void* allocate(size_t size, const char* typeName, const char* filename, int line);
@@ -23,6 +30,10 @@ class PhysXWorld
     bool    m_needFetchResults;
 #ifndef FINAL_BUILD
 	PVD::PvdConnection *debuggerConnection;
+	// [PORT] PhysX 4 splits 3.x's single connection object in two: PxPvd owns the
+	// instrumentation and PxPvdTransport owns the socket. The transport is created
+	// by us and must be released by us, after the PxPvd that reads from it.
+	physx::PxPvdTransport *debuggerTransport;
 #endif
 
 public:

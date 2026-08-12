@@ -31,15 +31,21 @@ fork is deliberately cut.
 | ↳ B4 residual symbols | ✅ **done** — zero own-code symbols left |
 | ↳ B5 PhysX for MinGW-i686 | ✅ **done** — 403 TUs, 15 static libs |
 | **Milestone C — runs to a known point** | ⬜ not started — pre-work in [`../MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md) |
+| ↳ compat layer (HTTP, DDS, shaders, crash dumps, PVD) | ✅ **done** — §2.1-2.3, 2.5, 2.6 of that plan |
 
 ### Binaries
 
 ```
-SupervisorServer.exe    3,033,706 bytes   PE32 i386, console
-MasterServer.exe        3,168,442 bytes   PE32 i386, console
-GameServer.exe         14,535,353 bytes   PE32 i386, console
-WarZ.exe               22,910,126 bytes   PE32 i386, GUI
+SupervisorServer.exe    3,222,276 bytes   PE32 i386, console
+MasterServer.exe        3,358,117 bytes   PE32 i386, console
+GameServer.exe         15,543,210 bytes   PE32 i386, console
+WarZ.exe               23,949,606 bytes   PE32 i386, GUI
 ```
+
+Each grew by roughly 190 KB when the shims listed under
+[the compat layer](#srcexternalcompat--the-shims-that-grew-implementations) stopped
+being no-ops, and the two that link PhysX grew a further ~800 KB when PVD was turned
+on and its instrumentation started being compiled.
 
 **Zero unresolved symbols across the whole product.** Four binaries, from a tree that
 did not build at all as checked out, with no commercial SDK anywhere in it.
@@ -103,18 +109,16 @@ PhysX 3 → 4 was the largest single piece of work. Renames that could be aliase
 
 **Deliberate behaviour changes**, all marked `[PORT]` in the source:
 
-- **PhysX PVD is left disconnected.** PhysX 4 needs the `PxPvd` created *before*
-  `PxCreatePhysics`, so restoring it means restructuring `Init()`. The exact sequence is
-  in a comment at the call site.
 - **Convex hulls come from points alone** — `PxConvexMeshDesc::triangles` no longer exists.
 - **No navmesh generation.** Recast's build pipeline belongs in the asset cook, as
   Kynapse's generator did. `BuildForCurrentLevel`/`LoadPathData` are the seams. The level
   editor's generator panel now exposes Recast's parameters rather than Kynapse's.
 - **No UI screens.** Every screen is a `.swf`; nothing imports Flash into RML, so each
   must be re-authored. The RmlUi `RenderInterface` is also still stubbed.
-- **No voice chat, HTTP, gzip, or Steam.** TeamSpeak (client *and* server), Chilkat and
-  Steamworks are all proprietary; each is shimmed to fail cleanly so its subsystem
-  disables itself rather than proceeding half-initialised.
+- **No voice chat or Steam.** TeamSpeak (client *and* server) and Steamworks are
+  proprietary; each is shimmed to fail cleanly so its subsystem disables itself rather
+  than proceeding half-initialised. **HTTP and gzip are no longer in that list** — see
+  the compat layer below.
 - **No anti-cheat or gameplay telemetry.** The GameBlocks / FairFight SDK is absent, so
   `GBClient::Connected()` returns false and every guarded call site is skipped. That
   disables the server-side aimbot detector, the weapon-cheat projectile accounting, and
@@ -310,20 +314,57 @@ include silently resolves to a header that declares the same API and does nothin
 
 | Shim | Replaces | Runtime consequence |
 |---|---|---|
-| `dxsdk/` | D3DX (**removed from the Windows SDK**) | **None — this one is real**: a hand-written, dependency-free scalar implementation |
+| `dxsdk/` | D3DX (**removed from the Windows SDK**) | **None for math, loading or shaders — these are real.** Math is a hand-written scalar implementation; DDS loading and `D3DCompile` are in `compat/`. Image *saving* is still stubbed, and only the editors use it |
+| `ChilKat/` | Chilkat HTTP + gzip (commercial) | **None — real.** WinHTTP transport, the in-tree zlib for gzip, local base64. See `compat/ChilkatHttp.cpp` |
+| `CrashRpt/` | crash reporting | **None locally — real.** dbghelp minidumps plus a text report and the attached files. No *upload*: CrashRpt's sender is not part of this build |
 | `Scaleform3/` | Scaleform GFx (discontinued 2018) | No UI |
 | `fmod/` | FMOD Ex (commercial) | Silence |
-| `ChilKat/` | Chilkat HTTP + gzip (commercial) | No backend connectivity |
 | `ts3_sdk_3/` | TeamSpeak 3 SDK (commercial) | No VOIP |
 | `Steam/` | Steamworks (proprietary, optional) | Runs standalone |
 | `GameBlocks/` | GameBlocks / FairFight anti-cheat (commercial) | No cheat detection, no telemetry |
-| `CrashRpt/` | crash reporting | None meaningful |
 
 `PhysX/` is **not** a shim — PhysX 4.1 is vendored and compiled in full under BSD-3, with
 a `compat/` layer for the 3.x spellings. Physics is real.
 
 Compiled out entirely via flags that already existed upstream — no shim needed:
 `ENABLE_WEB_BROWSER=0`, `APEX_ENABLED=0`, `__WITH_PB__` and `USE_VMPROTECT` undefined.
+
+### `src/External/compat/` — the shims that grew implementations
+
+Four of the entries above stopped being no-ops. Their headers still sit at the path the
+source includes from; what changed is that the declarations now have bodies, in a
+directory of their own:
+
+| File | Backed by | Serves |
+|---|---|---|
+| `ChilkatHttp.cpp` | WinHTTP, the in-tree zlib, local base64 | `CWOBackendReq` — client login and menus, **and every `api_Srv*.aspx` call the GameServer makes**. Also `CkString::base64Decode`, which both servers hit at startup decoding the game name out of `argv` |
+| `D3DXImage.cpp` | A DDS parser, no dependency | `r3dTexture::LoadTextureInternal` via `r3dDeviceTunnel` — 2D, cube and volume — plus `D3DXLoadSurfaceFromSurface` for Terrain3 |
+| `D3DXShaderCompile.cpp` | `d3dcompiler_NN.dll`, loaded at first use | `r3dCompileShader`, for the `vs_3_0` / `ps_3_0` the engine targets |
+| `CrashReport.cpp` | `MiniDumpWriteDump` | `r3dThreadEntryHelper`'s `crInstall`, in all four binaries |
+
+They are compiled **into Eternity** rather than into a library of their own. Eternity is
+below every caller and is where `r3dOutToLog` lives, so it is the only placement that
+lets them log without forming a cycle GNU ld would refuse to resolve. See
+`src/Eternity/CMakeLists.txt`.
+
+Three limits are worth knowing before relying on them:
+
+- **Image loading is DDS only, and never resamples.** A requested size is honoured when
+  it is the file's own or one of its mip levels — which is what the engine asks for,
+  since `LoadTextureInternal` computes its downscale as a power-of-two mip count and
+  does the resize itself. Anything else fails loudly rather than returning a
+  wrong-sized texture. Image *saving* is untouched and still stubbed.
+- **`D3DXCompileShader` sets `D3DCOMPILE_ENABLE_BACKWARDS_COMPATIBILITY`**, because the
+  HLSL in `Data/Shaders` is 2013-vintage. `ID3DXConstantTable` is not implemented and
+  never returned; nothing in this codebase asks for one.
+- **Crash reports are written, not sent.** CrashRpt shipped a separate
+  `CrashSender.exe`; there is no uploader here, so reports accumulate under
+  `CrashReports/` and the configured endpoint is recorded in `report.txt` rather than
+  contacted.
+
+HTTPS to a private backend with a self-signed certificate needs `WARZ_HTTP_INSECURE=1`
+in the environment. Certificate validation is on by default, and a validation failure
+says so in the log along with the name of that switch.
 
 **After Phase 1 the game builds and starts, renders nothing, and is silent. That is the
 correct outcome** — each subsystem is restored by a later, independently scoped phase
