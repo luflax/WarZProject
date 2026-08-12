@@ -1,4 +1,5 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] std::sort
 
 #include "r3d.h"
 
@@ -9232,7 +9233,11 @@ void r3dTerrain3::DoCreatePhysHeightField( PhysicsChunk& chunk, int chunkX, int 
 
 	R3DPROFILE_START( "Finalize" );
 
-	chunk.PhysicsHeightField = g_pPhysicsWorld->PhysXSDK->createHeightField( chunk.PhysicsHeightFieldDesc );
+	// [PORT] PhysX 4 moved descriptor-based heightfield creation from PxPhysics to
+	// PxCooking. PxPhysics::createHeightField now only accepts a cooked PxInputStream.
+	chunk.PhysicsHeightField = g_pPhysicsWorld->Cooking->createHeightField(
+		chunk.PhysicsHeightFieldDesc,
+		g_pPhysicsWorld->PhysXSDK->getPhysicsInsertionCallback() );
 
 	int kx = R3D_MAX( tdesc.CellCountX / physicsTileCellCount, 1 );
 	int kz = R3D_MAX( tdesc.CellCountZ / physicsTileCellCount, 1 );
@@ -17524,7 +17529,10 @@ int r3dTerrain3::DeleteLayerMasks( MaskIdSet& masksForDeletion, int startMaskIdx
 
 				if( gridX == gX && gridZ == gZ )
 				{
-					offsetEntryMap.insert( OffsetToEntryMap::value_type( i->second.Value, &*i ) );
+					// [PORT] i->second.Value is a bit-field, and value_type takes a reference.
+			// A bit-field has no address, so it must be copied into a local first.
+			const UINT64 offsetValue = i->second.Value;
+			offsetEntryMap.insert( OffsetToEntryMap::value_type( offsetValue, &*i ) );
 				}
 			}
 
@@ -17656,7 +17664,11 @@ int r3dTerrain3::DeleteLayerMasks( MaskIdSet& masksForDeletion, int startMaskIdx
 							if( m_MegaTexGridFile_Map.find( id ) == m_MegaTexGridFile_Map.end() )
 							{
 								r3dOutToLog( "Optimizing (%d,%d,%d,%d)\n", tx, tz, L, m );
-								info.LayerList.Erase( info.LayerList.GetIterator( i ) );
+								{
+				// [PORT] Erase takes a non-const Iterator&; GetIterator returns by value.
+				auto eraseIt = info.LayerList.GetIterator( i );
+				info.LayerList.Erase( eraseIt );
+			}
 								e --;
 							}
 							else
