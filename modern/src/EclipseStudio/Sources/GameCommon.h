@@ -40,7 +40,7 @@ extern r3dCamera 	gCam;
 extern r3dRenderPipeline*	CurRenderPipeline;
 
 
-#include "fmod/soundsys.h"
+#include "fmod/SoundSys.h"
 enum SoundGroup_e {
   // all sound groups starts with SOUND_GROUP_START enum (1000, as in SoundSys.h)
   SOUND_GROUP_A = SOUND_GROUP_START,

@@ -107,7 +107,7 @@ private:
 	}
 
 	/**	Get node bounding box. */
-	R3D_FORCEINLINE r3dBoundBox QuadTree::GetNodeAABB(const QuadTreeNode &n) const
+	R3D_FORCEINLINE r3dBoundBox GetNodeAABB(const QuadTreeNode &n) const
 	{
 		float size = GetNodeSize(n.depth);
 

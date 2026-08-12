@@ -12,9 +12,9 @@
 #pragma warning (disable: 4101)
 
 #include "CVar.h"
-#include "fmod/soundsys.h"
+#include "fmod/SoundSys.h"
 
-#include "APIScaleformGFX.h"
+#include "APIScaleformGfx.h"
 #include "GameCommon.h"
 #include "GameLevel.h"
 

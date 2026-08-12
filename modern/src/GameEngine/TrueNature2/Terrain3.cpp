@@ -6138,7 +6138,8 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 
 		for( int i = 0, e = (int)oTempData->Count(); i < e; i ++ )
 		{
-			union
+			// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+			union R3D_Rgb565
 			{
 				struct
 				{
@@ -6148,17 +6149,17 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 				};
 
 				UINT16 sample;
-			};
+			} rgb565;
 
-			sample = (*oTempData)[ i ];
+			rgb565.sample = (*oTempData)[ i ];
 
-			if( r )
+			if( rgb565.r )
 				chanPresent[ 0 ] = 1;
 
-			if( g )
+			if( rgb565.g )
 				chanPresent[ 1 ] = 1;
 
-			if( b )
+			if( rgb565.b )
 				chanPresent[ 2 ] = 1;
 		}
 
@@ -6252,7 +6253,8 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 
 			for( int i = 0, e = (int)oTempData->Count(); i < e; i ++ )
 			{
-				union
+				// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+				union R3D_Rgb565
 				{
 					struct
 					{
@@ -6262,17 +6264,17 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 					};
 
 					UINT16 sample;
-				};
+				} rgb565;
 
-				sample = (*oTempData)[ i ];
+				rgb565.sample = (*oTempData)[ i ];
 
-				if( r )
+				if( rgb565.r )
 					r_present = 1;
 
-				if( g )
+				if( rgb565.g )
 					b_present = 1;
 
-				if( b )
+				if( rgb565.b )
 					g_present = 1;
 			}
 
@@ -6603,7 +6605,11 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 
 						for( int i = 0, e = (int)unpackedMask.Count(); i < e; i ++ )
 						{
-							union
+							// PORT NOTE: this was an anonymous union holding an anonymous
+							// struct, declared as a local. GCC rejects an anonymous struct
+							// that is not inside a NAMED type, so the union gets a tag. The
+							// inner struct stays anonymous, keeping .r/.g/.b member access.
+							union R3D_Rgb565
 							{
 								struct
 								{
@@ -6613,13 +6619,13 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 								};
 
 								UINT16 sample;
-							};
+							} rgb565;
 
-							sample = unpackedMask[ i ];
+							rgb565.sample = unpackedMask[ i ];
 
-							int r_conv = r * 255 / 31;
-							int g_conv = g * 255 / 63;
-							int b_conv = b * 255 / 31;
+							int r_conv = rgb565.r * 255 / 31;
+							int g_conv = rgb565.g * 255 / 63;
+							int b_conv = rgb565.b * 255 / 31;
 
 							int cidx = midx * LAYERS_PER_MASK;
 
@@ -6703,7 +6709,8 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 						int cidx = midx * LAYERS_PER_MASK;
 						for( int i = 0, e = unpackedMask.Count(); i < e; i ++ )
 						{
-							union
+							// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+							union R3D_Rgb565
 							{
 								struct
 								{
@@ -6713,21 +6720,21 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 								};
 
 								UINT16 sample;
-							};
+							} rgb565;
 
-							r = unpackedChannels[ cidx + 0 ][ i ] * 31 / 255;
+							rgb565.r = unpackedChannels[ cidx + 0 ][ i ] * 31 / 255;
 
 							if( cidx + 1 < (int)unpackedChannels.Count() )
-								g = unpackedChannels[ cidx + 1 ][ i ] * 63 / 255;
+								rgb565.g = unpackedChannels[ cidx + 1 ][ i ] * 63 / 255;
 							else
-								g = 0;
+								rgb565.g = 0;
 
 							if( cidx + 2 < (int)unpackedChannels.Count() )
-								b = unpackedChannels[ cidx + 2 ][ i ] * 31 / 255;
+								rgb565.b = unpackedChannels[ cidx + 2 ][ i ] * 31 / 255;
 							else
-								b = 0;
+								rgb565.b = 0;
 
-							unpackedMask[ i ] = sample;
+							unpackedMask[ i ] = rgb565.sample;
 						}
 
 						UpdateMask( &unpackedMask, packedTempMask, unpackedTempMask, tx, tz, L, midx + startMaskIdx );
@@ -6815,7 +6822,13 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 
 				if( eraseIdx >= 0 )
 				{
-					info.LayerList.Erase( info.LayerList.GetIterator( eraseIdx ) );
+					// PORT NOTE: Erase takes Iterator& (non-const), and GetIterator returns by
+					// value. MSVC allowed binding a temporary to a non-const reference; ISO
+					// C++ does not. Materialise the iterator into a named local.
+					{
+						auto eraseIt = info.LayerList.GetIterator( eraseIdx );
+						info.LayerList.Erase( eraseIt );
+					}
 				}
 			}
 		}

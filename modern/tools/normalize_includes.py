@@ -135,11 +135,15 @@ def main():
                     new_path = new_path.replace("\\", "/")
                     file_slash += 1
 
-                if not any(new_path.startswith(p) or p in new_path for p in SHIMMED_PREFIXES):
-                    corrected = fix_case(new_path, source_dir, index)
-                    if corrected and corrected != new_path:
-                        new_path = corrected
-                        file_case += 1
+                # NOTE: do NOT skip paths matching SHIMMED_PREFIXES here. An earlier
+                # version did, and "fmod/" matched the REAL project header
+                # GameEngine/fmod/SoundSys.h, leaving "fmod/soundsys.h" uncorrected
+                # and breaking 9 GameEngine TUs. fix_case() already returns None for
+                # anything it cannot resolve on disk, which covers the shims safely.
+                corrected = fix_case(new_path, source_dir, index)
+                if corrected and corrected != new_path:
+                    new_path = corrected
+                    file_case += 1
 
                 if new_path == path:
                     return m.group(0)

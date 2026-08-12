@@ -5,6 +5,8 @@
 
 #pragma once
 
+
+#include <algorithm>   // [PORT] std::find; MSVC pulled this in transitively
 //////////////////////////////////////////////////////////////////////////
 
 const int INVALID_COLLECTION_INDEX = -1;

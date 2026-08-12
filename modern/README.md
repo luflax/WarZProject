@@ -16,10 +16,31 @@ fork is deliberately cut.
 | | |
 |---|---|
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
-| Source copied | run `tools/bootstrap.sh` |
-| Milestone A — compiles | ⬜ not started |
+| Source copied | ✅ `tools/bootstrap.sh` |
+| **Eternity** (engine core) | ✅ **81/81 TUs compile** — strict C++20, no `-fpermissive` |
+| **GameEngine** | 🟡 **29/46 TUs compile**; 17 blocked on absent SDKs (below) |
+| EclipseStudio (client + editors) | ⬜ not started (~471 files) |
+| server/src | ⬜ not started (~156 files) |
 | Milestone B — links | ⬜ not started |
 | Milestone C — runs to a known point | ⬜ not started |
+
+Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686, `-std=c++20`, **no `-fpermissive`**).
+
+### GameEngine: what the 17 remaining failures need
+
+None are conformance problems — every one is an absent SDK.
+
+| Blocked on | Files | Obtainable? |
+|---|---|---|
+| **PhysX SDK** | 9 — `PhysXWorld`, `PhysObj`, `GameObj`, `Terrain3`, `VehicleManager`, `VehicleDescriptor`, `obj_Vehicle`, `PhysXRepXHelpers`, `CamouflageDataManager` | **Yes** — PhysX 4.1 is BSD-3. Not yet vendored |
+| **Autodesk Navigation** | 7 — `AI_Brain`, `AI_Tactics`, and the five `AutodeskNav*` wrappers | **No** — discontinued product |
+| **Scaleform GFx** | 1 — `APIScaleformGfx` | **No** — discontinued 2018 |
+
+The PhysX forward-declaration shim carries headers that merely hold pointers. It cannot
+carry these nine: they call the API directly (`actor->isRigidStatic()`,
+`PxSceneQueryFilterData filter(...)`, `PxHeightFieldSample`). Across GameEngine the
+codebase touches **171 distinct PhysX symbols and 89 member accesses** — past the point
+where stubbing is cheaper than vendoring PhysX 4.1.
 
 ---
 

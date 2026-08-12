@@ -138,6 +138,9 @@ struct D3DXVECTOR4
     D3DXVECTOR4 operator+(const D3DXVECTOR4& v) const { return D3DXVECTOR4(x + v.x, y + v.y, z + v.z, w + v.w); }
     D3DXVECTOR4 operator-(const D3DXVECTOR4& v) const { return D3DXVECTOR4(x - v.x, y - v.y, z - v.z, w - v.w); }
     D3DXVECTOR4 operator*(float s) const              { return D3DXVECTOR4(x * s, y * s, z * s, w * s); }
+    D3DXVECTOR4& operator*=(float s) { x *= s; y *= s; z *= s; w *= s; return *this; }
+    D3DXVECTOR4& operator+=(const D3DXVECTOR4& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
+    D3DXVECTOR4& operator-=(const D3DXVECTOR4& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
 };
 
 struct D3DXQUATERNION
