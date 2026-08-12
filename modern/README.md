@@ -28,7 +28,7 @@ fork is deliberately cut.
 | ↳ B1 CMake targets | ✅ **done** — `cmake --build` drives the whole tree |
 | ↳ B2 vendored libraries | ✅ RakNet, pugixml, Recast/Detour, RmlUi · ⬜ PhysX |
 | ↳ B3 link the binaries | 🔨 **2 of 4 linked** — see below |
-| ↳ B4 residual symbols | ⬜ 13 own-code symbols left, client only |
+| ↳ B4 residual symbols | ✅ **done** — zero own-code symbols left |
 
 ### Binaries
 
@@ -36,12 +36,13 @@ fork is deliberately cut.
 SupervisorServer.exe   LINKED   3,033,706 bytes   PE32 i386
 MasterServer.exe       LINKED   3,168,442 bytes   PE32 i386
 GameServer             17 undefined  — all PhysX
-WarZ.exe               69 undefined  — 56 PhysX, 13 own-code
+WarZ.exe               56 undefined  — all PhysX
 ```
 
-Every one of the four **compiles** completely; all four reach the linker. PhysX is the
-single blocker for the remaining two, exactly as the plan predicted — it is vendored
-headers-only, so `PxCreateFoundation` and friends have nothing to resolve against.
+All four **compile** completely and all four reach the linker. **Every remaining
+unresolved symbol in the entire product is PhysX** — it is vendored headers-only, so
+`PxCreateFoundation` and friends have nothing to resolve against. Nothing else stands
+between this tree and four binaries.
 
 Build with:
 

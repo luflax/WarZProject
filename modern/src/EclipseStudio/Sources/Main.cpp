@@ -1383,6 +1383,16 @@ void ExecuteParticleEditor();
 void ExecutePhysicsEditor();
 void ExecuteBackendTest();
 
+// [PORT] Declared HERE, at file scope, rather than at block scope inside
+// game::MainLoop and game::Close below. MainLoop is DEFINED with a qualified name
+// ("void game::MainLoop()"), so its body sits in namespace game, and a function
+// declaration written inside a function body names the nearest enclosing namespace --
+// it declared game::InitGrass and game::CloseGrass, which nothing defines. The real
+// ones are global, in ObjectsCode/Nature/GrassMap.cpp. Main.cpp does not include
+// GrassMap.h, so these are the declarations; the call sites now qualify with :: .
+void InitGrass();
+void CloseGrass();
+
 extern int		_r3d_bTerminateOnZ;
 
 void game::MainLoop()
@@ -1467,8 +1477,7 @@ void game::MainLoop()
 	g_bStartedAsParticleEditor = false;
 #endif
 
-	void InitGrass();
-	InitGrass();
+	::InitGrass();
 
 	g_PrefabManager.LoadAllPrefabs();
 
@@ -1567,8 +1576,7 @@ void game::MainLoop()
 	
 	SAFE_DELETE( g_GameRewards );
 
-	void CloseGrass();
-	CloseGrass();
+	::CloseGrass();
 
 //	DestroyPointLightsRendererV2();
 
