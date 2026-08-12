@@ -47,6 +47,8 @@ Three dependencies are referenced but not actually used. Removing them costs not
 | **GameBlocks / FairFight** | Anti-cheat, aimbot detection | Commercial | *Drop* — see below | — |
 | **HackShield** | Anti-cheat | AhnLab commercial | *Drop* | — |
 | **VMProtect** | Binary obfuscation | Commercial | *Drop* (already disabled) | — |
+| **NVIDIA NVAPI** | SLI detection + 3D Vision stereo (`r3dRender.CPP` only) | Free download but under NVIDIA's SDK licence, not a permissive one; no redistributable source | *Drop* — no-op shim at `src/External/NVApi/`. 3D Vision was discontinued by NVIDIA in 2019, so this is dead capability | — |
+| **AMD `atimgpud`** | Crossfire detection (`r3dRender.CPP` only) | AMD SDK terms; the `.lib` is absent from this drop | *Drop* — one-function shim at `src/External/ATICrossfireDetect/` returning 1 GPU | — |
 
 ### Replacement notes
 
@@ -95,7 +97,7 @@ server-side statistical approach already present in the FairFight aimbot detecto
 | **DirectX SDK (June 2010)** | D3D9 + **D3DX** | D3DX was **removed from the Windows SDK**; `D3DXMATRIX` is used pervasively (e.g. `GameObj.h:305`) | **DirectXMath** (Windows SDK) or **GLM** | MIT |
 | **libjpeg 6b** | Texture loading | 1998 vintage | **stb_image** at cook time; ship BC7 via **bc7enc_rdo** | Public domain / MIT |
 | **CrashRpt** | Crash reporting | Stale | **Crashpad** or **Sentry Native** | Apache-2.0 / MIT |
-| **Berkelium** | In-game web browser (`ENABLE_WEB_BROWSER`) | Abandoned, 2012-era Chromium | **Drop** — use `ShellExecute` to the OS browser, as `Main.cpp:1602` already does | — |
+| **Berkelium** | In-game web browser (`ENABLE_WEB_BROWSER`) | Abandoned, 2012-era Chromium | **Dropped** — the port builds with `-DENABLE_WEB_BROWSER=0`; `r3dPCH.h` now only defaults the flag to 1 when it is not already defined, and every call site is already behind `#if ENABLE_WEB_BROWSER`. Longer term, `ShellExecute` to the OS browser as `Main.cpp:1602` already does | — |
 | **PhysX 3.x** | Physics, character controllers | Not a licensing problem (PhysX 4+ is BSD-3), but 3.x is old and the API differs | **Jolt Physics** (target) / **PhysX 4.1** (interim) | MIT / BSD-3 |
 
 **GLM over DirectXMath** if you want the math layer to outlive the graphics API — relevant

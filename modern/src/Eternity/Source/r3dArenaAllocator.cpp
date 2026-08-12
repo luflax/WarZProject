@@ -11,6 +11,30 @@
 #include "r3dArenaAllocator.h"
 #include "r3dAssert.h"
 #include <algorithm>
+#include <bit>      // std::countl_zero -- the portable uintLog2 below
+
+// The guard mirrors MinGW's own condition in malloc.h exactly, so that if
+// __MSVCRT_VERSION__ is ever raised to 0x900 this definition drops out rather than
+// colliding with the _CRTIMP declaration that would then be visible.
+#if !defined(_MSC_VER) && (!defined(__MSVCRT_VERSION__) || __MSVCRT_VERSION__ < 0x900)
+// COMPAT: _aligned_msize is an MSVC-CRT function (msvcr90 and later) that reports the
+// usable size of an _aligned_malloc block. MinGW declares it only under
+// __MSVCRT_VERSION__ >= 0x900, and the system msvcrt.dll does not export it -- defining
+// that macro would move the failure from compile time to link time rather than fix it.
+//
+// It is referenced twice, both inside #ifndef FINAL_BUILD, and only to maintain the
+// memStats.totalAllocatedMemory counter for blocks larger than PAGE_SIZE. Returning 0
+// means those blocks go uncounted, which is a real loss of statistics -- but it is
+// SYMMETRIC: Allocate adds 0 and Deallocate subtracts 0, so the counter stays
+// self-consistent instead of drifting negative. Reporting the requested size on the
+// Allocate side only would be worse, not better.
+//
+// Nothing else reads _aligned_msize; grep confirms these are the only two call sites.
+static inline size_t _aligned_msize(void* /*mem*/, size_t /*alignment*/, size_t /*offset*/)
+{
+	return 0;
+}
+#endif
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -36,6 +60,8 @@ namespace
 
 //////////////////////////////////////////////////////////////////////////
 
+#if defined(_MSC_VER) && defined(_M_IX86)
+
 	__declspec (naked) size_t uintLog2(size_t val)
 	{
 		// prepare stack
@@ -53,13 +79,32 @@ namespace
 		}
 
 		// Cleanup function
-		__asm  
+		__asm
 		{
 			mov esp, ebp
 			pop ebp
 			ret
 		}
 	}
+
+#else
+
+	// PORTABILITY: the block above is MSVC-only -- GCC and Clang parse neither
+	// __asm{} nor __declspec(naked), and __LOCAL_SIZE has no equivalent. This is
+	// the same computation: 'bsr' returns the index of the highest set bit, which
+	// is what countl_zero gives from the other end. It lowers to the same single
+	// instruction, so nothing is lost.
+	//
+	// bsr leaves its destination register untouched when val == 0, so the original
+	// returns garbage there. 0 is the least surprising answer, and MemoryArena
+	// never calls this with 0 -- AllocateMemory rejects size 0 before reaching it.
+	inline size_t uintLog2(size_t val)
+	{
+		return val ? (sizeof(size_t) * 8 - 1) - static_cast<size_t>(std::countl_zero(val))
+		           : 0;
+	}
+
+#endif
 }
 
 //-------------------------------------------------------------------------

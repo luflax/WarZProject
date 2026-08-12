@@ -21,6 +21,10 @@
 # Env:
 #   CXX=<compiler>   default i686-w64-mingw32-g++
 #   JOBS=<n>         default nproc
+#   CONFIG=server|client
+#                    Which configuration to check Eternity/GameEngine in (default
+#                    server). Those two trees are compiled BOTH ways across the product;
+#                    a full check sweeps both. See defines_for() below.
 #
 set -uo pipefail
 
@@ -29,7 +33,10 @@ cd "$MODERN_DIR"
 
 CXX=${CXX:-i686-w64-mingw32-g++}
 JOBS=${JOBS:-$(nproc 2>/dev/null || echo 4)}
-TARGET="${1:-src/Eternity/Source}"
+# src/Eternity, not src/Eternity/Source: Eternity.vcxproj also compiles SF/ and
+# UndoHistory/ (10 files -- CmdVar, the console, the editor undo stack). Probing only
+# Source/ missed them and undercounted the engine at 81 TUs when it is 91.
+TARGET="${1:-src/Eternity}"
 VERBOSE=0; TRIAGE=0; ONLY_FAILED=0
 case "${2:-}" in
   -v)       VERBOSE=1 ;;
@@ -70,7 +77,10 @@ includes_for() {
 # Studio.vcxproj, never in WO_GameServer.vcxproj -- the server has its own obj_Vehicle
 # under server/src/.../Vehicles/. They pull in client headers and must be probed as
 # client code.
-BASE_DEFINES="-DWIN32 -D_WINDOWS -DPX_PHYSX_STATIC_LIB -DNDEBUG"
+# ENABLE_WEB_BROWSER=0 disables the in-game Berkelium browser, which is an abandoned
+# project and absent from this drop. r3dPCH.h only defaults it to 1 when it is not
+# already defined, and every call site is behind #if ENABLE_WEB_BROWSER.
+BASE_DEFINES="-DWIN32 -D_WINDOWS -DPX_PHYSX_STATIC_LIB -DNDEBUG -DENABLE_WEB_BROWSER=0"
 CLIENT_ONLY_RE='GameEngine/gameobjects/(obj_Vehicle|VehicleManager)\.cpp$'
 
 defines_for() {
@@ -81,15 +91,25 @@ defines_for() {
                           echo "$BASE_DEFINES -DWO_SERVER -DDISABLE_PHYSX";              return ;;
     *EclipseStudio*)      echo "$BASE_DEFINES";                                          return ;;
   esac
-  if [[ "$1" =~ $CLIENT_ONLY_RE ]]; then
+  # Eternity and GameEngine are compiled TWICE across the product: the client links them
+  # without WO_SERVER, the three servers with it, and the two configurations take
+  # different #ifdef branches. Checking only one leaves the other unverified -- and it
+  # is not a small difference: WO_SERVER turns off USE_R3D_MEMORY_ALLOCATOR and
+  # ENABLE_WEB_BROWSER, and UIimEdit.cpp defines 8 imgui_DrawList symbols as client code
+  # and none as server code. CONFIG selects which one to check; sweep both.
+  if [[ "${CONFIG:-server}" == client ]] || [[ "$1" =~ $CLIENT_ONLY_RE ]]; then
     echo "$BASE_DEFINES"
   else
-    echo "$BASE_DEFINES -DWO_SERVER"   # Eternity/GameEngine: smallest surface
+    echo "$BASE_DEFINES -DWO_SERVER"
   fi
 }
 # No -fpermissive: it masked ~70 real conformance errors behind one root cause
 # (Tsg_stl/TString.h calling unqualified r3dTL::Max). Strict is the honest gate.
-FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"
+#
+# -msse2: bare i686 has no SSE, so the engine's _mm_cvtss_si32 / _mm_set_ss calls fail
+# to inline. It is invisible under -fsyntax-only and breaks five files the moment real
+# codegen is on. The original 2013 build assumed SSE2, so this restores the true target.
+FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions -msse2"
 
 # Files present on disk but NOT listed in the original .vcxproj -- dead legacy that
 # was never compiled. Verified by diffing Eternity.vcxproj's <ClCompile> entries

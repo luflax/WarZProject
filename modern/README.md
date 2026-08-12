@@ -17,24 +17,27 @@ fork is deliberately cut.
 |---|---|
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
 | Source copied | ✅ `tools/bootstrap.sh` |
-| **Eternity** (engine core) | ✅ **81/81 TUs compile** |
-| **GameEngine** | ✅ **44/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
-| **EclipseStudio** (client + editors) | ✅ **209/209 TUs compile** |
-| **server/src** (3 server binaries) | ✅ **71/71 TUs compile** |
-| Shared sources, server configuration | ✅ **48/48 TUs compile** |
+| **Eternity** (engine core) | ✅ **91/91 TUs** — in *both* client and server configuration |
+| **GameEngine** | ✅ **44/44 TUs** — both configurations; PhysX 4.1, Recast/Detour and RmlUi all in |
+| **EclipseStudio** (client + editors) | ✅ **209/209 TUs** |
+| **server/src** (3 server binaries) | ✅ **71/71 TUs** |
+| Shared sources, server configuration | ✅ **48/48 TUs** |
 | **Milestone A — compiles** | ✅ **done** |
-| Milestone B — links | 📋 **planned** — see [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) |
+| **Milestone B — links** | 🔨 **in progress** — see [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) |
+| ↳ B0 build-configuration correctness | ✅ **done** |
+| ↳ B1 CMake targets · B2 vendored libs · B3 link · B4 residual | ⬜ not started |
 | Milestone C — runs to a known point | ⬜ not started |
 
-> Milestone B reconnaissance found two gaps in the counts below, both documented in the
-> plan: ten `Eternity/SF` + `UndoHistory` sources were outside the probed directory (the
-> engine is **91** TUs, not 81), and Eternity/GameEngine have only ever been checked in
-> their *server* configuration. Both are fixed in the plan's first step.
+**The whole product compiles under strict ISO C++20** — 415 translation units, no
+`-fpermissive`, no commercial SDK. Every one of them also passes real **codegen**
+(`-c`, not just `-fsyntax-only`), which is what Milestone B needs.
 
-**Milestone A is complete: the whole product compiles under strict ISO C++20** — 405
-translation units plus 48 re-checked in their server configuration, no `-fpermissive`,
-no commercial SDK. Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686,
-`-std=c++20 -fsyntax-only -fms-extensions`).
+Eternity and GameEngine are checked in **both** configurations, because the client links
+them without `WO_SERVER` and the servers with it, and the two take different `#ifdef`
+branches. That is 135 TUs × 2 configurations + 280 single-configuration TUs = **550
+compilations**. Measured with `./tools/probe.sh` and `./tools/codegen.sh` (MinGW-w64
+i686, `-std=c++20 -fms-extensions -msse2`); pass `CONFIG=client` to select the
+client-side build of the two shared libraries.
 
 Several sources are compiled **twice** across the product — once as client code and once
 with `WO_SERVER` defined, which takes different `#ifdef` branches. `WO_GameServer.vcxproj`

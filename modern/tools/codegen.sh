@@ -66,15 +66,10 @@ rm -rf "$OUT"; mkdir -p "$OUT"
 compile_one() {
   local f="$1"
   local o="$OUT/$(echo "$f" | tr '/' '_').o"
-  local defs
-  if [[ "$CONFIG" == client ]]; then
-    # No WO_SERVER: the client configuration of Eternity/GameEngine.
-    defs="$BASE_DEFINES"
-  else
-    defs="$(defines_for "$f")"
-  fi
+  # defines_for reads CONFIG itself, so client/server selection lives in exactly one
+  # place -- probe.sh -- rather than being reimplemented here.
   if $CXX -std=c++20 -w -fms-extensions -msse2 \
-       $defs $(includes_for "$f") -c "$f" -o "$o" 2> "$o.log"
+       $(defines_for "$f") $(includes_for "$f") -c "$f" -o "$o" 2> "$o.log"
   then echo "PASS $f"; else echo "FAIL $f"; fi
 }
 export -f compile_one defines_for includes_for

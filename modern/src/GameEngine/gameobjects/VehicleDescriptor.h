@@ -194,6 +194,10 @@ struct VehicleDescriptor
 	PxF32 GetSpeed();
 	PxF32 GetLongTireSlip(const PxU32 tireIndex);
 	PxF32 GetLatTireSlip(const PxU32 tireIndex);
+	// [PORT] Tire slip moved from PxVehicleWheelsDynData to PxVehicleWheelQueryResult
+	// in PhysX 4; this resolves the per-wheel result, or NULL if the vehicle has not
+	// been simulated yet. See the definition in VehicleDescriptor.cpp.
+	const physx::PxWheelQueryResult* GetWheelQuery(const PxU32 tireIndex) const;
 	PxF32 GetSideSpeed();
 
 	PxReal GetEngineRpm();

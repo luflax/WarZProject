@@ -168,9 +168,16 @@ using namespace physx;
 #define ENABLE_RAGDOLL 1
 #define ENABLE_MULTI_GPU_OPTIMIZATIONS 0
 
-#ifndef WO_SERVER 
+#ifndef WO_SERVER
 #ifndef FINAL_BUILD
+// [PORT] Made overridable so the build can switch it off, the same way
+// ENABLE_MEMORY_DEBUG below already is. The in-game browser is Berkelium, which is an
+// abandoned project (it embedded Chromium and has had no release since 2013) and is not
+// in this drop. There is no permissive drop-in, so the port builds with
+// -DENABLE_WEB_BROWSER=0; every call site is already behind #if ENABLE_WEB_BROWSER.
+#ifndef ENABLE_WEB_BROWSER
 	#define ENABLE_WEB_BROWSER 1
+#endif
 #endif
 #endif
 

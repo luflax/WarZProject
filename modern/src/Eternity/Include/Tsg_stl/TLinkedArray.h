@@ -65,7 +65,13 @@ namespace r3dTL
 		Iterator GetIterator( int index ) const;
 
 		void Insert( Iterator& iter, const T& val );
-		void Erase( Iterator& iter );
+		// [PORT] const&, not &. Erase only reads iter.mListElem and iter.mIndex -- it
+		// never writes through the reference -- and Terrain3.cpp:6225 calls it as
+		// Erase( LayerList.GetIterator( i ) ), binding a temporary. MSVC accepted that
+		// as an extension; ISO C++ does not bind an rvalue to a non-const lvalue ref.
+		// Widening the parameter fixes the call site without touching the other five,
+		// which all pass named lvalues and are unaffected.
+		void Erase( const Iterator& iter );
 
 		void PushBack( const T& elem );
 		void ClearValues();
@@ -317,7 +323,7 @@ namespace r3dTL
 
 	template < typename T, typename S >
 	void
-	TLinkedArray< T, S >::Erase( Iterator& iter )
+	TLinkedArray< T, S >::Erase( const Iterator& iter )
 	{
 		r3d_assert( iter.IsValid() );
 
