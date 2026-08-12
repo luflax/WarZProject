@@ -51,7 +51,9 @@ class CVarString : public CVar
 #define CVAR_CONCAT(x,y)       x ## y 
 #define CVAR_BYLINE(name,line) CVAR_CONCAT(name,line) 
 
-#define CVAR_COMMENT(yy, zz)   static CVarInt CVAR_BYLINE(_cvar_Comment,__LINE__) ("@"##yy, 0, zz)
+// [PORT] `"@"##yy` pasted two string literals, which is not a valid paste. Adjacent
+// string-literal concatenation was what it meant, and is what it now does.
+#define CVAR_COMMENT(yy, zz)   static CVarInt CVAR_BYLINE(_cvar_Comment,__LINE__) ("@" yy, 0, zz)
 #define	CVAR_FLOAT(xx, yy, zz) CVarFloat xx(#xx, yy, zz)
 #define	CVAR_INT(xx, yy, zz)   CVarInt   xx(#xx, yy, zz)
 #define	CVAR_STRING(xx, yy, zz) CVarString xx(#xx, yy, zz)

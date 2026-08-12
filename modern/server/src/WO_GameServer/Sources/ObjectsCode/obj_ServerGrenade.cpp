@@ -1,6 +1,10 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
+// [PORT] for std::find / std::sort / std::shuffle; MSVC pulled <algorithm> in
+// transitively, libstdc++ does not.
+#include <algorithm>
+
 #include "obj_ServerGrenade.h"
 #include "obj_ServerPlayer.h"
 #include "ServerGameLogic.h"

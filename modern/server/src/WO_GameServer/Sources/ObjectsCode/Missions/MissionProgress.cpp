@@ -175,7 +175,7 @@ MissionsProgress& MissionsProgress::operator =( const MissionsProgress& data )
 void MissionsProgress::ParseMissionProgress( pugi::xml_node& xmlItem )
 {
 	// Mission accepted and completed data is quantized into the bits of its arrays.
-	pugi::xml_node& xmlMissionsContainer = xmlItem.child("MissionsData");
+	pugi::xml_node xmlMissionsContainer = xmlItem.child("MissionsData");
 	if( !xmlMissionsContainer.empty() )
 	{
 //#ifdef _DEBUG
@@ -183,7 +183,7 @@ void MissionsProgress::ParseMissionProgress( pugi::xml_node& xmlItem )
 //		xmlItem.print(xmlBuf);
 //		r3dOutToLog( "Loading Missions Progress:\n%s\n", xmlBuf.out_.c_str() );
 //#endif
-		pugi::xml_node& xmlMissionsHeader = xmlMissionsContainer.child("MissionsHeader");
+		pugi::xml_node xmlMissionsHeader = xmlMissionsContainer.child("MissionsHeader");
 		if( !xmlMissionsHeader.empty() )
 		{
 			uint32_t ver = xmlMissionsHeader.attribute("version").as_uint();
@@ -193,7 +193,7 @@ void MissionsProgress::ParseMissionProgress( pugi::xml_node& xmlItem )
 				return;
 			}
 
-			pugi::xml_node& xmlMissionData = xmlMissionsContainer.child("MissionsArrays");
+			pugi::xml_node xmlMissionData = xmlMissionsContainer.child("MissionsArrays");
 			if( !xmlMissionData.empty() )
 			{
 				for(int i = 0; i < MaxArrSize; ++i)
@@ -1110,7 +1110,7 @@ EActionState MissionsProgress::GetState( uint32_t missionID, GameObject* item )
 
 void MissionsProgress::LoadProgress( const pugi::xml_node& xmlCharData )
 {
-	pugi::xml_node& xmlStateData = xmlCharData.child("MissionProgress");
+	pugi::xml_node xmlStateData = xmlCharData.child("MissionProgress");
 	while( !xmlStateData.empty() )
 	{
 		uint32_t missionID = xmlStateData.attribute("missionID").as_uint();
@@ -1152,7 +1152,7 @@ void MissionsProgress::LoadProgress( const pugi::xml_node& xmlCharData )
 			stateData->m_stageTriggered	= (vsos & 0x000000FF) != 0 || 
 				( g_pMissionMgr->m_mapMissions[ missionID ]->m_disallowSave && 0 == g_pMissionMgr->m_mapMissions[ missionID ]->m_stages[ 0 ]->m_triggerObjHash );
 
-			pugi::xml_node& xmlActionData = xmlStateData.child("Action");
+			pugi::xml_node xmlActionData = xmlStateData.child("Action");
 			while( !xmlActionData.empty() )
 			{
 				uint32_t soa = xmlActionData.attribute("soa").as_uint();

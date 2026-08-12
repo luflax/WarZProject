@@ -283,7 +283,8 @@ class obj_ServerPlayer : public GameObject, INetworkHelper
 private: // disable access to SetPosition directly, use TeleportPlayer
 	void		SetPosition(const r3dPoint3D& pos)
 	{
-		__super::SetPosition(pos);
+		// [PORT] __super is an MSVC extension; the base class has to be named.
+		GameObject::SetPosition(pos);
 	}
 
 	bool		IsSwimming();
@@ -362,9 +363,9 @@ virtual	BOOL		Update();			// ObjMan: tick update
 virtual	BOOL	 	OnCollide(GameObject *obj, CollisionInfo &trace);
 
 	INetworkHelper*	GetNetworkHelper() { return dynamic_cast<INetworkHelper*>(this); }
-	DefaultPacket*	INetworkHelper::NetGetCreatePacket(int* out_size);
-	void		INetworkHelper::LoadServerObjectData() { r3dError("not implemented"); }
-	void		INetworkHelper::SaveServerObjectData() { r3dError("not implemented"); }
+	DefaultPacket*	NetGetCreatePacket(int* out_size);
+	void		LoadServerObjectData() { r3dError("not implemented"); }
+	void		SaveServerObjectData() { r3dError("not implemented"); }
 
 virtual	BOOL		OnNetReceive(DWORD EventID, const void* packetData, int packetSize);
 };

@@ -39,15 +39,31 @@ esac
 # Per-target: a single shared cache replayed the wrong tree's failures.
 CACHE=".probe-failed.$(echo "$TARGET" | tr "/" "_")"
 
-INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/ChilKat/Include -Isrc/External/Steam -Isrc/External/ts3_sdk_3/include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
+BASE_INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/ChilKat/Include -Isrc/External/Steam -Isrc/External/ts3_sdk_3/include -Isrc/External/GameBlocks -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
 
-# WO_SERVER strips rendering. PhysX 4.1 is now vendored (BSD-3), so DISABLE_PHYSX is
-# no longer set -- the real SDK headers are used. PX_PHYSX_STATIC_LIB avoids dllimport
-# decoration, which matters for a headers-only compile check.
-# Defines depend on WHICH BINARY the file belongs to. EclipseStudio is the client
-# and its headers hard-#error if WO_SERVER is set ("client weapon.h included in
-# SERVER"); server/src is the server. Getting this wrong accounted for 22 of the
-# first 94 EclipseStudio failures.
+# Each server project puts its OWN Sources/ on the include path (".\Sources" in the
+# vcxproj), so "ServerGameLogic.h" and friends resolve unqualified. Without this, 30 of
+# the first 71 server files failed on a missing include rather than on anything real.
+includes_for() {
+  case "${FORCE_BINARY:-$1}" in
+    */WO_GameServer/*|WO_GameServer)       echo "$BASE_INCLUDES -Iserver/src/WO_GameServer/Sources" ;;
+    */MasterServer/*|MasterServer)         echo "$BASE_INCLUDES -Iserver/src/MasterServer/Sources" ;;
+    */SupervisorServer/*|SupervisorServer) echo "$BASE_INCLUDES -Iserver/src/SupervisorServer/Sources -Iserver/src/MasterServer/Sources" ;;
+    *)                    echo "$BASE_INCLUDES" ;;
+  esac
+}
+
+# WO_SERVER strips rendering. PX_PHYSX_STATIC_LIB avoids dllimport decoration, which
+# matters for a headers-only compile check.
+#
+# Defines depend on WHICH BINARY the file belongs to. EclipseStudio is the client and its
+# headers hard-#error if WO_SERVER is set ("client weapon.h included in SERVER"); server
+# is the server. Getting this wrong accounted for 22 of the first 94 EclipseStudio
+# failures.
+#
+# The three server binaries do NOT share defines. MasterServer and SupervisorServer are
+# built with DISABLE_PHYSX -- they never touch physics -- while WO_GameServer links the
+# full SDK and adds KY_BUILD_SHIPPING. Taken from their .vcxproj files.
 #
 # GameEngine is shared, so its defines are chosen PER FILE rather than per tree: two of
 # its sources (gameobjects/obj_Vehicle.cpp and VehicleManager.cpp) are listed only in
@@ -58,12 +74,15 @@ BASE_DEFINES="-DWIN32 -D_WINDOWS -DPX_PHYSX_STATIC_LIB -DNDEBUG"
 CLIENT_ONLY_RE='GameEngine/gameobjects/(obj_Vehicle|VehicleManager)\.cpp$'
 
 defines_for() {
-  case "$1" in
-    *EclipseStudio*) echo "$BASE_DEFINES -DVEHICLES_ENABLED"; return ;;
-    *server*)        echo "$BASE_DEFINES -DWO_SERVER";        return ;;
+  case "${FORCE_BINARY:-$1}" in
+    */WO_GameServer/*|WO_GameServer)
+                          echo "$BASE_DEFINES -DWO_SERVER -D_CRT_SECURE_NO_WARNINGS -DKY_BUILD_SHIPPING"; return ;;
+    */MasterServer/*|MasterServer|*/SupervisorServer/*|SupervisorServer)
+                          echo "$BASE_DEFINES -DWO_SERVER -DDISABLE_PHYSX";              return ;;
+    *EclipseStudio*)      echo "$BASE_DEFINES";                                          return ;;
   esac
   if [[ "$1" =~ $CLIENT_ONLY_RE ]]; then
-    echo "$BASE_DEFINES -DVEHICLES_ENABLED"
+    echo "$BASE_DEFINES"
   else
     echo "$BASE_DEFINES -DWO_SERVER"   # Eternity/GameEngine: smallest surface
   fi
@@ -89,6 +108,10 @@ fi
 if [[ $ONLY_FAILED == 1 && -s "$CACHE" ]]; then
   mapfile -t FILES < "$CACHE"
   echo "Re-probing ${#FILES[@]} previously-failing file(s) from $CACHE"
+elif [[ "$TARGET" == @* ]]; then
+  # Explicit file list, e.g. the shared sources the server projects compile out of src/.
+  # Regenerate with tools/find_shared_server_sources.py.
+  mapfile -t FILES < "${TARGET#@}"
 elif [[ -d "$TARGET" ]]; then
   mapfile -t FILES < <(find "$TARGET" -name '*.cpp' -o -name '*.CPP' | grep -Ev "$EXCLUDE_RE" | sort)
 else
@@ -98,13 +121,15 @@ fi
 OUT=$(mktemp -d)
 trap 'rm -rf "$OUT"' EXIT
 
-export CXX FLAGS INCLUDES BASE_DEFINES CLIENT_ONLY_RE OUT
-export -f defines_for
+export CXX FLAGS BASE_INCLUDES BASE_DEFINES CLIENT_ONLY_RE FORCE_BINARY OUT
+FORCE_BINARY="${FORCE_BINARY:-}"
+export -f defines_for includes_for
 probe_one() {
   local f="$1"
   local tag; tag=$(echo "$f" | tr '/' '_')
   local defines; defines=$(defines_for "$f")
-  if err=$($CXX $FLAGS $INCLUDES $defines "$f" 2>&1); then
+  local includes; includes=$(includes_for "$f")
+  if err=$($CXX $FLAGS $includes $defines "$f" 2>&1); then
     echo "PASS $f" > "$OUT/$tag"
   else
     { echo "FAIL $f"; grep -m1 -E "error:|fatal error:" <<<"$err"; } > "$OUT/$tag"

@@ -3406,9 +3406,11 @@ void obj_ServerPlayer::OnNetPacket(const PKT_C2S_CraftItem_s& n)
 	// craft
 	AddItemToBackpackSlot(SlotTo, craftItm);
 
-	PKT_S2C_CraftAns_s n;
-	n.ans = 1;
-	gServerLogic.p2pSendToPeer(peerId_, this, &n, sizeof(n));
+	// [PORT] this local was also called `n`, shadowing the packet parameter of
+	// OnNetPacket(const PKT_C2S_CraftItem_s& n).
+	PKT_S2C_CraftAns_s ans;
+	ans.ans = 1;
+	gServerLogic.p2pSendToPeer(peerId_, this, &ans, sizeof(ans));
 
 	if(resN.ResMetal || resN.ResStone || resN.ResWood)
 		gServerLogic.p2pSendToPeer(peerId_, this, &resN, sizeof(resN));

@@ -32,12 +32,22 @@ class dtTileCache;
 namespace AutodeskNavAgentEnums
 {
     // Preserved from the Kynapse wrapper: consumers switch on these values.
+    //
+    // Both spellings are live. The client (EclipseStudio obj_Zombie) uses the
+    // AvoidanceResult_* form; the server (sobj_Zombie) uses the short form, which is
+    // what the Kynapse header this codebase was originally written against exposed.
+    // Rather than rewrite either side, the enum carries both names for each value.
     enum EAvoidanceResult
     {
         AvoidanceResult_None = 0,
         AvoidanceResult_Stop,
         AvoidanceResult_Slowdown,
         AvoidanceResult_Trajectory,
+
+        NoAvoidance = AvoidanceResult_None,
+        Stop        = AvoidanceResult_Stop,
+        SlowDown    = AvoidanceResult_Slowdown,
+        Trajectory  = AvoidanceResult_Trajectory,
     };
 }
 

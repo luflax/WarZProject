@@ -29,6 +29,10 @@ public:
         if (offset < m_data.size())
             m_data.erase(offset, n);
     }
+    // Chilkat read a whole file into the buffer. Reporting failure is honest and is the
+    // path LogUploader already handles ("can't open file ...").
+    bool          loadFile(const char* /*path*/)  { m_data.clear(); return false; }
+    bool          saveFile(const char* /*path*/) const { return false; }
 private:
     std::string m_data;
 };
@@ -85,6 +89,8 @@ public:
     void AddParam(const char*, const char*)         {}
     void AddHeader(const char*, const char*)        {}
     void AddStringForUpload(const char*, const char*, const char*, const char*) {}
+    void AddBytesForUpload(const char* /*name*/, const char* /*filename*/, const CkByteData&) {}
+    void UseUpload()                                {}
     // Chilkat parsed a full URL into host/path/query. Nothing is sent, so this only
     // has to be callable.
     bool SetFromUrl(const char*)                    { return false; }
@@ -114,6 +120,10 @@ public:
     // Chilkat parsed the host out of a URL. Returning null makes HttpDownload log
     // "failed to parse url" and abort, which is the honest outcome.
     const char* getDomain(const char*)              { return nullptr; }
+
+    // The real component needs an unlock code; this one is never unlocked, and says so.
+    bool        IsUnlocked() const                  { return false; }
+    const char* lastErrorText() const               { return "Chilkat is not available in this build"; }
 };
 
 // Chilkat spells the class CkGzip and the header CkGzip.h; CkGZip is kept as an alias

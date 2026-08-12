@@ -237,7 +237,7 @@ public:
 	bool		ApplyDamageToVehicle(GameObject* fromObj, GameObject* targetVehicle, const r3dPoint3D& dmgPos, float damage, bool forceDamage, STORE_CATEGORIES damageSource, uint32_t damageItemId);
 #endif
 	void		DoKillPlayer(GameObject* sourceObj, obj_ServerPlayer* targetPlr, STORE_CATEGORIES weaponCat, bool forced_by_server=false, bool fromPlayerInAir = false, bool targetPlayerInAir = false );
-	void		DoExplosion(GameObject* fromObj, GameObject* sourceObj, r3dVector& forwVector, r3dVector& lastCollisionNormal, float direction, float damageArea, float damageAmount, STORE_CATEGORIES damageCategory, uint32_t damageItemId, bool isFromVehicle = false); // const WeaponConfig* wpnConfig)
+	void		DoExplosion(GameObject* fromObj, GameObject* sourceObj, const r3dVector& forwVector, const r3dVector& lastCollisionNormal, float direction, float damageArea, float damageAmount, STORE_CATEGORIES damageCategory, uint32_t damageItemId, bool isFromVehicle = false); // const WeaponConfig* wpnConfig)
 
 	int			getReputationKillEffect(int repFromPlr, int repKilledPlr);
 	

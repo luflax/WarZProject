@@ -20,13 +20,27 @@ fork is deliberately cut.
 | **Eternity** (engine core) | ✅ **81/81 TUs compile** |
 | **GameEngine** | ✅ **44/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
 | **EclipseStudio** (client + editors) | ✅ **209/209 TUs compile** |
-| server/src | ⬜ not started (~156 files) |
+| **server/src** (3 server binaries) | ✅ **71/71 TUs compile** |
+| Shared sources, server configuration | ✅ **48/48 TUs compile** |
+| **Milestone A — compiles** | ✅ **done** |
 | Milestone B — links | ⬜ not started |
 | Milestone C — runs to a known point | ⬜ not started |
 
-**The entire client compiles under strict ISO C++20** — 334 translation units, no
-`-fpermissive`, no commercial SDK. Measured with `./tools/probe.sh <dir>`
-(MinGW-w64 i686, `-std=c++20 -fsyntax-only -fms-extensions`).
+**Milestone A is complete: the whole product compiles under strict ISO C++20** — 405
+translation units plus 48 re-checked in their server configuration, no `-fpermissive`,
+no commercial SDK. Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686,
+`-std=c++20 -fsyntax-only -fms-extensions`).
+
+Several sources are compiled **twice** across the product — once as client code and once
+with `WO_SERVER` defined, which takes different `#ifdef` branches. `WO_GameServer.vcxproj`
+pulls in 50 files from `src/` and `MasterServer.vcxproj` three more.
+`tools/find_shared_server_sources.py` extracts that list, and `probe.sh` checks it in the
+server configuration:
+
+```bash
+./tools/find_shared_server_sources.py
+FORCE_BINARY=WO_GameServer ./tools/probe.sh @.probe-shared.WO_GameServer
+```
 
 ### What replaced what
 
@@ -57,9 +71,20 @@ PhysX 3 → 4 was the largest single piece of work. Renames that could be aliase
   editor's generator panel now exposes Recast's parameters rather than Kynapse's.
 - **No UI screens.** Every screen is a `.swf`; nothing imports Flash into RML, so each
   must be re-authored. The RmlUi `RenderInterface` is also still stubbed.
-- **No voice chat, HTTP, gzip, or Steam.** TeamSpeak, Chilkat and Steamworks are all
-  proprietary; each is shimmed to fail cleanly so its subsystem disables itself rather
-  than proceeding half-initialised.
+- **No voice chat, HTTP, gzip, or Steam.** TeamSpeak (client *and* server), Chilkat and
+  Steamworks are all proprietary; each is shimmed to fail cleanly so its subsystem
+  disables itself rather than proceeding half-initialised.
+- **No anti-cheat or gameplay telemetry.** The GameBlocks / FairFight SDK is absent, so
+  `GBClient::Connected()` returns false and every guarded call site is skipped. That
+  disables the server-side aimbot detector, the weapon-cheat projectile accounting, and
+  the whole event stream (kills, chat, item pickups, god-mode attempts). Those call
+  sites are a reasonable seam for a replacement detector.
+- **Zombie nav diagnostics are re-expressed.** Kynapse exposed a `Kaim::Bot` with a
+  visual-debug id, live-path status and a trajectory object; Detour has none of these.
+  The logs now report the agent's `dtCrowd` index, status and avoidance result.
+  `FindBarricade` tests against the barricade itself rather than walking a Kynapse
+  obstacle's spatialised cylinders — which is what the original `TODO` on that line
+  asked for, and is slightly more permissive at corners.
 
 ---
 
@@ -140,7 +165,8 @@ include silently resolves to a header that declares the same API and does nothin
 | `ChilKat/` | Chilkat HTTP + gzip (commercial) | No backend connectivity |
 | `ts3_sdk_3/` | TeamSpeak 3 SDK (commercial) | No VOIP |
 | `Steam/` | Steamworks (proprietary, optional) | Runs standalone |
-| `CrashRpt/`, `GameBlocks/` | crash reporting, anti-cheat | None meaningful |
+| `GameBlocks/` | GameBlocks / FairFight anti-cheat (commercial) | No cheat detection, no telemetry |
+| `CrashRpt/` | crash reporting | None meaningful |
 
 `PhysX/` is **not** a shim — PhysX 4.1 is vendored in full under BSD-3, with a
 `compat/` layer for the 3.x spellings.

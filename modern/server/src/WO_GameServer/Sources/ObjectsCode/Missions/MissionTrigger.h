@@ -42,14 +42,14 @@ public:
 	void			SetMissionDescStringID( const char* stringID );
 
 	INetworkHelper*	GetNetworkHelper() { return dynamic_cast<INetworkHelper*>(this); }
-	virtual DefaultPacket*	INetworkHelper::NetGetCreatePacket(int* out_size);
+	virtual DefaultPacket*	NetGetCreatePacket(int* out_size);
 	void			NetShowMissionTrigger(DWORD peerId);
 
 	virtual void	ReadSerializedData(pugi::xml_node& node);
 
 	int			GetServerObjectSerializationType() { return 1; } // static object
-	void		INetworkHelper::LoadServerObjectData();
-	void		INetworkHelper::SaveServerObjectData();
+	void		LoadServerObjectData();
+	void		SaveServerObjectData();
 };
 
 } // namespace Mission

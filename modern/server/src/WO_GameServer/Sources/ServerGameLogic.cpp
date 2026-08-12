@@ -2473,7 +2473,7 @@ void ServerGameLogic::ResetNetObjVisData(const obj_ServerPlayer* plr)
 	}
 }
 
-void ServerGameLogic::DoExplosion(GameObject* fromObj, GameObject* sourceObj, r3dVector& forwVector, r3dVector& lastCollisionNormal, float direction, float damageArea, float damageAmount, STORE_CATEGORIES damageCategory, uint32_t damageItemId, bool isFromVehicle) // const WeaponConfig* wpnConfig)
+void ServerGameLogic::DoExplosion(GameObject* fromObj, GameObject* sourceObj, const r3dVector& forwVector, const r3dVector& lastCollisionNormal, float direction, float damageArea, float damageAmount, STORE_CATEGORIES damageCategory, uint32_t damageItemId, bool isFromVehicle) // const WeaponConfig* wpnConfig)
 {
 	r3d_assert(sourceObj);
 

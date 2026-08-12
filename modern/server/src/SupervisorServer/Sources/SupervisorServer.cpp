@@ -1,7 +1,9 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dNetwork.h"
-#include <ShellAPI.h>
+// [PORT] lowercase: MinGW ships shellapi.h, and the Windows SDK header is
+// case-insensitively matched only on Windows filesystems.
+#include <shellapi.h>
 #include "CkString.h"
 
 //#pragma warning(disable: 4065)	// switch statement contains 'default' but no 'case' labels

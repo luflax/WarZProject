@@ -3,7 +3,8 @@
 #include "r3dDebug.h"
 
 #include <windows.h>
-#include <DbgHelp.h>
+// [PORT] lowercase: MinGW ships dbghelp.h.
+#include <dbghelp.h>
 // [PORT] linking handled by CMake: #pragma comment(lib, "DbgHelp.lib")
 
 extern void r3dCloseLogFile();

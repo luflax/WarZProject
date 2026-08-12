@@ -19,8 +19,11 @@ enum Ts3ErrorType
     ERROR_dont_notify       = 0x0004,
     ERROR_lib_time_limit_reached = 0x0005,
 
+    ERROR_serverlibrary_not_initialised = 0x0101,
+
     ERROR_failed_connection_initialisation = 0x0403,
-    ERROR_client_invalid_id = 0x0508,
+    ERROR_client_invalid_id      = 0x0508,
+    ERROR_client_not_logged_in   = 0x0510,
 };
 
 #ifdef __cplusplus

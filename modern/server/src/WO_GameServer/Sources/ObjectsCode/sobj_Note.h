@@ -20,10 +20,10 @@ public:
 	virtual BOOL	Update();
 	
 	INetworkHelper*	GetNetworkHelper() { return dynamic_cast<INetworkHelper*>(this); }
-	DefaultPacket*	INetworkHelper::NetGetCreatePacket(int* out_size);
+	DefaultPacket*	NetGetCreatePacket(int* out_size);
 	void		NetSendNoteData(DWORD peerId);
 
 	int		GetServerObjectSerializationType() { return 1; } // static object
-	void		INetworkHelper::LoadServerObjectData();
-	void		INetworkHelper::SaveServerObjectData();
+	void		LoadServerObjectData();
+	void		SaveServerObjectData();
 };

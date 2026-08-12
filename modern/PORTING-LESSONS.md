@@ -1,7 +1,7 @@
 # Porting Lessons
 
-What actually worked, and what wasted time, driving the whole client — Eternity 81/81,
-GameEngine 44/44, EclipseStudio 209/209 — to compile under strict C++20 GCC.
+What actually worked, and what wasted time, driving the whole product — Eternity 81/81,
+GameEngine 44/44, EclipseStudio 209/209, server 71/71 — to compile under strict C++20 GCC.
 
 Read this before starting a new tree. Most of it generalises to any MSVC-era codebase.
 
@@ -19,6 +19,8 @@ Measured, repeatedly:
 | `Min`/`Max` unqualified in `Tsg_stl/TString.h` | include + qualify `r3dTL::` | **61 of 81** |
 | `_THROW0` / `_FARQ` in `r3dSTLAllocators.h` | define them at the top of the file | **198** |
 | Wrong `-D` for the tree (`WO_SERVER` on client code) | per-binary defines in `probe.sh` | **22** |
+| Missing `-I<project>/Sources` for the server | per-project include dirs in `probe.sh` | **30 of 71** |
+| `INetworkHelper::f()` written inside a derived class | drop the qualifier | **13** |
 | Leaked `for(int i…)` scope in `xpsobject.h` | give the second loop its own `i` | **6** |
 | `fmod/soundsys.h` casing | one entry in a skip-list | **9** |
 
@@ -65,6 +67,27 @@ type-checked**. `xpsobject.h` referenced `VertFVF` (defined nowhere), `Stats.Buf
 
 **Before "fixing" such code, ask whether it ever ran.** Often the honest change is to
 delete it or comment it out, not to invent an implementation.
+
+### Reproduce the project's include path, not just its defines
+
+Each server `.vcxproj` puts its own `Sources/` on the include path, so
+`#include "ServerGameLogic.h"` resolves unqualified from anywhere in that project. Miss
+that one `-I` and 30 of 71 files fail on a missing header — errors that say nothing about
+the code. **Read `AdditionalIncludeDirectories` and `PreprocessorDefinitions` out of the
+project file before the first probe**, not after triaging phantom failures. Doing so also
+surfaced that MasterServer and SupervisorServer build with `DISABLE_PHYSX` while
+WO_GameServer does not.
+
+### A file compiled twice is two files
+
+`WO_GameServer.vcxproj` compiles 50 sources out of `src/` — 28 of them from EclipseStudio
+— with `WO_SERVER` defined. Those take different `#ifdef` branches from the client build
+of the same file, so probing them once, as client code, checks half of what ships.
+
+**Enumerate every configuration each file is built in, and probe each one.** Here that
+meant a `FORCE_BINARY` override in `probe.sh` plus a generated file list
+(`tools/find_shared_server_sources.py`), and it was worth doing before declaring the
+client finished rather than after.
 
 ### Check whether the file was even in the build
 
@@ -113,6 +136,13 @@ accepting a rename.**
 **After any bulk rewrite, re-run the scan and diff a sample.** Silent corruption is
 worse than a compile error.
 
+### Two spellings of the same enum can both be live
+
+`AutodeskNavAgentEnums` was referenced as both `AvoidanceResult_None` (client) and
+`NoAvoidance` (server) — the two halves were written against different Kynapse versions.
+The fix is not to pick one and rewrite the other side; it is to give the enum **both
+names for each value**. Check every consumer before normalising a name.
+
 ### Heuristic checks are leads, not findings
 
 `extra-qualification` reports 923 hits; Eternity is 100% clean. The regex cannot tell a
@@ -141,6 +171,7 @@ Ordered by files affected.
 | `this->T::T()` | cannot call a constructor directly — use a delegating ctor |
 | Temporary bound to `T&` | needs a named local |
 | Bit-field bound to `T&` | bit-fields have no address; copy first |
+| `__super::f()` | name the base class |
 | `_asm` | none — and MSVC rejects it on x64 too |
 | `_cdecl` | `__cdecl` |
 | `stdext::hash_map`, `std::tr1::` | `std::unordered_map`, `std::` |
@@ -151,6 +182,8 @@ Ordered by files affected.
 | Use-before-declaration of a global inside a template body | declare it above the template; non-dependent names resolve at the definition point |
 | Function declared `extern` (or as a friend) then defined `static` | make the two agree |
 | Rebinding a parameter used as an iteration cursor (`node = node.next_sibling()`) | take cheap handles like `pugi::xml_node` **by value**, not by `const&` |
+| A local shadowing a still-live parameter | rename the local |
+| Header-name case (`ShellAPI.h`, `DbgHelp.h`, `Pdh.h`) | lowercase — these only ever worked on a case-insensitive filesystem |
 | Explicit specialization inside a class body | must be at namespace scope |
 | MSVC STL internals (`std::_String_base::_Xlen`) | no libstdc++ equivalent — guard with `_MSC_VER` |
 
