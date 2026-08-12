@@ -26,3 +26,16 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
+
+# Run PE32 output through Wine. This is what lets `ctest` execute the cross-compiled
+# test binaries without every test command having to spell out the emulator.
+#
+# Wine is NOT a build requirement: it is looked up rather than assumed, and when it is
+# absent the variable stays empty, the cross-compiled suite simply cannot run, and the
+# compile-only test tier (tests/layout) still reports. See tests/CMakeLists.txt for how
+# the tiers are split, and MILESTONE-C-PREWORK.md §1.2 for why `wine32:i386` is
+# frequently unresolvable in the containers this port is developed in.
+find_program(WARZ_WINE wine)
+if(WARZ_WINE)
+    set(CMAKE_CROSSCOMPILING_EMULATOR ${WARZ_WINE})
+endif()

@@ -30,7 +30,8 @@ fork is deliberately cut.
 | ↳ B3 link the binaries | ✅ **4 of 4** |
 | ↳ B4 residual symbols | ✅ **done** — zero own-code symbols left |
 | ↳ B5 PhysX for MinGW-i686 | ✅ **done** — 403 TUs, 15 static libs |
-| **Milestone C — runs to a known point** | ⬜ not started — pre-work in [`../MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md) |
+| **Milestone C — runs to a known point** | ⬜ blocked on a Windows runtime — pre-work in [`../MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md) |
+| ↳ staged `--selftest` ladder + test suite | ✅ **done** — see [Tests](#tests); the tiers needing no runtime report green |
 | ↳ compat layer (HTTP, DDS, shaders, crash dumps, PVD) | ✅ **done** — §2.1-2.3, 2.5, 2.6 of that plan |
 
 ### Binaries
@@ -273,6 +274,74 @@ by measurement:
 
 **A faster linker** was measured and rejected: linking `WarZ.exe` — 22.9 MB, static, ~20
 archives — takes about one second. There is nothing there to win.
+
+---
+
+## Tests
+
+The product is PE32 and needs Wine to run, and `wine32:i386` frequently does not resolve
+in a container. A suite that only ran under Wine would report nothing in the environment
+this port is developed in, so the tests are split by **what each one needs in order to
+reach a verdict**:
+
+| Tier | Needs | Reports today |
+|---|---|---|
+| `warz_layout_checks` | the cross-compiler only | ✅ |
+| `warz_tests_host` | a host compiler only | ✅ |
+| `warz_tests` | a working emulator | ⬜ built, disabled |
+| `warz_tests_server` | a working emulator | ⬜ built, disabled |
+| `milestone_c.*` | a working emulator | ⬜ built, disabled |
+
+```sh
+# compile-only + whatever the emulator can run
+cmake --build build --target warz_layout_checks
+ctest --test-dir build
+
+# host-native tier -- runs anywhere, no Wine
+cmake -B build-host -S tests && cmake --build build-host
+./build-host/warz_tests_host
+```
+
+The cross build probes the emulator with `try_run` at configure time and **disables**
+the tiers it cannot run rather than failing them, so a red suite always means something
+is broken rather than that a container has no Wine.
+
+**`warz_layout_checks` is compile-only** — every assertion is a `static_assert`, so
+building the target *is* the test. It covers the wire format: 154 `#pragma pack(1)`
+packet structs whose layout the client and server must agree on byte for byte, frozen by
+`tools/gen_packet_layout.py` (which reads `DW_AT_byte_size` out of the compiler's own
+DWARF, so it needs no runtime either). Regenerate it only alongside a deliberate packet
+change, with a `P2PNET_VERSION` bump in the same commit.
+
+**`warz_tests_host`** carries the tests whose code under test has no Win32 dependency —
+principally the D3DX math. That shim is the only one in the tree that fails *silently*:
+every other one returns an error or makes no sound, this one returns numbers, and 864
+uses of `D3DXMATRIX` sit downstream. `tests/host/` stands in for `<d3d9.h>` so it can run
+natively; `tests/layout/test_d3dx_layout.cpp` is compiled in *both* configurations and
+asserts the same sizes and offsets in each, so the stand-in cannot drift into a
+comfortable fiction.
+
+**`milestone_c.*`** takes Milestone C's server criterion apart. As
+[`PHASE1-BUILD-PLAN.md`](../PHASE1-BUILD-PLAN.md) states it, it is one sentence covering
+four independent claims — and the real boot path cannot reach any of them without a
+MasterServer, a SupervisorServer and a backend, because `gameServerLoop` calls
+`r3dError` when the API does not answer. Every one of those dependencies is in the outer
+shell, so `GameServer.exe --selftest=<stage>` drives the initialisation directly:
+
+```sh
+GameServer.exe --selftest=config                      # process, log, console vars
+GameServer.exe --selftest=world  --ticks=100          # + ObjectManager and PhysX
+GameServer.exe --selftest=level  --level=<dir>        # + a level loads
+```
+
+There is no game data in the repository ([`MILESTONE-C-PREWORK.md`](../MILESTONE-C-PREWORK.md)
+§1.3), so `tests/fixtures/levels/UnitTestLevel` is the synthetic level that doc proposes
+as the alternative: four objects with written-down positions and no mesh, texture or
+sound reference anywhere.
+
+The framework is ~250 lines in `tests/framework`, not doctest or GoogleTest — both would
+arrive through a fetch that fails offline, and neither is worth an entry in
+[`DEPENDENCIES.md`](../DEPENDENCIES.md).
 
 ---
 

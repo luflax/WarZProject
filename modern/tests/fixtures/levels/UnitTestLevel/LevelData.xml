@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  A minimal synthetic level, for exercising the load path without game assets.
+
+  MILESTONE-C-PREWORK.md §1.3 records that there is no game data in this repository and
+  calls it "the single largest unowned dependency in Milestone C", offering two ways
+  out: source the original data, or author a minimal level. This is the second, and it
+  is the better one for a TEST -- it isolates the loader from asset-format drift, and it
+  is small enough to read, so a failure points at the loader rather than at 40MB of
+  content nobody can inspect.
+
+  The contract this file is written against is GameLevel_IO.cpp:26-61 (LoadLevelObject):
+
+    <object className="..." fileName="...">   className is looked up as a STRING in the
+                                              AObject class table; fileName becomes the
+                                              object's load name
+      <position x= y= z= />                   missing attributes read as 0.0
+
+  Nothing here references a mesh, texture or sound file. Server-side that is already the
+  normal case -- ServerMain.cpp sets r3dTexture_UseEmpty and skips materials -- and it
+  is what lets this load with an empty bin/ directory.
+
+  Object count and positions are asserted by tests/world/test_level_load.cpp. Keep the
+  two in step.
+-->
+<level version="1"
+       minimapOrigin.x="0"
+       minimapOrigin.z="0"
+       minimapSize.x="100"
+       minimapSize.z="100"
+       shadowLimitHeight="50"
+       near_plane="0.1"
+       far_plane="1000">
+
+  <!-- Three plain mesh objects at known, distinct, non-zero positions. Distinct so a
+       loader that returns the same object three times, or that drops the position
+       parse, cannot pass by coincidence. -->
+  <object className="MeshGameObject" fileName="unit_test_mesh_a">
+    <position x="10.0" y="20.0" z="30.0"/>
+  </object>
+
+  <object className="MeshGameObject" fileName="unit_test_mesh_b">
+    <position x="-5.5" y="0.25" z="7.75"/>
+  </object>
+
+  <object className="MeshGameObject" fileName="unit_test_mesh_c">
+    <position x="0.0" y="0.0" z="0.0"/>
+  </object>
+
+  <!-- A class that deliberately does not exist. Server-side, LoadLevelObject remaps an
+       unknown className to obj_ServerDummyObject (GameLevel_IO.cpp:40-46) rather than
+       failing the load: a level authored against a newer build must not take the
+       server down. This entry is what proves that path is still wired. -->
+  <object className="obj_DeliberatelyUnknownClass" fileName="unit_test_unknown">
+    <position x="1.0" y="2.0" z="3.0"/>
+  </object>
+
+</level>
