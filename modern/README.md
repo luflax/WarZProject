@@ -18,7 +18,7 @@ fork is deliberately cut.
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
 | Source copied | ✅ `tools/bootstrap.sh` |
 | **Eternity** (engine core) | ✅ **81/81 TUs compile** — strict C++20, no `-fpermissive` |
-| **GameEngine** | 🟡 **29/46 TUs compile**; 17 blocked on absent SDKs (below) |
+| **GameEngine** | 🟡 **32/46 TUs compile** — PhysX 4.1 vendored; 14 remain (below) |
 | EclipseStudio (client + editors) | ⬜ not started (~471 files) |
 | server/src | ⬜ not started (~156 files) |
 | Milestone B — links | ⬜ not started |
@@ -26,21 +26,32 @@ fork is deliberately cut.
 
 Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686, `-std=c++20`, **no `-fpermissive`**).
 
-### GameEngine: what the 17 remaining failures need
+### GameEngine: what the 14 remaining failures need
 
-None are conformance problems — every one is an absent SDK.
+**PhysX 4.1 is now vendored** (BSD-3, headers only) with a 3.x→4.1 compat layer, which
+took five of the nine PhysX-blocked files green: `GameObj`, `VehicleDescriptor`,
+`CamouflageDataManager`, `NavGenerationHelpers`, `NavRegionManager`.
 
-| Blocked on | Files | Obtainable? |
+| Blocked on | Files | Path forward |
 |---|---|---|
-| **PhysX SDK** | 9 — `PhysXWorld`, `PhysObj`, `GameObj`, `Terrain3`, `VehicleManager`, `VehicleDescriptor`, `obj_Vehicle`, `PhysXRepXHelpers`, `CamouflageDataManager` | **Yes** — PhysX 4.1 is BSD-3. Not yet vendored |
-| **Autodesk Navigation** | 7 — `AI_Brain`, `AI_Tactics`, and the five `AutodeskNav*` wrappers | **No** — discontinued product |
-| **Scaleform GFx** | 1 — `APIScaleformGfx` | **No** — discontinued 2018 |
+| **Autodesk Navigation** | 7 — `AI_Brain`, `AI_Tactics`, five `AutodeskNav*` wrappers | Unobtainable (discontinued). Replace with Recast & Detour |
+| **PhysX 3.x APIs removed in 4.1** | 4 — `PhysXWorld`, `PhysXRepXHelpers`, `PhysObj`, `Terrain3` | Genuine porting, not aliasing — see below |
+| **EclipseStudio client surface** | 2 — `obj_Vehicle`, `VehicleManager` | Blocked until EclipseStudio is ported |
+| **Scaleform GFx** | 1 — `APIScaleformGfx.cpp` | Drives the full Loader/Movie/Renderer API; a port target, not a shim target |
 
-The PhysX forward-declaration shim carries headers that merely hold pointers. It cannot
-carry these nine: they call the API directly (`actor->isRigidStatic()`,
-`PxSceneQueryFilterData filter(...)`, `PxHeightFieldSample`). Across GameEngine the
-codebase touches **171 distinct PhysX symbols and 89 member accesses** — past the point
-where stubbing is cheaper than vendoring PhysX 4.1.
+The four PhysX files use APIs that PhysX 4 **removed outright**, so no alias can bridge
+them:
+
+| File | Needs |
+|---|---|
+| `PhysXRepXHelpers` | RepX 3.x (`RepXCollection`, `instantiateCollection`) → `PxSerialization` + `PxRepXSerializer` |
+| `PhysXWorld` | 3.x serialization (`PxSerializable`, `PxSerialFlags`) and the old PVD connection manager |
+| `PhysObj` | `PxControllerDesc::interactionMode`, `groupsBitmask`, `PxControllerFilters::mActiveGroups` — all gone |
+| `Terrain3` | heightfield cooking now goes through `PxInputStream`; `PxHeightFieldDesc::thickness` removed |
+
+A `Scaleform::GFx` **type-surface** shim was added — enough for headers that merely
+declare Scaleform members (`AI_Player.H` holds a `GFx::Value` by value). It deliberately
+does not attempt the full API.
 
 ---
 

@@ -1089,7 +1089,7 @@ GameObject::DrawPhysxGeometry( const r3dCamera& Cam, eRenderStageID DrawState )
 
 		if( PxActor* actor = PhysicsObject->getPhysicsActor() )
 		{
-			if( PxRigidStatic* rigid = actor->isRigidStatic() )
+			if( PxRigidStatic* rigid = actor->is<PxRigidStatic>() )
 			{
 				PxShape* shapes[ 4 ] = { NULL };
 
@@ -1149,7 +1149,7 @@ GameObject::DrawPhysxGeometry( const r3dCamera& Cam, eRenderStageID DrawState )
 
 							p16 = static_cast< const UINT16* >( tg.triangleMesh->getTriangles() );
 
-							int is16Bit = tg.triangleMesh->has16BitTriangleIndices();
+							int is16Bit = tg.triangleMesh->getTriangleMeshFlags().isSet(PxTriangleMeshFlag::e16_BIT_INDICES);
 
 							int capacity = r3dRenderer->GetPolygon3DBufferCapacity();
 
@@ -1418,11 +1418,11 @@ bool GameObject::IsOverWater(float& waterDepth)
 	if( !hitResult )
 		return false;
 
-	r3dPoint3D posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);	// This is the ground position over/underwater.
+	r3dPoint3D posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);	// This is the ground position over/underwater.
 	waterDepth = getWaterDepthAtPos(posForWater);
 	if( waterDepth < 0 )
 		return false;
-	float waterLevel = hit.impact.y + waterDepth;
+	float waterLevel = hit.position.y + waterDepth;
 
 	return GetPosition().y >= waterLevel;
 }

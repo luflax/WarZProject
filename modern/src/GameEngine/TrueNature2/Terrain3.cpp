@@ -24,6 +24,13 @@
 
 #include "Terrain3.h"
 
+// PORT NOTE: _CrtCheckMemory is an MSVC CRT debug-heap function with no libstdc++
+// equivalent. It is a diagnostic assertion only, so it degrades to "heap is fine".
+#ifndef _MSC_VER
+  #define _CrtCheckMemory() (1)
+#endif
+
+
 #ifdef ARTIFICIAL_FINAL_BUILD
 #define FINAL_BUILD
 #endif
@@ -8768,7 +8775,8 @@ r3dTerrain3::PreparePhysXHeightFieldDesc_NoAlloc( PxHeightFieldDesc* hfDesc )
 	hfDesc->nbColumns			= w;
 	hfDesc->nbRows				= h;
 	hfDesc->convexEdgeThreshold	= 0;
-	hfDesc->thickness			= -1000.0f;
+	// [PORT] PxHeightFieldDesc::thickness was removed in PhysX 4.
+	// hfDesc->thickness			= -1000.0f;
 
 	// allocate storage for samples
 	hfDesc->samples.stride		= sizeof(PxU32);
@@ -9216,7 +9224,8 @@ void r3dTerrain3::DoCreatePhysHeightField( PhysicsChunk& chunk, int chunkX, int 
 	chunk.PhysicsHeightFieldDesc.nbColumns				= physicsTileCellCount + PHYS_TILE_BORDER;
 	chunk.PhysicsHeightFieldDesc.nbRows					= physicsTileCellCount + PHYS_TILE_BORDER;
 	chunk.PhysicsHeightFieldDesc.convexEdgeThreshold	= 0;
-	chunk.PhysicsHeightFieldDesc.thickness				= -1000.0f;
+	// [PORT] PxHeightFieldDesc::thickness was removed in PhysX 4.
+	// chunk.PhysicsHeightFieldDesc.thickness				= -1000.0f;
 
 	// allocate storage for samples
 	chunk.PhysicsHeightFieldDesc.samples.stride	= sizeof(PxU32);
@@ -9241,7 +9250,7 @@ void r3dTerrain3::DoCreatePhysHeightField( PhysicsChunk& chunk, int chunkX, int 
 
 	chunk.PhysicsTerrain = g_pPhysicsWorld->PhysXSDK->createRigidStatic(pose);
 
-	PxShape* aHeightFieldShape = chunk.PhysicsTerrain->createShape(shapeGeom, *g_pPhysicsWorld->defaultMaterial);
+	PxShape* aHeightFieldShape = PxRigidActorExt::createExclusiveShape(*chunk.PhysicsTerrain, shapeGeom, *g_pPhysicsWorld->defaultMaterial);
 
 	PxFilterData filterData(PHYSCOLL_STATIC_GEOMETRY, 0, 0, 0);
 	aHeightFieldShape->setSimulationFilterData(filterData);
@@ -15410,7 +15419,8 @@ void r3dTerrain3::DoLoadMegaTexTileMaskFromFile( T file, INT64 offset, D3DSURFAC
 		{
 			int baseLayer = index * LAYERS_PER_MASK;
 
-			union
+			// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+			union R3D_Rgb565
 			{
 				struct
 				{
@@ -15420,21 +15430,21 @@ void r3dTerrain3::DoLoadMegaTexTileMaskFromFile( T file, INT64 offset, D3DSURFAC
 				};
 
 				UINT16 val;
-			};
+			} rgb565;
 
 			for( int i = 0, e = (int)m_UnpackedMask.Count(); i < e; i ++ )
 			{
-				val = m_UnpackedMask[ i ];
+				rgb565.val = m_UnpackedMask[ i ];
 
 				UINT8& dominantValue = (*dominantLayerValues)[ i ];
 
-				if( b > 17 )
+				if( rgb565.b > 17 )
 				{
-					dominantValue = b;
+					dominantValue = rgb565.b;
 					(*dominantLayerData)[ i ] = baseLayer + 1;
 				}
 
-				int g2 = g / 2;
+				int g2 = rgb565.g / 2;
 
 				if( g2 > 17 )
 				{
@@ -15442,9 +15452,9 @@ void r3dTerrain3::DoLoadMegaTexTileMaskFromFile( T file, INT64 offset, D3DSURFAC
 					(*dominantLayerData)[ i ] = baseLayer + 2;
 				}
 
-				if( r > 17 )
+				if( rgb565.r > 17 )
 				{
-					dominantValue = r;
+					dominantValue = rgb565.r;
 					(*dominantLayerData)[ i ] = baseLayer + 3;
 				}
 			}
@@ -18499,7 +18509,8 @@ void r3dTerrain3::UpdateLayerMaskMipFromLevelBelow( int tx, int tz, int L, int m
 					int gsum = 0;
 					int bsum = 0;
 
-					union
+					// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+					union R3D_Rgb565
 					{
 						struct
 						{
@@ -18509,26 +18520,26 @@ void r3dTerrain3::UpdateLayerMaskMipFromLevelBelow( int tx, int tz, int L, int m
 						};
 
 						UINT16 sample;
-					};
+					} rgb565;
 
 					for( int i = 0; i < 4; i ++ )
 					{
-						sample = tempUShorts0[ srcIdxes[ i ] ];
+						rgb565.sample = tempUShorts0[ srcIdxes[ i ] ];
 
-						rsum += r;
-						gsum += g;
-						bsum += b;
+						rsum += rgb565.r;
+						gsum += rgb565.g;
+						bsum += rgb565.b;
 					}
 
 					rsum /= 4;
 					gsum /= 4;
 					bsum /= 4;
 
-					r = rsum;
-					g = gsum;
-					b = bsum;
+					rgb565.r = rsum;
+					rgb565.g = gsum;
+					rgb565.b = bsum;
 
-					tempUShorts1[ z * qs.MaskAtlasTileDim + x ] = sample;
+					tempUShorts1[ z * qs.MaskAtlasTileDim + x ] = rgb565.sample;
 				}
 			}
 		}

@@ -154,7 +154,10 @@
 
 #ifndef DISABLE_PHYSX  // DISABLE_PHYSX defined for server
 #include "PxPhysicsAPI.h"
-#include "CharacterKinematic/PxControllerManager.h"
+// PORT NOTE: the vendored SDK is PhysX 4.1 (BSD-3); this codebase targets 3.x.
+// Px3xCompat.h reinstates the renamed/removed 3.x spellings.
+#include "Px3xCompat.h"
+#include "characterkinematic/PxControllerManager.h"
 using namespace physx;
 #else
 // PORT NOTE: engine headers name PhysX types unconditionally (PhysObj.h:188),

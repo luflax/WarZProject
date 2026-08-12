@@ -925,14 +925,14 @@ void obj_Vehicle::UpdatePositionFromPhysx()
 			return;
 	}
 
-	PxRigidDynamicFlags f;
+	PxRigidBodyFlags f;
 	
 	if (!isTank)
 		vd->vehicle->getRigidDynamicActor()->getRigidDynamicFlags();
 	else
 		vd->tank->getRigidDynamicActor()->getRigidDynamicFlags();
 
-	if ( !(f & PxRigidDynamicFlag::eKINEMATIC) )
+	if ( !(f & PxRigidBodyFlag::eKINEMATIC) )
 	{
 		PxTransform t;
 		
@@ -1106,9 +1106,9 @@ void obj_Vehicle::SwitchToDrivable(bool doDrive)
 	if (vd)
 	{
 		if (vd->hasTracks == 0)
-			vd->vehicle->getRigidDynamicActor()->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, !doDrive);
+			vd->vehicle->getRigidDynamicActor()->setRigidDynamicFlag(PxRigidBodyFlag::eKINEMATIC, !doDrive);
 		else
-			vd->tank->getRigidDynamicActor()->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, !doDrive);
+			vd->tank->getRigidDynamicActor()->setRigidDynamicFlag(PxRigidBodyFlag::eKINEMATIC, !doDrive);
 	}
 
 	if (doDrive)
@@ -1123,14 +1123,14 @@ void obj_Vehicle::SyncPhysicsPoseWithObjectPose()
 		return;
 
 
-	PxRigidDynamicFlags f;
+	PxRigidBodyFlags f;
 	
 	if (!isTank)
 		f = vd->vehicle->getRigidDynamicActor()->getRigidDynamicFlags();
 	else
 		f = vd->tank->getRigidDynamicActor()->getRigidDynamicFlags();
 
-	if (!(f & PxRigidDynamicFlag::eKINEMATIC))
+	if (!(f & PxRigidBodyFlag::eKINEMATIC))
 		return;
 
 	r3dPoint3D pos(GetPosition());
@@ -1154,9 +1154,9 @@ void obj_Vehicle::SyncPhysicsObjectPose()
 
 	PxActor* actor = PhysicsObject->getPhysicsActor();
 
-	if(actor->isRigidActor())
+	if(actor->is<PxRigidActor>())
 	{
-		PxRigidActor* dyn = actor->isRigidActor();
+		PxRigidActor* dyn = actor->is<PxRigidActor>();
 
 		r3dPoint3D pos(GetPosition());
 		D3DXMATRIX rotM(GetRotationMatrix());

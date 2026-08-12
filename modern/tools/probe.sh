@@ -27,11 +27,12 @@ TARGET="${1:-src/Eternity/Source}"
 VERBOSE=0
 [[ "${2:-}" == "-v" ]] && VERBOSE=1
 
-INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets"
+INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat"
 
-# WO_SERVER + DISABLE_PHYSX give the smallest compile surface: no rendering, no
-# PhysX. Prove the core compiles before adding subsystems back.
-DEFINES="-DWIN32 -D_WINDOWS -DWO_SERVER -DDISABLE_PHYSX"
+# WO_SERVER strips rendering. PhysX 4.1 is now vendored (BSD-3), so DISABLE_PHYSX is
+# no longer set -- the real SDK headers are used. PX_PHYSX_STATIC_LIB avoids dllimport
+# decoration, which matters for a headers-only compile check.
+DEFINES="-DWIN32 -D_WINDOWS -DWO_SERVER -DPX_PHYSX_STATIC_LIB -DNDEBUG"
 # No -fpermissive: it masked ~70 real conformance errors behind one root cause
 # (Tsg_stl/TString.h calling unqualified r3dTL::Max). Strict is the honest gate.
 FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"

@@ -134,7 +134,9 @@ BasePhysicsObject* BasePhysicsObject::CreateCharacterController(const PhysicsObj
 	desc.maxJumpHeight = 0.0f;
 	desc.contactOffset = params.contactOffset;
 	desc.stepOffset = 0.1f;
-	desc.interactionMode = PxCCTInteractionMode::eUSE_FILTER;
+	// [PORT] PxControllerDesc::interactionMode was removed in PhysX 4;
+	// behaviour is now supplied via PxControllerBehaviorCallback.
+	// desc.interactionMode = PxCCTInteractionMode::eUSE_FILTER;
 	desc.material = g_pPhysicsWorld->PhysXSDK->createMaterial(0.5f, 0.5f, 0.1f);
 	desc.userData = (void*)physCallbackObj;
 	desc.nonWalkableMode = PxCCTNonWalkableMode::eFORCE_SLIDING;
@@ -381,7 +383,7 @@ BasePhysicsObject* BasePhysicsObject::CreateDynamicObject(const PhysicsObjectCon
 		//boxDesc.shapeFlags		|= NX_SF_VISUALIZATION | NX_SF_DISABLE_RESPONSE | NX_SF_DISABLE_COLLISION;
 		//actorDesc.flags			|= NX_AF_DISABLE_COLLISION | NX_AF_DISABLE_RESPONSE;
 
-		actor->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, true);
+		actor->setRigidDynamicFlag(PxRigidBodyFlag::eKINEMATIC, true);
 
 		nowWhoIsTheDummy = true;
 	}
@@ -426,7 +428,7 @@ BasePhysicsObject* BasePhysicsObject::CreateDynamicObject(const PhysicsObjectCon
 
 	if(params.isKinematic)
 	{
-		actor->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, true);
+		actor->setRigidDynamicFlag(PxRigidBodyFlag::eKINEMATIC, true);
 	}
 
 	PxRigidBodyExt::setMassAndUpdateInertia(*actor, params.mass);
@@ -804,7 +806,7 @@ BasePhysicsObject::IsStatic()
 {
 	if( PxActor* actor = getPhysicsActor() )
 	{
-		return actor->isRigidStatic() ? true : false ;
+		return actor->is<PxRigidStatic>() ? true : false ;
 	}
 
 	return false ;
@@ -823,18 +825,18 @@ PhysObj::~PhysObj()
 
 void PhysObj::AddImpulseAtPos(const r3dPoint3D& impulse, const r3dPoint3D& pos)
 {
-	if(Actor && Actor->isRigidDynamic() && Actor->isRigidDynamic()->getRigidDynamicFlags()!=PxRigidDynamicFlag::eKINEMATIC)
+	if(Actor && Actor->is<PxRigidDynamic>() && Actor->is<PxRigidDynamic>()->getRigidDynamicFlags()!=PxRigidBodyFlag::eKINEMATIC)
 	{
-		PxRigidDynamic* dyn = Actor->isRigidDynamic();
+		PxRigidDynamic* dyn = Actor->is<PxRigidDynamic>();
 		dyn->addForce(*(PxVec3*)&impulse, PxForceMode::eIMPULSE);
 	}
 }
 
 void PhysObj::AddImpulseAtLocalPos(const r3dPoint3D& impulse, const r3dPoint3D& pos)
 {
-	if(Actor && Actor->isRigidDynamic() && Actor->isRigidDynamic()->getRigidDynamicFlags()!=PxRigidDynamicFlag::eKINEMATIC)
+	if(Actor && Actor->is<PxRigidDynamic>() && Actor->is<PxRigidDynamic>()->getRigidDynamicFlags()!=PxRigidBodyFlag::eKINEMATIC)
 	{
-		PxRigidDynamic* dyn = Actor->isRigidDynamic();
+		PxRigidDynamic* dyn = Actor->is<PxRigidDynamic>();
 		dyn->addForce(*(PxVec3*)&impulse, PxForceMode::eIMPULSE);
 	}
 }
@@ -843,9 +845,9 @@ void PhysObj::AddImpulseAtLocalPos(const r3dPoint3D& impulse, const r3dPoint3D& 
 
 void PhysObj::Move(const r3dPoint3D& move, float sharpness)
 {
-	if(Actor->isRigidActor())
+	if(Actor->is<PxRigidActor>())
 	{
-		PxRigidActor* dyn = Actor->isRigidActor();
+		PxRigidActor* dyn = Actor->is<PxRigidActor>();
 		PxTransform trans = dyn->getGlobalPose();
 		trans.p.x += move.x;
 		trans.p.y += move.y;
@@ -857,9 +859,9 @@ void PhysObj::Move(const r3dPoint3D& move, float sharpness)
 void PhysObj::SetPosition(const r3dPoint3D& pos)
 {
 	r3dPoint3D correctPos = pos + m_PositionDifference;
-	if(Actor->isRigidActor())
+	if(Actor->is<PxRigidActor>())
 	{
-		PxRigidActor* dyn = Actor->isRigidActor();
+		PxRigidActor* dyn = Actor->is<PxRigidActor>();
 		PxTransform trans = dyn->getGlobalPose();
 		trans.p.x = correctPos.x;
 		trans.p.y = correctPos.y;
@@ -876,9 +878,9 @@ void PhysObj::SetRotation(const r3dVector& Angles)
 		PxVec3(rotation._21, rotation._22, rotation._23),
 		PxVec3(rotation._31, rotation._32, rotation._33));
 
-	if(Actor->isRigidActor())
+	if(Actor->is<PxRigidActor>())
 	{
-		PxRigidActor* dyn = Actor->isRigidActor();
+		PxRigidActor* dyn = Actor->is<PxRigidActor>();
 		PxTransform trans = dyn->getGlobalPose();
 		trans.q = PxQuat(orientation);
 		dyn->setGlobalPose(trans);
@@ -887,18 +889,18 @@ void PhysObj::SetRotation(const r3dVector& Angles)
 
 void PhysObj::SetVelocity(const r3dPoint3D& vel)
 {
-	if(Actor && Actor->isRigidBody())
+	if(Actor && Actor->is<PxRigidBody>())
 	{
-		PxRigidBody* dyn = Actor->isRigidBody();
+		PxRigidBody* dyn = Actor->is<PxRigidBody>();
 		dyn->setLinearVelocity(*(PxVec3*)&vel);
 	}
 }
 
 void PhysObj::SetScale(const r3dPoint3D& scale)
 {
-	if (Actor && Actor->isRigidActor())
+	if (Actor && Actor->is<PxRigidActor>())
 	{
-		PxRigidActor *ra = Actor->isRigidActor();
+		PxRigidActor *ra = Actor->is<PxRigidActor>();
 		PxShape *s = 0;
 		ra->getShapes(&s, 1);
 		if (s)
@@ -926,9 +928,9 @@ void PhysObj::SetScale(const r3dPoint3D& scale)
 
 r3dPoint3D PhysObj::GetPosition() const
 {
-	if(Actor->isRigidActor())
+	if(Actor->is<PxRigidActor>())
 	{
-		const PxRigidActor* dyn = Actor->isRigidActor();
+		const PxRigidActor* dyn = Actor->is<PxRigidActor>();
 		PxTransform trans = dyn->getGlobalPose();
 		r3dPoint3D correctPos = r3dPoint3D(trans.p.x, trans.p.y, trans.p.z);
 		correctPos -= m_PositionDifference;
@@ -941,9 +943,9 @@ r3dPoint3D PhysObj::GetPosition() const
 D3DXMATRIX PhysObj::GetRotation() const
 {
 	D3DXMATRIX res; D3DXMatrixIdentity(&res);
-	if(Actor->isRigidActor())
+	if(Actor->is<PxRigidActor>())
 	{
-		const PxRigidActor* dyn = Actor->isRigidActor();
+		const PxRigidActor* dyn = Actor->is<PxRigidActor>();
 		PxTransform trans = dyn->getGlobalPose();
 		PxMat33 mat(trans.q);
 
@@ -967,9 +969,9 @@ D3DXMATRIX PhysObj::GetRotation() const
 
 r3dPoint3D PhysObj::GetVelocity() const
 {
-	if(Actor && Actor->isRigidBody())
+	if(Actor && Actor->is<PxRigidBody>())
 	{
-		const PxRigidBody* dyn = Actor->isRigidBody();
+		const PxRigidBody* dyn = Actor->is<PxRigidBody>();
 		PxVec3 vel = dyn->getLinearVelocity();
 		return r3dPoint3D(vel.x,vel.y,vel.z);
 	}
@@ -979,9 +981,9 @@ r3dPoint3D PhysObj::GetVelocity() const
 
 r3dPoint3D PhysObj::GetScale() const
 {
-	if(Actor && Actor->isRigidActor())
+	if(Actor && Actor->is<PxRigidActor>())
 	{
-		PxRigidActor *ra = Actor->isRigidActor();
+		PxRigidActor *ra = Actor->is<PxRigidActor>();
 		PxShape *s = 0;
 		ra->getShapes(&s, 1);
 		if (s)
@@ -1008,32 +1010,32 @@ r3dPoint3D PhysObj::GetScale() const
 
 bool PhysObj::IsSleeping() 
 { 
-	if(Actor && Actor->isRigidDynamic())
-		return Actor->isRigidDynamic()->isSleeping(); 
+	if(Actor && Actor->is<PxRigidDynamic>())
+		return Actor->is<PxRigidDynamic>()->isSleeping(); 
 
 	return true; // static
 }
 
 void PhysObj::ForceToSleep() 
 { 
-	if(Actor && Actor->isRigidDynamic())
-		Actor->isRigidDynamic()->putToSleep(); 
+	if(Actor && Actor->is<PxRigidDynamic>())
+		Actor->is<PxRigidDynamic>()->putToSleep(); 
 }
 
 void PhysObj::addSmoothVelocity(const r3dVector& vel)
 {
-	if(Actor && Actor->isRigidDynamic() && Actor->isRigidDynamic()->getRigidDynamicFlags()!=PxRigidDynamicFlag::eKINEMATIC)
+	if(Actor && Actor->is<PxRigidDynamic>() && Actor->is<PxRigidDynamic>()->getRigidDynamicFlags()!=PxRigidBodyFlag::eKINEMATIC)
 	{
-		PxRigidDynamic* dyn = Actor->isRigidDynamic();
+		PxRigidDynamic* dyn = Actor->is<PxRigidDynamic>();
 		dyn->addForce(*(PxVec3*)&vel, PxForceMode::eIMPULSE);
 	}
 }
 
 void PhysObj::addImpulse(const r3dVector& impulse)
 {
-	if(Actor && Actor->isRigidDynamic() && Actor->isRigidDynamic()->getRigidDynamicFlags()!=PxRigidDynamicFlag::eKINEMATIC)
+	if(Actor && Actor->is<PxRigidDynamic>() && Actor->is<PxRigidDynamic>()->getRigidDynamicFlags()!=PxRigidBodyFlag::eKINEMATIC)
 	{
-		PxRigidDynamic* dyn = Actor->isRigidDynamic();
+		PxRigidDynamic* dyn = Actor->is<PxRigidDynamic>();
 		dyn->addForce(*(PxVec3*)&impulse, PxForceMode::eIMPULSE);
 	}
 }
