@@ -29,3 +29,7 @@ src/Tools
 server/GameBlocksSDK
 
 #Web
+
+
+# CMake build output for the C++20 port
+modern/build/

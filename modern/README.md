@@ -25,7 +25,30 @@ fork is deliberately cut.
 | **Milestone A — compiles** | ✅ **done** |
 | **Milestone B — links** | 🔨 **in progress** — see [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) |
 | ↳ B0 build-configuration correctness | ✅ **done** |
-| ↳ B1 CMake targets · B2 vendored libs · B3 link · B4 residual | ⬜ not started |
+| ↳ B1 CMake targets | ✅ **done** — `cmake --build` drives the whole tree |
+| ↳ B2 vendored libraries | ✅ RakNet, pugixml, Recast/Detour, RmlUi · ⬜ PhysX |
+| ↳ B3 link the binaries | 🔨 **2 of 4 linked** — see below |
+| ↳ B4 residual symbols | ⬜ 13 own-code symbols left, client only |
+
+### Binaries
+
+```
+SupervisorServer.exe   LINKED   3,033,706 bytes   PE32 i386
+MasterServer.exe       LINKED   3,168,442 bytes   PE32 i386
+GameServer             17 undefined  — all PhysX
+WarZ.exe               69 undefined  — 56 PhysX, 13 own-code
+```
+
+Every one of the four **compiles** completely; all four reach the linker. PhysX is the
+single blocker for the remaining two, exactly as the plan predicted — it is vendored
+headers-only, so `PxCreateFoundation` and friends have nothing to resolve against.
+
+Build with:
+
+```sh
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw-i686.cmake
+./tools/build.sh              # reports COMPILE vs LINK failure per binary
+```
 | Milestone C — runs to a known point | ⬜ not started |
 
 **The whole product compiles under strict ISO C++20** — 415 translation units, no

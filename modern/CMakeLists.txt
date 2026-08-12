@@ -1,100 +1,94 @@
 #
 # Infestation: Survivor Stories — C++20 port
 #
-# Replaces six Visual Studio solutions (Eternity, WarZ, WarZ_Server, RSBuild,
-# RSUpdate, backend) with a single CMake tree.
+# Replaces the original Visual Studio solutions (Eternity, WarZ, WarZ_Server) with one
+# CMake tree. Milestone B's goal is a clean COMPILE and LINK, not a running game --
+# see ../MILESTONE-B-PLAN.md.
 #
-# Phase 1 goal is a clean COMPILE and LINK, not a running game. See
-# ../PHASE1-BUILD-PLAN.md for scope and explicit non-goals.
+# Cross-compile with:
+#   cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw-i686.cmake
+#   cmake --build build -j
 #
 cmake_minimum_required(VERSION 3.25)
 
 project(InfestationModern
-    VERSION 0.1.0
+    VERSION 0.2.0
     DESCRIPTION "Infestation: Survivor Stories — C++20 port"
-    LANGUAGES CXX
+    # C as well as C++: zlib ships inside src/Eternity/Source/ZLib as eleven .c files,
+    # and Eternity.vcxproj compiles them into the engine rather than linking a
+    # separate library.
+    LANGUAGES CXX C
 )
 
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+# Release by default. The original's shipping configuration is 'Final', which strips the
+# editors -- that is a separate configuration this port has not verified yet, so it is
+# reachable but not the default.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+    set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
+endif()
+
+set(WARZ_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${WARZ_ROOT}/cmake")
 
 # --------------------------------------------------------------------------
 # Options
 # --------------------------------------------------------------------------
 
-option(WARZ_BUILD_CLIENT  "Build the game client"          ON)
-option(WARZ_BUILD_SERVER  "Build the three server binaries" ON)
-option(WARZ_USE_SHIMS     "Use no-op shims for absent commercial dependencies" ON)
-option(WARZ_WARNINGS_AS_ERRORS "Treat warnings as errors (NOT for phase 1)" OFF)
+option(WARZ_BUILD_CLIENT       "Build the game client"                     ON)
+option(WARZ_BUILD_SERVER       "Build the three server binaries"           ON)
+option(WARZ_WARNINGS_AS_ERRORS "Treat warnings as errors (not yet)"        OFF)
 
 # --------------------------------------------------------------------------
-# Guard: the tree must be bootstrapped first
+# Guards
 # --------------------------------------------------------------------------
 
-if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/src/Eternity/Include/r3d.h")
+if(NOT EXISTS "${WARZ_ROOT}/src/Eternity/Include/r3d.h")
     message(FATAL_ERROR
         "Source tree not bootstrapped.\n"
-        "Run:  ./modern/tools/bootstrap.sh\n"
+        "Run:  ./tools/bootstrap.sh\n"
         "This copies source from the original tree without modifying it.")
 endif()
 
+if(NOT EXISTS "${WARZ_ROOT}/cmake/sources/Eternity.cmake")
+    message(FATAL_ERROR
+        "Source lists missing.\n"
+        "Run:  ./tools/gen_sources.py\n"
+        "They are derived from the original .vcxproj files rather than globbed, "
+        "because sixteen files on disk are orphans the original never compiled.")
+endif()
+
 # --------------------------------------------------------------------------
-# Compiler configuration
+# Configuration
 # --------------------------------------------------------------------------
 
-include(CompilerFlags)
+include(CompilerFlags)     # warz_compiler_flags, warz_final_config
+include(WarzConfig)        # warz_includes, warz_defines_*, warz_add_dual_library
+include(Dependencies)      # vendored libraries -> WARZ_*_LIBS
 
 # --------------------------------------------------------------------------
-# Feature flags
+# Targets -- mirrors the original layering:
 #
-# These switches already exist in the original source (r3dPCH.h). Phase 1 sets
-# them to compile out subsystems whose SDKs are absent and which are not needed
-# for a build milestone. See PHASE1-BUILD-PLAN.md section 3.
-# --------------------------------------------------------------------------
-
-add_library(warz_config INTERFACE)
-
-target_compile_definitions(warz_config INTERFACE
-    WIN32_LEAN_AND_MEAN
-    NOMINMAX
-    _CRT_SECURE_NO_WARNINGS
-    _SCL_SECURE_NO_WARNINGS
-
-    # Subsystems disabled for the build milestone
-    ENABLE_AUTODESK_NAVIGATION=0    # Kynapse — discontinued, no SDK
-    ENABLE_WEB_BROWSER=0            # Berkelium — abandoned
-    APEX_ENABLED=0                  # already 0 upstream
-
-    # __WITH_PB__      intentionally undefined — PunkBuster
-    # USE_VMPROTECT    intentionally undefined — VMProtect
-    # ENABLE_GAMEBLOCKS see note in ServerGameLogic.h:9; made conditional in phase 1
-)
-
-# --------------------------------------------------------------------------
-# Dependencies
-# --------------------------------------------------------------------------
-
-include(Dependencies)
-
-# --------------------------------------------------------------------------
-# Targets
+#     Eternity -> GameEngine -> EclipseStudio / server
 #
-# Mirrors the original layering:  Eternity -> GameEngine -> EclipseStudio / server
+# Eternity and GameEngine are each built TWICE, _client and _server, because the client
+# links them without WO_SERVER and the servers with it, and the two take substantially
+# different #ifdef branches.
 # --------------------------------------------------------------------------
 
-add_subdirectory(src/External)      # real vendored libs + shims
-add_subdirectory(src/Eternity)      # r3dLib      (static)
-add_subdirectory(src/GameEngine)    # GameEngine  (static)
+add_subdirectory(src/External)      # RakNet + the header-only shims
+add_subdirectory(src/Eternity)      # Eternity_client   / Eternity_server
+add_subdirectory(src/GameEngine)    # GameEngine_client / GameEngine_server
 
 if(WARZ_BUILD_CLIENT)
     add_subdirectory(src/EclipseStudio)   # WarZ.exe
 endif()
 
 if(WARZ_BUILD_SERVER)
-    add_subdirectory(server/src)          # GameServer / MasterServer / SupervisorServer
+    add_subdirectory(server/src)          # SupervisorServer / MasterServer / GameServer
 endif()
 
 # --------------------------------------------------------------------------
@@ -103,9 +97,11 @@ endif()
 
 message(STATUS "")
 message(STATUS "Infestation (C++20 port) ${PROJECT_VERSION}")
-message(STATUS "  C++ standard   : ${CMAKE_CXX_STANDARD}")
-message(STATUS "  Compiler       : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
-message(STATUS "  Client         : ${WARZ_BUILD_CLIENT}")
-message(STATUS "  Server         : ${WARZ_BUILD_SERVER}")
-message(STATUS "  Dependency shims: ${WARZ_USE_SHIMS}")
+message(STATUS "  C++ standard : ${CMAKE_CXX_STANDARD}")
+message(STATUS "  Compiler     : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  Client       : ${WARZ_BUILD_CLIENT}")
+message(STATUS "  Server       : ${WARZ_BUILD_SERVER}")
+message(STATUS "  PhysX libs   : ${WARZ_PHYSX_LIBS}")
+message(STATUS "  RmlUi libs   : ${WARZ_RMLUI_LIBS}")
+message(STATUS "  Recast libs  : ${WARZ_RECAST_LIBS}")
 message(STATUS "")

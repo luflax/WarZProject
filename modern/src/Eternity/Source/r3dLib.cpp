@@ -1,17 +1,22 @@
-// PORT NOTE: this file overrides MSVC STL internals (std::_String_base::_Xlen,
-// _Xran, _Xlength_error) to trim CRT dependencies. Those symbols exist only in
-// Microsoft's STL; libstdc++ has no equivalent and needs no such override.
-#include "r3dPCH.h"
-#ifdef _MSC_VER
-
+// PORT NOTE: the FIRST SECTION of this file overrides MSVC STL internals
+// (std::_String_base::_Xlen, _Xran, _Xlength_error) to trim CRT dependencies. Those
+// symbols exist only in Microsoft's STL; libstdc++ has no equivalent and needs no such
+// override, so that section is guarded by _MSC_VER.
+//
+// The guard used to wrap the WHOLE file, which also removed checkLicenseKey() and
+// frame_timer below -- neither of which has anything to do with MSVC's STL. That left
+// checkLicenseKey undefined at link time even though r3dLib.cpp was compiled: the
+// object came out 406 bytes, essentially empty. The guard now ends before the license
+// section, at the comment marking the boundary.
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dLib.h"
 
+#include <functional>
+
+#ifdef _MSC_VER
 
 /* 			aLca Visual Studio 2013 Workaround				*/
-
-#include <functional>
 
 namespace std
 
@@ -44,6 +49,9 @@ void __cdecl std::_String_base::_Xran(void)
 
 /*                                                       	*/
 
+#endif // _MSC_VER -- end of the MSVC-STL override section
+
+// Everything below is toolchain-independent.
 
 // def to 0 to disable license key check
 #define CHECK_LICENSE_KEY 0
@@ -247,5 +255,3 @@ void checkLicenseKey()
 #endif
 }
 
-
-#endif // _MSC_VER

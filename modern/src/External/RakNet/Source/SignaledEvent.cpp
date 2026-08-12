@@ -2,7 +2,12 @@
 #include "RakAssert.h"
 #include "RakSleep.h"
 
-#if defined(__GNUC__) 
+// [PORT] RakNet guards this on __GNUC__ alone, treating "compiled by GCC" as
+// "targeting Unix". That holds for GCC on Linux and breaks under MinGW-w64,
+// where __GNUC__ is defined but the target is Windows and there is no netdb.h.
+// Added !defined(_WIN32) so the Windows path is taken on a Windows target
+// regardless of which compiler builds it.
+#if defined(__GNUC__) && !defined(_WIN32)
 #include <sys/time.h>
 #include <unistd.h>
 #endif

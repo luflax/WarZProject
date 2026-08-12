@@ -49,7 +49,27 @@ if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/RakNet/Source")
         target_compile_options(RakNet PRIVATE /w)
         target_compile_definitions(RakNet PRIVATE _CRT_SECURE_NO_WARNINGS)
     else()
-        target_compile_options(RakNet PRIVATE -w)
+        # -fpermissive is what "build it permissively" above actually requires, and it
+        # is deliberately scoped to THIS target. RakNet contains constructs no standard
+        # C++ accepts -- ReplicaManager3.cpp:122 compares a pointer to false -- and
+        # fixing an unmaintained third-party library is not this port's job.
+        #
+        # The game code is still compiled with NO -fpermissive. That distinction is the
+        # whole point: the flag masked roughly seventy real conformance errors in our
+        # own sources when it was applied globally.
+        target_compile_options(RakNet PRIVATE -w -fpermissive)
+    endif()
+
+    if(WIN32)
+        # DR_SHA1.h tests _MSC_VER to decide whether <tchar.h> exists, and when it does
+        # not, defines its own "#define TCHAR char". Under MinGW both premises are
+        # wrong: _MSC_VER is undefined but tchar.h is present and the Windows headers
+        # define TCHAR themselves -- so winnt.h's "typedef char TCHAR, *PTCHAR;"
+        # expands to "typedef char char, *PTCHAR;" and fails.
+        #
+        # SHA1_HAS_TCHAR is RakNet's own escape hatch for exactly this, so no source
+        # change is needed.
+        target_compile_definitions(RakNet PRIVATE SHA1_HAS_TCHAR)
     endif()
 else()
     message(WARNING

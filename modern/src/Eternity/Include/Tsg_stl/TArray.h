@@ -15,6 +15,13 @@
 
 extern bool r3dOutToLog(const char* Str, ...);
 
+// [PORT] Declared HERE, in the global namespace, rather than at block scope inside
+// r3dTL::...::ReportOutOfBounds where it used to live. A function declaration inside a
+// function body names the nearest ENCLOSING NAMESPACE, so within namespace r3dTL it
+// declared r3dTL::r3dGetMainModuleBaseAddress -- a function nothing ever defines. The
+// real one is global, in r3dDebug.cpp, and the call came out undefined at link time.
+void* r3dGetMainModuleBaseAddress();
+
 namespace r3dTL
 {
 
@@ -514,8 +521,7 @@ namespace r3dTL
 	R3D_NO_INLINE
 	void TArray<T>::ReportOutOfBounds( int idx, const char* func, void* eip ) const
 	{
-		void* r3dGetMainModuleBaseAddress();
-		void* base = r3dGetMainModuleBaseAddress();
+		void* base = ::r3dGetMainModuleBaseAddress();
 
 		r3dOutToLog( "ERROR: Bounds check failed (%d of %d) in %s (EIP=0x%X, BASE=0x%X)\n", idx, mCount, func, eip, base );
 #ifndef FINAL_BUILD
