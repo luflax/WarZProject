@@ -34,6 +34,10 @@ endif()
 set(WARZ_ROOT "${CMAKE_CURRENT_SOURCE_DIR}")
 list(APPEND CMAKE_MODULE_PATH "${WARZ_ROOT}/cmake")
 
+# compile_commands.json: what clangd, clang-tidy and include-what-you-use all read, and
+# what tools/header_cost.py uses to price a header. Free to produce, so always on.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # --------------------------------------------------------------------------
 # Options
 # --------------------------------------------------------------------------
@@ -65,7 +69,9 @@ endif()
 # Configuration
 # --------------------------------------------------------------------------
 
+include(Speed)             # ccache, when it is installed
 include(CompilerFlags)     # warz_compiler_flags, warz_final_config
+include(Pch)               # warz_enable_pch -- must precede any target that calls it
 include(WarzConfig)        # warz_includes, warz_defines_*, warz_add_dual_library
 include(Dependencies)      # vendored libraries -> WARZ_*_LIBS
 
@@ -99,8 +105,12 @@ message(STATUS "")
 message(STATUS "Infestation (C++20 port) ${PROJECT_VERSION}")
 message(STATUS "  C++ standard : ${CMAKE_CXX_STANDARD}")
 message(STATUS "  Compiler     : ${CMAKE_CXX_COMPILER_ID} ${CMAKE_CXX_COMPILER_VERSION}")
+message(STATUS "  Generator    : ${CMAKE_GENERATOR}")
+message(STATUS "  Build type   : ${CMAKE_BUILD_TYPE}")
 message(STATUS "  Client       : ${WARZ_BUILD_CLIENT}")
 message(STATUS "  Server       : ${WARZ_BUILD_SERVER}")
+message(STATUS "  ccache       : ${WARZ_CCACHE_STATUS}")
+message(STATUS "  PCH          : ${WARZ_PCH_STATUS}")
 message(STATUS "  PhysX libs   : ${WARZ_PHYSX_LIBS}")
 message(STATUS "  RmlUi libs   : ${WARZ_RMLUI_LIBS}")
 message(STATUS "  Recast libs  : ${WARZ_RECAST_LIBS}")

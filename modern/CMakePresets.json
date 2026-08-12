@@ -1,0 +1,58 @@
+{
+  "version": 6,
+  "cmakeMinimumRequired": { "major": 3, "minor": 25, "patch": 0 },
+
+  "configurePresets": [
+    {
+      "name": "base",
+      "hidden": true,
+      "generator": "Ninja",
+      "toolchainFile": "${sourceDir}/cmake/toolchain-mingw-i686.cmake",
+      "cacheVariables": {
+        "CMAKE_EXPORT_COMPILE_COMMANDS": "ON"
+      }
+    },
+    {
+      "name": "default",
+      "inherits": "base",
+      "displayName": "Release (-O3)",
+      "description": "The normal build. All four binaries, optimised.",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Release" }
+    },
+    {
+      "name": "dev",
+      "inherits": "base",
+      "displayName": "Dev (-O1, fast to build)",
+      "description": "Release's defines at -O1. For iterating, not for profiling or shipping.",
+      "binaryDir": "${sourceDir}/build-dev",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Dev" }
+    },
+    {
+      "name": "final",
+      "inherits": "base",
+      "displayName": "Final (shipping)",
+      "description": "The original shipping configuration: FINAL_BUILD, editors stripped. Not yet verified by this port.",
+      "binaryDir": "${sourceDir}/build-final",
+      "cacheVariables": { "CMAKE_BUILD_TYPE": "Final" }
+    },
+    {
+      "name": "no-cache",
+      "inherits": "default",
+      "displayName": "Release, ccache and PCH both off",
+      "description": "The reference build. Used by tools/buildtime.sh --verify to prove PCH changes no object file.",
+      "binaryDir": "${sourceDir}/build-reference",
+      "cacheVariables": {
+        "WARZ_CCACHE": "OFF",
+        "WARZ_PCH": "OFF"
+      }
+    }
+  ],
+
+  "buildPresets": [
+    { "name": "default", "configurePreset": "default" },
+    { "name": "dev",     "configurePreset": "dev" },
+    { "name": "final",   "configurePreset": "final" },
+    { "name": "no-cache","configurePreset": "no-cache" }
+  ]
+}

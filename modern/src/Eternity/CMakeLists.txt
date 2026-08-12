@@ -45,11 +45,14 @@ foreach(variant client server)
     target_include_directories(Eternity_${variant} PUBLIC
         ${CMAKE_CURRENT_SOURCE_DIR}/Source/ZLib/src
     )
-    # zlib is not ours to modernise; keep the port's conformance signal focused on the
-    # game code.
-    set_source_files_properties(
-        ${WARZ_ETERNITY_SOURCES}
-        DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
-        PROPERTIES SKIP_PRECOMPILE_HEADERS ON
-    )
 endforeach()
+
+# Those eleven .c files are also why this target needs care with precompiled headers: a
+# C++ PCH forced into a C translation unit is a hard error, and Eternity is the only
+# target in the tree that compiles both languages.
+#
+# That is handled in cmake/Pch.cmake, by guarding the header with
+# $<$<COMPILE_LANGUAGE:CXX>:...> so it never reaches a C source. This block used to set
+# SKIP_PRECOMPILE_HEADERS on ${WARZ_ETERNITY_SOURCES} -- ALL 98 of them, C and C++
+# alike -- under a comment about zlib. It was inert while no PCH existed, and would have
+# silently switched precompiled headers off for the whole engine the moment one did.

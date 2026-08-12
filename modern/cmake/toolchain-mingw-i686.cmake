@@ -5,7 +5,8 @@
 # places in the codebase assume sizeof(void*) == 4.
 #
 # Usage:
-#   cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw-i686.cmake
+#   cmake --preset default          # preferred -- see CMakePresets.json
+#   cmake -B build -G Ninja -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw-i686.cmake
 
 set(CMAKE_SYSTEM_NAME Windows)
 set(CMAKE_SYSTEM_PROCESSOR x86)

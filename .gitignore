@@ -31,8 +31,11 @@ server/GameBlocksSDK
 #Web
 
 
-# CMake build output for the C++20 port
+# CMake build output for the C++20 port. The presets in modern/CMakePresets.json each
+# use their own directory -- build-dev, build-final, build-reference -- and
+# tools/buildtime.sh --verify creates one more.
 modern/build/
+modern/build-*/
 
 # Python bytecode from the source-list generators in modern/tools/
 __pycache__/

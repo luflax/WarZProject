@@ -135,12 +135,25 @@ PhysX 3 → 4 was the largest single piece of work. Renames that could be aliase
 # 1. Copy source from the original tree (idempotent; never writes to it)
 ./tools/bootstrap.sh
 
-# 2. Configure
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
-
-# 3. Build
-cmake --build build --parallel
+# 2. Configure and build
+cmake --preset default
+./tools/build.sh
 ```
+
+`tools/build.sh` is preferred over a bare `cmake --build` because it reports each
+binary's real status, and distinguishes **COMPILE FAILED** from **LINK FAILED** — grepping
+a build log for `undefined reference` reports a target as having zero unresolved symbols
+when in truth it never reached the linker.
+
+The presets in [`CMakePresets.json`](CMakePresets.json) carry the cross-toolchain, so
+there is nothing to remember:
+
+| Preset | Build dir | For |
+|---|---|---|
+| `default` | `build/` | Release, `-O3`. The normal build. |
+| `dev` | `build-dev/` | Release's defines at `-O1`. Faster to build; **not** for profiling or shipping. |
+| `final` | `build-final/` | The original shipping configuration. Not yet verified by this port. |
+| `no-cache` | `build-reference/` | ccache and PCH both off. The reference build for `tools/buildtime.sh --verify`. |
 
 Preview what would be copied without writing anything:
 
@@ -151,9 +164,16 @@ Preview what would be copied without writing anything:
 ### Requirements
 
 - **CMake ≥ 3.25**
-- **MSVC 19.30+** (VS 2022) — the client is deeply Win32-bound
-- Clang 15+ / GCC 12+ can target the **server** only
+- **MinGW-w64 i686 GCC 13** — what this port is actually built and verified with; it
+  produces all four binaries, client included
+- MSVC 19.30+ (VS 2022) is the other intended target and the flags are kept in
+  `cmake/CompilerFlags.cmake`, but no configuration of this port has been built with it
 - Windows SDK (supplies D3D9 and DirectXMath; the DirectX SDK is *not* needed)
+
+Optional, both detected automatically:
+
+- **Ninja** — the default generator; falls back to Unix Makefiles
+- **ccache** — see [Build times](#build-times)
 
 ### Options
 
@@ -163,6 +183,85 @@ Preview what would be copied without writing anything:
 | `WARZ_BUILD_SERVER` | `ON` | Build the three server binaries |
 | `WARZ_USE_SHIMS` | `ON` | No-op shims for absent commercial SDKs |
 | `WARZ_WARNINGS_AS_ERRORS` | `OFF` | Leave off for Phase 1 — a 2013 codebase under C++20 produces thousands of warnings |
+| `WARZ_PCH` | `ON` | Precompile `r3dPCH.h`. See [Build times](#build-times) |
+| `WARZ_CCACHE` | `ON` | Use `ccache` if it is installed; silently skipped if not |
+| `WARZ_CCACHE_DIR` | *(ccache default)* | Cache location. The default `~/.cache/ccache` already survives `rm -rf build` |
+| `WARZ_CCACHE_MAXSIZE` | `10G` | 1,303 objects per configuration, and this port has several |
+
+---
+
+## Build times
+
+Measured on 4 cores, i686-w64-mingw32 GCC 13, `Release`. `tools/buildtime.sh` reproduces
+every number here.
+
+| | Before | Now |
+|---|---|---|
+| Null build (nothing to do) | 2.3 s | **0.06 s** |
+| One `.cpp` + relink | 6.3 s | **1.3 s** |
+| `P2PMessages.h` — 58 TUs | 1 m 42 s | **29 s** |
+| `r3dPCH.h` — rebuilds everything | — | **2 m 06 s** |
+| Clean build | 18.9 min | **8 m 23 s** |
+| Clean build, warm ccache | 18.9 min | **13 s** |
+
+Three separate mechanisms, because these are three different problems:
+
+**Ninja** (`CMakePresets.json`) fixes only the null build. Recursive make spent 2.3
+seconds stat-ing 1,303 objects to decide there was nothing to do.
+
+**Precompiled headers** (`cmake/Pch.cmake`) fix the per-edit cost. An average
+translation unit here pulls in **888 headers**, and 698 of them arrive through
+`r3dPCH.h` — which costs **4.98 s to parse against a whole TU's 5.25 s**. It was already
+the original MSVC build's precompiled header, and 417 of the 419 sources still open with
+`#include "r3dPCH.h"`; only the wiring was lost in the move to CMake. Restoring it needed
+no source changes at all.
+
+**ccache** (`cmake/Speed.cmake`) fixes the clean build, which is what a branch switch
+really is. Optional — absent, everything still works, just uncached.
+
+Two things worth knowing:
+
+- **The eight precompiled headers cost 1.6 GB** in the build directory (~200 MB each).
+  One per target, because `r3dPCH.h` branches on `WO_SERVER`, `DISABLE_PHYSX` and
+  `FINAL_BUILD`, so the client and server variants are genuinely different headers.
+- **In an ephemeral container the ccache directory does not survive the session.** The
+  13-second figure needs a cache that persists; set `WARZ_CCACHE_DIR` to somewhere that
+  does.
+
+### Neither cache may change the binary
+
+`tools/buildtime.sh --verify` builds a reference tree with PCH and ccache both off and
+compares **every object file**. Current result: **1,300 identical, 0 differing** — the
+three exceptions being the TUs that expand `__TIME__` (`Main.cpp` and the two
+`VersionNo.cpp`), which differ between any two builds.
+
+This is not ceremony. `CCACHE_BASEDIR` — the standard advice for sharing a cache between
+checkouts — rewrites absolute paths to relative *on the way to the compiler*, which
+changed `__FILE__` in **621 of 1,303 objects** and took 27 KB off `WarZ.exe`. Correct
+output, but it meant that installing a cache changed the program, and that two people
+reading the same `r3d_assert` would see different paths. It is deliberately not set;
+`cmake/Speed.cmake` records why.
+
+### What was not done
+
+**Unity builds** would cut the clean build further, but this codebase fights them:
+`menu_sliders_x`/`_y` are file-scope statics in two different files and `gNearPlaneNormal`
+in three, and each collision is a hand-fixed compile error. PCH and ccache capture most
+of the same win without touching what the compiler sees.
+
+**Header fan-out** is the deeper problem and is untouched. `r3d.h` reaches 208 of WarZ's
+209 translation units, so it is still the case that changing one header rebuilds almost
+everything — PCH scales that cost down but does not change its shape. `tools/header_cost.py`
+ranks headers by *(TUs reached × parse cost)* so that work, if it is ever done, is aimed
+by measurement:
+
+```bash
+./tools/header_cost.py                 # rank by reach
+./tools/header_cost.py --measure 15    # price the top 15, rank by real cost
+```
+
+**A faster linker** was measured and rejected: linking `WarZ.exe` — 22.9 MB, static, ~20
+archives — takes about one second. There is nothing there to win.
 
 ---
 
@@ -176,9 +275,13 @@ of them.
 ```
 modern/
 ├── CMakeLists.txt        replaces six Visual Studio solutions
+├── CMakePresets.json     default / dev / final / no-cache
 ├── cmake/
 │   ├── CompilerFlags.cmake    /permissive-, /Zc:__cplusplus, C++20
-│   └── Dependencies.cmake     pugixml, stb (fetched)
+│   ├── Dependencies.cmake     pugixml, stb (fetched)
+│   ├── BuildPhysX.cmake       PhysX 4.1 for MinGW-i686 — a config NVIDIA does not ship
+│   ├── Pch.cmake              precompiles r3dPCH.h; ~90% of each TU's front-end cost
+│   └── Speed.cmake            ccache, when it is installed
 ├── src/
 │   ├── Eternity/         copied — r3d engine core
 │   ├── GameEngine/       copied — object model, physics, terrain

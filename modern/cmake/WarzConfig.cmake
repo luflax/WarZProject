@@ -104,5 +104,9 @@ function(warz_add_dual_library name)
             CXX_STANDARD_REQUIRED ON
             CXX_EXTENSIONS OFF
         )
+        # After target_link_libraries: the PCH must be compiled with the same defines
+        # the target's sources see, and warz_defines_${variant} is where WO_SERVER
+        # comes from. See cmake/Pch.cmake.
+        warz_enable_pch(${target})
     endforeach()
 endfunction()
