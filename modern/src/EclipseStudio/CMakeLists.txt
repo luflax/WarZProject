@@ -31,3 +31,8 @@ target_link_libraries(WarZ PRIVATE
     ${WARZ_RMLUI_LIBS}      # replaces Scaleform GFx
     ${WARZ_PHYSX_LIBS}
 )
+
+# 206 of the 209 sources here open with #include "r3dPCH.h", and parsing it costs 4.98 s
+# of each TU's 5.25 s. This is the single largest target in the product and the one that
+# gains most. See cmake/Pch.cmake.
+warz_enable_pch(WarZ)

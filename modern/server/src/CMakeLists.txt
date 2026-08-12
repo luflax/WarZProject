@@ -49,6 +49,12 @@ function(warz_add_server name)
         warz_compiler_flags
         ${ARG_LIBS}
     )
+
+    # Each server gets its OWN precompiled header rather than sharing one. r3dPCH.h
+    # branches on DISABLE_PHYSX, which Supervisor and Master define and GameServer does
+    # not -- so their r3dPCH.h is a genuinely different header, one pulling in
+    # PxForwardDecls.h and the other the whole PxPhysicsAPI.h. See cmake/Pch.cmake.
+    warz_enable_pch(${name})
 endfunction()
 
 # ---------------------------------------------------------------------------
