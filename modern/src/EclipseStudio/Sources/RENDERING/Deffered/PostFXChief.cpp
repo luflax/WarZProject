@@ -387,6 +387,20 @@ template<> void PostFXChief::SetDefaultTexFilteringTillN<0>()
 
 template void PostFXChief::SetDefaultTexFilteringTillN< PostFXChief::NUM_SAMPLERS - 1 >();
 
+// SetDefaultTexFiltering is DEFINED in this .cpp, not in PostFXChief.h, so other
+// translation units can call it but cannot instantiate it -- they see only the
+// declaration. The explicit instantiation of SetDefaultTexFilteringTillN above does not
+// help: the specializations it triggers are implicit, get vague linkage, and are free to
+// be inlined away and never emitted, which is exactly what happens here.
+//
+// The PFX_* units call stages FREE_TEX_STAGE_START + 0..3 (PFX_ComposeMultibloom for
+// all four, PFX_ExposureBlend / PFX_ConvertToLDR / PFX_FilmGrain for the first), so
+// those four specializations are instantiated explicitly and are guaranteed to exist.
+template void PostFXChief::SetDefaultTexFiltering< PostFXChief::FREE_TEX_STAGE_START + 0 >();
+template void PostFXChief::SetDefaultTexFiltering< PostFXChief::FREE_TEX_STAGE_START + 1 >();
+template void PostFXChief::SetDefaultTexFiltering< PostFXChief::FREE_TEX_STAGE_START + 2 >();
+template void PostFXChief::SetDefaultTexFiltering< PostFXChief::FREE_TEX_STAGE_START + 3 >();
+
 //------------------------------------------------------------------------
 
 void

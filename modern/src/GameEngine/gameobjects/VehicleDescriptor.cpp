@@ -699,13 +699,34 @@ PxF32 VehicleDescriptor::GetSpeed()
 	return speed;
 }
 
+// [PORT] PhysX 4 removed PxVehicleWheelsDynData::getTireLongSlip and ::getTireLatSlip.
+// Both values are now produced by PxVehicleUpdates into a PxVehicleWheelQueryResult,
+// which VehicleManager retains for exactly this purpose -- the same migration already
+// applied to suspension travel and steer angle in obj_Vehicle.cpp.
+//
+// A vehicle that has not been simulated yet has no results, and a wheel whose
+// suspension cannot reach the ground reports zero slip, so 0.0f is the correct answer
+// in both cases as well as the pre-existing default.
+const PxWheelQueryResult* VehicleDescriptor::GetWheelQuery(const PxU32 tireIndex) const
+{
+	const PxVehicleWheels* wheels = (hasTracks == 0)
+		? static_cast<const PxVehicleWheels*>(vehicle)
+		: static_cast<const PxVehicleWheels*>(tank);
+	if (!wheels || !g_pPhysicsWorld || !g_pPhysicsWorld->m_VehicleManager)
+		return NULL;
+
+	const PxVehicleWheelQueryResult* wqr =
+		g_pPhysicsWorld->m_VehicleManager->GetWheelQueryResults(wheels);
+
+	return (wqr && tireIndex < wqr->nbWheelQueryResults)
+		? &wqr->wheelQueryResults[tireIndex]
+		: NULL;
+}
+
 PxF32 VehicleDescriptor::GetLongTireSlip(const PxU32 tireIndex)
 {
-	float value = 0.0f;
-	if (hasTracks == 0)
-		value = vehicle->mWheelsDynData.getTireLongSlip(tireIndex);
-	else
-		value = tank->mWheelsDynData.getTireLongSlip(tireIndex);
+	const PxWheelQueryResult* wq = GetWheelQuery(tireIndex);
+	float value = wq ? wq->longitudinalSlip : 0.0f;
 
 	if (value < 0.0f)
 		value = -value;
@@ -715,11 +736,8 @@ PxF32 VehicleDescriptor::GetLongTireSlip(const PxU32 tireIndex)
 
 PxF32 VehicleDescriptor::GetLatTireSlip(const PxU32 tireIndex)
 {
-	float value = 0.0f;
-	if (hasTracks == 0)
-		value = vehicle->mWheelsDynData.getTireLatSlip(tireIndex);
-	else
-		value = tank->mWheelsDynData.getTireLatSlip(tireIndex);
+	const PxWheelQueryResult* wq = GetWheelQuery(tireIndex);
+	float value = wq ? wq->lateralSlip : 0.0f;
 
 	if (value < 0.0f)
 		value = -value;

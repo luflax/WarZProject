@@ -54,7 +54,12 @@ void GetMyIP_Windows_Linux_IPV4And6( SystemAddress addresses[MAXIMUM_NUMBER_OF_I
 
 #else
 
-#if defined(__GNUC__)  || defined(__GCCXML__)
+// [PORT] RakNet guards this on __GNUC__ alone, treating "compiled by GCC" as
+// "targeting Unix". That holds for GCC on Linux and breaks under MinGW-w64,
+// where __GNUC__ is defined but the target is Windows and there is no netdb.h.
+// Added !defined(_WIN32) so the Windows path is taken on a Windows target
+// regardless of which compiler builds it.
+#if (defined(__GNUC__)  || defined(__GCCXML__)) && !defined(_WIN32)
 #include <netdb.h>
 #endif
 void GetMyIP_Windows_Linux_IPV4( SystemAddress addresses[MAXIMUM_NUMBER_OF_INTERNAL_IDS] )

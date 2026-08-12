@@ -17,19 +17,50 @@ fork is deliberately cut.
 |---|---|
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
 | Source copied | ✅ `tools/bootstrap.sh` |
-| **Eternity** (engine core) | ✅ **81/81 TUs compile** |
-| **GameEngine** | ✅ **44/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
-| **EclipseStudio** (client + editors) | ✅ **209/209 TUs compile** |
-| **server/src** (3 server binaries) | ✅ **71/71 TUs compile** |
-| Shared sources, server configuration | ✅ **48/48 TUs compile** |
+| **Eternity** (engine core) | ✅ **91/91 TUs** — in *both* client and server configuration |
+| **GameEngine** | ✅ **44/44 TUs** — both configurations; PhysX 4.1, Recast/Detour and RmlUi all in |
+| **EclipseStudio** (client + editors) | ✅ **209/209 TUs** |
+| **server/src** (3 server binaries) | ✅ **71/71 TUs** |
+| Shared sources, server configuration | ✅ **48/48 TUs** |
 | **Milestone A — compiles** | ✅ **done** |
-| Milestone B — links | ⬜ not started |
-| Milestone C — runs to a known point | ⬜ not started |
+| **Milestone B — links** | ✅ **done** — see [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) |
+| ↳ B0 build-configuration correctness | ✅ **done** |
+| ↳ B1 CMake targets | ✅ **done** — `cmake --build` drives the whole tree |
+| ↳ B2 vendored libraries | ✅ RakNet, pugixml, Recast/Detour, RmlUi, **PhysX 4.1** |
+| ↳ B3 link the binaries | ✅ **4 of 4** |
+| ↳ B4 residual symbols | ✅ **done** — zero own-code symbols left |
+| ↳ B5 PhysX for MinGW-i686 | ✅ **done** — 403 TUs, 15 static libs |
+| **Milestone C — runs to a known point** | ⬜ not started |
 
-**Milestone A is complete: the whole product compiles under strict ISO C++20** — 405
-translation units plus 48 re-checked in their server configuration, no `-fpermissive`,
-no commercial SDK. Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686,
-`-std=c++20 -fsyntax-only -fms-extensions`).
+### Binaries
+
+```
+SupervisorServer.exe    3,033,706 bytes   PE32 i386, console
+MasterServer.exe        3,168,442 bytes   PE32 i386, console
+GameServer.exe         14,535,353 bytes   PE32 i386, console
+WarZ.exe               22,910,126 bytes   PE32 i386, GUI
+```
+
+**Zero unresolved symbols across the whole product.** Four binaries, from a tree that
+did not build at all as checked out, with no commercial SDK anywhere in it.
+
+Build with:
+
+```sh
+cmake -B build -DCMAKE_TOOLCHAIN_FILE=cmake/toolchain-mingw-i686.cmake
+./tools/build.sh              # reports COMPILE vs LINK failure per binary
+```
+
+**The whole product compiles under strict ISO C++20** — 415 translation units, no
+`-fpermissive`, no commercial SDK. Every one of them also passes real **codegen**
+(`-c`, not just `-fsyntax-only`), which is what Milestone B needs.
+
+Eternity and GameEngine are checked in **both** configurations, because the client links
+them without `WO_SERVER` and the servers with it, and the two take different `#ifdef`
+branches. That is 135 TUs × 2 configurations + 280 single-configuration TUs = **550
+compilations**. Measured with `./tools/probe.sh` and `./tools/codegen.sh` (MinGW-w64
+i686, `-std=c++20 -fms-extensions -msse2`); pass `CONFIG=client` to select the
+client-side build of the two shared libraries.
 
 Several sources are compiled **twice** across the product — once as client code and once
 with `WO_SERVER` defined, which takes different `#ifdef` branches. `WO_GameServer.vcxproj`
@@ -44,8 +75,18 @@ FORCE_BINARY=WO_GameServer ./tools/probe.sh @.probe-shared.WO_GameServer
 
 ### What replaced what
 
-**All three discontinued SDKs are gone.** PhysX 4.1 is vendored (BSD-3), Autodesk
-Navigation is replaced by Recast & Detour (zlib), Scaleform GFx by RmlUi (MIT).
+**All three discontinued SDKs are gone.** PhysX 4.1 is vendored and **built from source**
+(BSD-3), Autodesk Navigation is replaced by Recast & Detour (zlib), Scaleform GFx by
+RmlUi (MIT).
+
+PhysX is built for **i686-w64-mingw32**, a configuration NVIDIA neither ships nor tests —
+they build Windows with MSVC and Linux with GCC, and their build system cannot produce
+the combination. `cmake/BuildPhysX.cmake` is that build; `tools/gen_physx_sources.py`
+derives the 403 translation units from NVIDIA's own module files rather than globbing.
+Six source changes were needed, all marked `[PORT]`; the one that mattered was
+`PX_ALIGN` silently evaporating, because it keyed off a *platform* test that is true for
+MinGW while `__declspec(align)` is not something GCC implements. See
+[`src/External/PhysX/README.md`](src/External/PhysX/README.md).
 
 PhysX 3 → 4 was the largest single piece of work. Renames that could be aliased live in
 `src/External/PhysX/compat/Px3xCompat.h`; the rest were ported by hand:
@@ -168,8 +209,8 @@ include silently resolves to a header that declares the same API and does nothin
 | `GameBlocks/` | GameBlocks / FairFight anti-cheat (commercial) | No cheat detection, no telemetry |
 | `CrashRpt/` | crash reporting | None meaningful |
 
-`PhysX/` is **not** a shim — PhysX 4.1 is vendored in full under BSD-3, with a
-`compat/` layer for the 3.x spellings.
+`PhysX/` is **not** a shim — PhysX 4.1 is vendored and compiled in full under BSD-3, with
+a `compat/` layer for the 3.x spellings. Physics is real.
 
 Compiled out entirely via flags that already existed upstream — no shim needed:
 `ENABLE_WEB_BROWSER=0`, `APEX_ENABLED=0`, `__WITH_PB__` and `USE_VMPROTECT` undefined.
@@ -197,4 +238,5 @@ Full audit: [`../DEPENDENCIES.md`](../DEPENDENCIES.md).
 | [`../CLAUDE.md`](../CLAUDE.md) | Codebase architecture and conventions |
 | [`../DEPENDENCIES.md`](../DEPENDENCIES.md) | Dependency audit and replacement choices |
 | [`../PHASE1-BUILD-PLAN.md`](../PHASE1-BUILD-PLAN.md) | This phase — milestones, work breakdown, risks |
+| [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) | Milestone B (linking) — measured work list, ordering, risks |
 | [`../PERFORMANCE-OPTIMIZATION-PLAN.md`](../PERFORMANCE-OPTIMIZATION-PLAN.md) | The performance work this unblocks |

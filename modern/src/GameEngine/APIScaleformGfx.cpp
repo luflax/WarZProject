@@ -43,6 +43,26 @@
 #include "RmlUi/Core/Types.h"
 
 //////////////////////////////////////////////////////////////////////////
+//
+// UI timing counters for the profiler overlay.
+//
+// r3dProfilerRender.cpp declares these extern, prints them, and resets them each
+// frame; the Scaleform implementation this file replaces was what defined and fed
+// them. Defining them here keeps the overlay linking and keeps its numbers honest --
+// the RmlUi path does not yet time itself, so they read zero, which is the truth
+// rather than a fabricated figure.
+//
+// Feed them from Advance/Display and Invoke once the RmlUi render interface is backed
+// by r3dRenderer; until then there is nothing to measure.
+//
+//////////////////////////////////////////////////////////////////////////
+
+float g_ScaleFormCompositeInvoke   = 0.0f;
+int   g_ScaleFormInvokeCount       = 0;
+float g_ScaleFormUpdateAndDraw     = 0.0f;
+int   g_ScaleFormUpdateAndDrawCount = 0;
+
+//////////////////////////////////////////////////////////////////////////
 
 namespace
 {

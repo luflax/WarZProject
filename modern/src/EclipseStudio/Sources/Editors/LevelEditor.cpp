@@ -313,6 +313,13 @@ void Serialize( pugi::xml_node node, r3dSSScatterParams* params )
 	SerializeXMLVal<W> ( "translucency"		, node, &params->translucency	) ;
 }
 
+// [PORT] This overload is defined HERE but called only from
+// ObjectsCode/WORLD/Lamp.cpp, which merely re-declares the template. Nothing in this
+// file uses it, so without an explicit instantiation neither specialization is ever
+// emitted and both come out undefined at link time. W = true writes, false reads.
+template void Serialize< true  >( pugi::xml_node, r3dSSScatterParams* );
+template void Serialize< false >( pugi::xml_node, r3dSSScatterParams* );
+
 // [PORT] These are DEFINED further down this same file (around line 690), but they
 // are used above by the Serialize<W> templates. They are non-dependent names, so ISO
 // C++ resolves them at the template's definition point and needs them declared here;

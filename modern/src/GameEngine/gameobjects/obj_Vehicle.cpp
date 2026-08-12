@@ -39,6 +39,13 @@ extern HUDPause*	hudPause;
 IMPLEMENT_CLASS(obj_Vehicle, "obj_Vehicle", "Object");
 AUTOREGISTER_CLASS(obj_Vehicle);
 
+// [PORT] Declared HERE, at file scope, rather than at block scope inside the anonymous
+// namespace below. A function declaration inside a function body names the nearest
+// ENCLOSING NAMESPACE, so declaring it within an anonymous namespace named
+// (anonymous namespace)::MatrixGetYawPitchRoll -- an internal-linkage function nothing
+// defines. The real one is global, in EclipseStudio/Sources/Editors/ObjectManipulator3d.cpp.
+void MatrixGetYawPitchRoll( const D3DXMATRIX & mat, float & fYaw, float & fPitch, float & fRoll );
+
 //////////////////////////////////////////////////////////////////////////
 
 namespace
@@ -116,7 +123,6 @@ namespace
 	{
 		q.normalize();
 
-		void MatrixGetYawPitchRoll ( const D3DXMATRIX & mat, float & fYaw, float & fPitch, float & fRoll );
 		PxMat33 mat(q);
 		D3DXMATRIX res;
 		D3DXMatrixIdentity(&res);
@@ -132,7 +138,7 @@ namespace
 		res._32 = mat.column2.y;
 		res._33 = mat.column2.z;
 
-		MatrixGetYawPitchRoll(res, xRot, yRot, zRot);
+		::MatrixGetYawPitchRoll(res, xRot, yRot, zRot);
 	}
 
 //////////////////////////////////////////////////////////////////////////

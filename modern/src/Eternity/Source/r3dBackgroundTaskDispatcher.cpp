@@ -18,6 +18,15 @@ extern CRITICAL_SECTION g_ResourceCritSection;
 // g_pBackgroundTaskDispatcher will be NULL in other project that do not create it!
 r3dBackgroundTaskDispatcher *g_pBackgroundTaskDispatcher = 0;
 
+#ifndef FINAL_BUILD
+// [PORT] Declared HERE, at file scope, rather than at block scope inside the anonymous
+// namespace below. A function declaration inside a function body names the nearest
+// ENCLOSING NAMESPACE, so within an anonymous namespace it declared
+// (anonymous namespace)::CheckLoadTextureStack -- an internal-linkage function nothing
+// defines. The real one is global, in r3dTex.cpp, and the call came out undefined.
+void CheckLoadTextureStack( r3dTL::TArray<r3dBackgroundTaskDispatcher::TaskDescriptor> * );
+#endif
+
 //////////////////////////////////////////////////////////////////////////
 
 namespace
@@ -83,8 +92,7 @@ unsigned int WINAPI BackgroundTaskDispatcherThreadFunc(void* Par)
 		}
 
 #ifndef FINAL_BUILD
-		void CheckLoadTextureStack( r3dTL::TArray<r3dBackgroundTaskDispatcher::TaskDescriptor> *);
-		CheckLoadTextureStack( data->tasks );
+		::CheckLoadTextureStack( data->tasks );
 #endif
 
 		//	Otherwise pick one task and proceed.

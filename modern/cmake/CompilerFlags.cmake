@@ -1,27 +1,32 @@
 # Compiler configuration for the C++20 port.
 #
-# The critical MSVC flags are /permissive-, /Zc:__cplusplus and /Zc:preprocessor.
-# Without them you are not really compiling C++20 — MSVC keeps accepting the
-# pre-standard constructs this codebase is full of, and the conformance debt
-# stays hidden until a Clang or GCC build is attempted.
+# On MSVC the critical flags are /permissive-, /Zc:__cplusplus and /Zc:preprocessor.
+# Without them you are not really compiling C++20 -- MSVC keeps accepting the
+# pre-standard constructs this codebase is full of, and the conformance debt stays
+# hidden until a Clang or GCC build is attempted.
+#
+# GCC/Clang is the toolchain that actually drives this port (MinGW-w64 i686), and it is
+# deliberately run WITHOUT -fpermissive: that flag masked roughly seventy real
+# conformance errors behind a single root cause.
 
 add_library(warz_compiler_flags INTERFACE)
 
 if(MSVC)
     target_compile_options(warz_compiler_flags INTERFACE
-        /permissive-          # ISO conformance — surfaces the real work
+        /permissive-          # ISO conformance -- surfaces the real work
         /Zc:__cplusplus       # report the true __cplusplus value
         /Zc:preprocessor      # conforming preprocessor
         /Zc:inline
         /Zc:throwingNew
         /MP                   # parallel compilation
         /bigobj               # AI_Player.CPP and RenderDeffered.cpp need this
+        /arch:SSE2
         /W3
         /utf-8
     )
 
-    # Noise suppression for a 2013 codebase. Revisit in phase 2 — these are
-    # silenced to keep the phase 1 signal readable, not because they are benign.
+    # Noise suppression for a 2013 codebase. Revisit later -- these are silenced to keep
+    # the signal readable, not because they are benign.
     target_compile_options(warz_compiler_flags INTERFACE
         /wd4244    # conversion, possible loss of data
         /wd4267    # size_t -> smaller type
@@ -30,17 +35,35 @@ if(MSVC)
     )
 
     target_compile_definitions(warz_compiler_flags INTERFACE
-        _WIN32_WINNT=0x0601   # Windows 7 — matches the compatibility target
+        _WIN32_WINNT=0x0601   # Windows 7 -- matches the compatibility target
     )
 else()
-    # Non-MSVC is a server-only target for now. The client is deeply Win32-bound;
-    # making it portable is well outside phase 1.
     target_compile_options(warz_compiler_flags INTERFACE
-        -Wall
-        -Wno-unused-variable
-        -Wno-unused-but-set-variable
-        -Wno-multichar
+        # -fms-extensions: the codebase uses MSVC-isms the standard does not cover,
+        # notably anonymous structs inside unions.
+        $<$<COMPILE_LANGUAGE:CXX>:-fms-extensions>
+
+        # -msse2: bare i686 has no SSE, so the engine's _mm_cvtss_si32 / _mm_set_ss
+        # calls fail to inline with "target specific option mismatch". It is invisible
+        # under -fsyntax-only and breaks five files the moment real codegen is on. The
+        # original 2013 build assumed SSE2, so this restores the true target rather
+        # than relaxing anything.
+        -msse2
+
         -fno-strict-aliasing   # the codebase type-puns freely
+
+        # -w, matching tools/probe.sh. The gate for this port is ERRORS -- strict ISO
+        # C++20 with no -fpermissive -- not warnings. A 2013 codebase produces thousands
+        # of -Wall diagnostics (reorder, unused-local-typedefs from the COMPILE_ASSERT
+        # macro, and so on), and leaving them on buries real errors in scrollback: the
+        # first failing build here printed several hundred lines of warnings around a
+        # single error. Turning warnings back on and working through them is worthwhile,
+        # but it is its own task, not a prerequisite for linking.
+        -w
+    )
+
+    target_compile_definitions(warz_compiler_flags INTERFACE
+        _WIN32_WINNT=0x0601
     )
 endif()
 
@@ -53,8 +76,10 @@ if(WARZ_WARNINGS_AS_ERRORS)
 endif()
 
 # The original 'Final' configuration: strips editors and debug UI, enables the
-# single-instance guard, caps FPS. Preserved so the shipping build stays reachable.
+# single-instance guard, caps FPS. Preserved so the shipping build stays reachable --
+# but note it is a SEPARATE configuration that this port has not yet verified.
 set(CMAKE_CXX_FLAGS_FINAL "${CMAKE_CXX_FLAGS_RELEASE}" CACHE STRING "" FORCE)
+set(CMAKE_C_FLAGS_FINAL "${CMAKE_C_FLAGS_RELEASE}" CACHE STRING "" FORCE)
 set(CMAKE_EXE_LINKER_FLAGS_FINAL "${CMAKE_EXE_LINKER_FLAGS_RELEASE}" CACHE STRING "" FORCE)
 
 add_library(warz_final_config INTERFACE)

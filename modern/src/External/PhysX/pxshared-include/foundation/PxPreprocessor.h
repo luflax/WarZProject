@@ -334,7 +334,9 @@ Pack macros - disabled on SPU because they are not supported
 Inline macro
 */
 #define PX_INLINE inline
-#if PX_MICROSOFT_FAMILY
+// [PORT] inline_depth is an MSVC pragma; PX_VC rather than the platform test, so GCC
+// does not have to fall back on ignoring an unknown pragma.
+#if PX_VC
 #pragma inline_depth(255)
 #endif
 
@@ -354,10 +356,11 @@ Force inline macro
 /**
 Noinline macro
 */
-#if PX_MICROSOFT_FAMILY
-#define PX_NOINLINE __declspec(noinline)
-#elif PX_GCC_FAMILY
+// [PORT] GCC first, for the same reason as PX_ALIGN below.
+#if PX_GCC_FAMILY
 #define PX_NOINLINE __attribute__((noinline))
+#elif PX_MICROSOFT_FAMILY
+#define PX_NOINLINE __declspec(noinline)
 #else
 #define PX_NOINLINE
 #endif
@@ -374,7 +377,10 @@ Restrict macro
 /**
 Noalias macro
 */
-#if PX_MICROSOFT_FAMILY
+// [PORT] __declspec(noalias) is MSVC-only and has no GCC equivalent; unlike the two
+// macros around it there is nothing to fall back to, so GCC simply gets the empty
+// definition. The cost is an optimisation hint, not correctness.
+#if PX_MICROSOFT_FAMILY && !PX_GCC_FAMILY
 #define PX_NOALIAS __declspec(noalias)
 #else
 #define PX_NOALIAS
@@ -391,15 +397,24 @@ struct A {
 This declaration style is parsed correctly by Visual Assist.
 
 */
+// [PORT] GCC is tested first. PX_MICROSOFT_FAMILY is a *platform* test -- it is true for
+// MinGW, where __declspec(align) is not a thing GCC implements. It does not reject it
+// either: it warns "attribute directive ignored" and drops the alignment on the floor.
+//
+// That is not a cosmetic loss. ArticulationV is declared PX_ALIGN_PREFIX(64), and losing
+// it took sizeof(Articulation) from 192 to 184 and broke PhysX's own
+// PX_COMPILE_TIME_ASSERT on the size. Structures reached by aligned SSE loads would have
+// been silently misaligned at runtime -- caught here only because one of them is
+// size-checked at compile time.
 #ifndef PX_ALIGN
-#if PX_MICROSOFT_FAMILY
-#define PX_ALIGN(alignment, decl) __declspec(align(alignment)) decl
-#define PX_ALIGN_PREFIX(alignment) __declspec(align(alignment))
-#define PX_ALIGN_SUFFIX(alignment)
-#elif PX_GCC_FAMILY
+#if PX_GCC_FAMILY
 #define PX_ALIGN(alignment, decl) decl __attribute__((aligned(alignment)))
 #define PX_ALIGN_PREFIX(alignment)
 #define PX_ALIGN_SUFFIX(alignment) __attribute__((aligned(alignment)))
+#elif PX_MICROSOFT_FAMILY
+#define PX_ALIGN(alignment, decl) __declspec(align(alignment)) decl
+#define PX_ALIGN_PREFIX(alignment) __declspec(align(alignment))
+#define PX_ALIGN_SUFFIX(alignment)
 #elif defined __CUDACC__
 #define PX_ALIGN(alignment, decl) __align__(alignment) decl
 #define PX_ALIGN_PREFIX(alignment)
