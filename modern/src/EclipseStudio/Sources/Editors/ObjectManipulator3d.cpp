@@ -1,4 +1,5 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 #include "../ObjectsCode/WORLD/obj_Prefab.h"
 
@@ -54,9 +55,9 @@ void NormalizeYPR ( r3dVector & ypr )
 
 #ifndef FINAL_BUILD
 
-#include "ui/UIimEdit2.h"
-#include "gamecommon.h"
-#include "../ObjectsCode/WORLD/obj_Group.h"
+#include "UI/UIimEdit2.h"
+#include "GameCommon.h"
+#include "../ObjectsCode/WORLD/obj_Group.H"
 
 #include "LevelEditor.h"
 

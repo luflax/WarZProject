@@ -9,9 +9,11 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-#include "RepX\RepX.h"
-#include "RepX\RepXUtility.h"
-#include "extensions\PxStringTableExt.h"
+// [PORT] PhysX 4 removed the RepX headers; serialization moved into extensions.
+#include "extensions/PxSerialization.h"
+#include "extensions/PxDefaultStreams.h"
+#include "extensions/PxStringTableExt.h"
+#include "PhysXWorld.h"
 //#include "PhysX\PxFoundation\internal\PxIOStream\public\PxFileBuf.h"
 
 #include "PhysXRepXHelpers.h"
@@ -41,15 +43,32 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-physx::repx::RepXCollection* loadCollection(const char* inPath, PxAllocatorCallback& inCallback)
+// [PORT] PhysX 3.x built a RepXCollection from a list of "extensions" and then ran
+// RepXUpgrader over it. PhysX 4 replaced all of that with a single call:
+// PxSerialization::createCollectionFromXml, which reads the same XML and handles
+// version upgrades internally. The serialization registry is created per call and
+// released once the collection is built.
+physx::PxCollection* loadCollection(const char* inPath, PxAllocatorCallback& inCallback)
 {
-	physx::repx::RepXExtension* theExtensions[64];
-	PxU32 numExtensions = buildExtensionList( theExtensions, 64, inCallback );
+	(void)inCallback;   // PhysX 4 takes the allocator from PxPhysics
+
+	if( !g_pPhysicsWorld || !g_pPhysicsWorld->PhysXSDK || !g_pPhysicsWorld->Cooking )
+		return NULL;
 
 	MyPhysXFileBuf_ReadOnly fileBuf(inPath);
-	physx::repx::RepXCollection* retval = physx::repx::RepXCollection::create( fileBuf, theExtensions, numExtensions, inCallback );
-	if ( retval )
-		retval = &physx::repx::RepXUpgrader::upgradeCollection( *retval );
+
+	PxSerializationRegistry* registry =
+		PxSerialization::createSerializationRegistry( *g_pPhysicsWorld->PhysXSDK );
+	if( !registry )
+		return NULL;
+
+	PxCollection* retval = PxSerialization::createCollectionFromXml(
+		fileBuf,
+		*g_pPhysicsWorld->Cooking,
+		*registry );
+
+	registry->release();
+
 	return retval;
 }
 

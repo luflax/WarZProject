@@ -2,7 +2,7 @@
 
 #include "r3d.h"
 
-#include "ObjectsCode/world/MaterialTypes.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
 
 #include "r3dDeviceQueue.h"
 
@@ -107,7 +107,7 @@ struct DrawOrthoTerraParams
 	r3dITerrain* terra ;
 };
 
-static void DoDrawOrthoTerra( void* params )
+/* [PORT] not static: declared friend elsewhere */ void DoDrawOrthoTerra( void* params )
 {
 	DrawOrthoTerraParams * pms = ( DrawOrthoTerraParams * ) params ;
 

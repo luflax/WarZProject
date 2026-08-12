@@ -15,12 +15,16 @@ namespace physx
 {
 	namespace repx
 	{
-		class RepXCollection;
+		class RepXCollection;   // [PORT] PhysX 3.x only; unused after the PhysX 4 port
 	}
 }
 //////////////////////////////////////////////////////////////////////////
 
-physx::repx::RepXCollection* loadCollection(const char* inPath, PxAllocatorCallback& inCallback);
+// [PORT] PhysX 4 removed RepX. XML deserialization is now
+// PxSerialization::createCollectionFromXml, which yields a PxCollection.
+// The allocator argument is no longer needed -- PhysX takes it from PxPhysics --
+// but is kept so call sites compile unchanged.
+physx::PxCollection* loadCollection(const char* inPath, PxAllocatorCallback& inCallback);
 
 //////////////////////////////////////////////////////////////////////////
 

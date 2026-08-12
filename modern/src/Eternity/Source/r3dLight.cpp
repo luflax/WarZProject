@@ -1,4 +1,5 @@
 #include	"r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include	"r3d.h"
 #include	"r3dLight.h"
 
@@ -505,7 +506,7 @@ r3dColor r3dLight::GetColor() const
 	return r3dColor( BYTE( R ), BYTE( G ), BYTE( B ) );
 }
 
-void r3dLight::SetColor(r3dColor &clr)
+void r3dLight::SetColor(const r3dColor &clr)
 {
   R = _r3d_b2f[clr.R];
   G = _r3d_b2f[clr.G];

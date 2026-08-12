@@ -4,7 +4,7 @@
 
 #include "ServerGameLogic.h"
 #include "MasterServerLogic.h"
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "ObjectsCode/obj_ServerPlayer.h"
 #include "ObjectsCode/obj_ServerGravestone.h"
@@ -24,7 +24,7 @@
 #include "ObjectsCode/Missions/MissionTrigger.h"
 
 #include "../EclipseStudio/Sources/GameCode/UserProfile.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../EclipseStudio/Sources/ObjectsCode/Gameplay/ZombieStates.h"
 
 #include "ServerWeapons/ServerWeapon.h"
@@ -39,7 +39,7 @@
 #include "GBClient/Inc/GBClient.h"
 #include "GBClient/Inc/GBReservedEvents.h"
 
-#pragma comment(lib, "../../../server/GameBlocksSDK/Lib/vc100/Win32/GBClient.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../../../server/GameBlocksSDK/Lib/vc100/Win32/GBClient.lib")
 
 // PunkBuster SDK
 #ifdef __WITH_PB__
@@ -2183,7 +2183,7 @@ void ServerGameLogic::GetStartSpawnPosition(const wiCharDataFull& loadout, r3dPo
 		bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(loadout.GamePos.x, loadout.GamePos.y + 0.5f, loadout.GamePos.z), PxVec3(0, -1, 0), 500.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 		r3dPoint3D posForWater = loadout.GamePos;
 		if( hitResult )
-			posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z); // This is the ground position underwater.
+			posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z); // This is the ground position underwater.
 
 		float waterDepth = getWaterDepthAtPos(posForWater);
 
@@ -2350,7 +2350,7 @@ r3dPoint3D ServerGameLogic::AdjustPositionToFloor(const r3dPoint3D& pos)
 						return pos;
 					}
 	
-	return r3dPoint3D(hit.impact.x, hit.impact.y + 0.01f, hit.impact.z);
+	return r3dPoint3D(hit.position.x, hit.position.y + 0.01f, hit.position.z);
 }
 
 //
@@ -2473,7 +2473,7 @@ void ServerGameLogic::ResetNetObjVisData(const obj_ServerPlayer* plr)
 	}
 }
 
-void ServerGameLogic::DoExplosion(GameObject* fromObj, GameObject* sourceObj, r3dVector& forwVector, r3dVector& lastCollisionNormal, float direction, float damageArea, float damageAmount, STORE_CATEGORIES damageCategory, uint32_t damageItemId, bool isFromVehicle) // const WeaponConfig* wpnConfig)
+void ServerGameLogic::DoExplosion(GameObject* fromObj, GameObject* sourceObj, const r3dVector& forwVector, const r3dVector& lastCollisionNormal, float direction, float damageArea, float damageAmount, STORE_CATEGORIES damageCategory, uint32_t damageItemId, bool isFromVehicle) // const WeaponConfig* wpnConfig)
 {
 	r3d_assert(sourceObj);
 
@@ -2527,12 +2527,12 @@ void ServerGameLogic::DoExplosion(GameObject* fromObj, GameObject* sourceObj, r3
 			if(g_pPhysicsWorld->raycastSingle(PxVec3(orig.x, orig.y, orig.z), PxVec3(dir.x, dir.y, dir.z), rayLen, PxSceneQueryFlag::eIMPACT, hit, filter))
 			{
 				// check distance to collision
-				float len = r3dPoint3D(hit.impact.x-obj->GetPosition().x, hit.impact.y-(obj->GetPosition().y+2.0f), hit.impact.z-obj->GetPosition().z).Length();
+				float len = r3dPoint3D(hit.position.x-obj->GetPosition().x, hit.position.y-(obj->GetPosition().y+2.0f), hit.position.z-obj->GetPosition().z).Length();
 				if((len+0.01f) < rayLen)
 				{
 					// human is behind a wall						
 					PhysicsCallbackObject* target;
-					if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+					if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 					{
 						// this currently only handles one piercable object between the player and explosion.  More complexity might be valid here. 
 						GameObject* hitobj = target->isGameObject();

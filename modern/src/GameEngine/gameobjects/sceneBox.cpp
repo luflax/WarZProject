@@ -1,13 +1,14 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "GameObj.h"
 #include "sceneBox.h"
 #include "ObjManag.h"
 
-#include "Rendering/Deffered/VisibilityGrid.h"
+#include "RENDERING/Deffered/VisibilityGrid.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "JobChief.h"
 

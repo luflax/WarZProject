@@ -1,6 +1,6 @@
 #pragma once
 
-#include "hud_base.h"
+#include "HUD_Base.h"
 
 typedef r3dgameVector(r3dSTLString) stringlist_t;
 

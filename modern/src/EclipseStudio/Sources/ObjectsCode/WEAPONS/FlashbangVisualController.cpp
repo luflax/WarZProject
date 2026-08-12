@@ -3,12 +3,12 @@
 //	Copyright (C) 2011.
 //=========================================================================
 
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 #include "FlashbangVisualController.h"
-#include "../../rendering/Deffered/PostFX.h"
-#include "../../rendering/Deffered/PostFXChief.h"
-#include "../../rendering/Deffered/CommonPostFX.h"
+#include "../../RENDERING/Deffered/PostFX.h"
+#include "../../RENDERING/Deffered/PostFXChief.h"
+#include "../../RENDERING/Deffered/CommonPostFX.h"
 
 //////////////////////////////////////////////////////////////////////////
 

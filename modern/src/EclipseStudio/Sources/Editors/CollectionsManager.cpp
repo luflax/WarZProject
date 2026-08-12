@@ -4,12 +4,13 @@
 //=========================================================================
 
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "CollectionsManager.h"
 #include "../GameLevel.h"
 #include "../XMLHelpers.h"
-#include "../../../gameengine/TrueNature/ITerrain.h"
+#include "../../../GameEngine/TrueNature/ITerrain.h"
 #include "../ObjectsCode/Nature/wind.h"
 
 //////////////////////////////////////////////////////////////////////////

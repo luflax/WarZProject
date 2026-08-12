@@ -1,18 +1,19 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
-#include "../../../Eternity/sf/Console/config.h"
+#include "../../../Eternity/SF/Console/Config.h"
 #include "HUDVault.h"
 #include "HUDDisplay.h"
 #include "HUDAttachments.h"
 #include "LangMngr.h"
 
-#include "FrontendShared.h"
+#include "FrontEndShared.h"
 
-#include "../multiplayer/clientgamelogic.h"
+#include "../multiplayer/ClientGameLogic.h"
 #include "../ObjectsCode/AI/AI_Player.H"
-#include "../ObjectsCode/weapons/Weapon.h"
-#include "../ObjectsCode/weapons/WeaponArmory.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
+#include "../ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../GameLevel.h"
 
 extern HUDAttachments*	hudAttm;
@@ -376,7 +377,7 @@ void HUDVault::reloadBackpackInfo()
 				const BackpackConfig* bpc = g_pWeaponArmory->getBackpackConfig(slot.Items[a].itemID);
 				if(bpc)
 				{
-					if(std::find<r3dgameVector(uint32_t)::iterator, uint32_t>(uniqueBackpacks.begin(), uniqueBackpacks.end(), slot.Items[a].itemID) != uniqueBackpacks.end())
+					if(std::find(uniqueBackpacks.begin(), uniqueBackpacks.end(), slot.Items[a].itemID) != uniqueBackpacks.end())
 						continue;
 
 					// add backpack info

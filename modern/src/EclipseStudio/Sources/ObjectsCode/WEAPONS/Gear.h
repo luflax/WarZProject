@@ -5,7 +5,7 @@
   #error "client gear.h included in SERVER"
 #endif
 
-#include "..\..\GameCode\UserProfile.h"
+#include "../../GameCode/UserProfile.h"
 #include "GearConfig.h"
 
 class Gear

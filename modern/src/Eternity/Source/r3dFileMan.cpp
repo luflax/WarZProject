@@ -1,11 +1,17 @@
 #include "r3dPCH.h"
+#include <share.h>     // [PORT] _SH_DENYNO
 #include "r3d.h"
 
-#include <Shlwapi.h>
-#include <ShellAPI.h>
+#include <shlwapi.h>
+#include <shellapi.h>
 
 #include "FileSystem/r3dFileSystem.h"
-#include "FileSystem\r3dFSStructs.h"
+#include "FileSystem/r3dFSStructs.h"
+
+// PORT NOTE: ISO C++ requires an explicit specialization to be declared before the
+// first use that would cause implicit instantiation. MSVC accepted it afterwards.
+template <> void r3dChunkedFileT< FILE >::AppendChunk();
+
 
 static	r3dFileSystem	g_filesys;
 extern CRITICAL_SECTION g_FileSysCritSection ;

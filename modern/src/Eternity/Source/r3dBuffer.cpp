@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "r3dBuffer.h"
+#include "r3dbuffer.h"
 
 #include "r3dDeviceQueue.h"
 
@@ -261,7 +261,7 @@ bool IsDepthTextureFormat( D3DFORMAT fmt )
 			fmt == INTZ_FORMAT ;
 }
 
-static void SetupSurfacePointers( void* params )
+/* [PORT] not static: declared friend elsewhere */ void SetupSurfacePointers( void* params )
 {
 	r3dScreenBuffer* sbuf = (r3dScreenBuffer*) params ;
 

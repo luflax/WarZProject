@@ -1,12 +1,12 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "GameCommon.h"
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "ObjectsCode/weapons/Gear.h"
-#include "ObjectsCode/weapons/Weapon.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/Gear.h"
+#include "ObjectsCode/WEAPONS/Weapon.h"
 
-#include "AI_Player.h"
+#include "AI_Player.H"
 #include "AI_PlayerAnim.h"
 
 //////////////////////////////////////////////////////////////////////////
@@ -817,7 +817,7 @@ void CUberData::LoadWeaponTable()
 		}
 		else
 		{
-			__asm nop;
+			((void)0); // [PORT] was: _asm nop
 		}
 		
 		//r3dOutToLog("Loading %s\n", t[0]);

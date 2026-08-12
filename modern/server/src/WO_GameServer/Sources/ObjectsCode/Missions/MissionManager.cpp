@@ -12,10 +12,10 @@
 #include "MissionRewards.h"
 #include "MissionTimer.h"
 #include "MissionProgress.h"
-#include "..\obj_ServerPlayer.h"
-#include "GameCode\UserRewards.h"
+#include "../obj_ServerPlayer.h"
+#include "GameCode/UserRewards.h"
 #include "GameLevel.h"
-#include "..\..\AsyncFuncs.h"
+#include "../../AsyncFuncs.h"
 
 extern ServerGameLogic gServerLogic;
 

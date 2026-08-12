@@ -4,6 +4,7 @@
 //=========================================================================
 
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 #include "r3dMat.h"
 #include "CamouflageDataManager.h"
@@ -55,12 +56,12 @@ void CamouflageDataManager::UpdateCamouflageData(const GameObject &o)
 		PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK,0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eDYNAMIC | PxSceneQueryFilterFlag::eSTATIC));
 		if(g_pPhysicsWorld->raycastSingle(orig, dirs[i], 5.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter))
 		{
-			r3dVector hitPos(hit.impact.x, hit.impact.y, hit.impact.z);
+			r3dVector hitPos(hit.position.x, hit.position.y, hit.position.z);
 			float dist = (hitPos - pos).LengthSq();
 			if (dist < closest)
 			{
 				r3d_assert(hit.shape);
-				target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData);
+				target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData);
 				PxU32 faceIndex = hit.faceIndex;
 				{
 					PxTriangleMeshGeometry pxGeometry;

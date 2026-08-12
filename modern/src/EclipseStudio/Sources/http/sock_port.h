@@ -10,7 +10,7 @@
 #if defined( WIN32 )
 
  // Windows features go here
- #include <Winsock2.h>
+ #include <winsock2.h>
  #include <stdio.h>
  
  #if !defined( NEED_SHORT_TYPES )

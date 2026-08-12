@@ -4,6 +4,7 @@
 //=========================================================================
 
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "obj_ZombieSpawn.h"

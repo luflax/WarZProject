@@ -3,13 +3,13 @@
 
 #include "ClientGameLogic.h"
 
-#include "GameObjects/ObjManag.h"
-#include "GameObjects/EventTransport.h"
+#include "gameobjects/ObjManag.h"
+#include "gameobjects/EventTransport.h"
 #include "MasterServerLogic.h"
 
 #include "multiplayer/P2PMessages.h"
 
-#include "ObjectsCode/AI/AI_Player.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "ObjectsCode/Gameplay/BasePlayerSpawnPoint.h"
 #include "ObjectsCode/Gameplay/obj_DroppedItem.h"
 #include "ObjectsCode/Gameplay/obj_Gravestone.h"
@@ -20,26 +20,26 @@
 // CAT todo - relocate obj_Vehicle to a more organized player, such as where obj_Zombie is
 #include "../GameEngine/gameobjects/obj_Vehicle.h"
 
-#include "ObjectsCode/weapons/Weapon.h"
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "ObjectsCode/weapons/Ammo.h"
-#include "ObjectsCode/weapons/Barricade.h"
-#include "ObjectsCode/weapons/FarmBlock.h"
-#include "ObjectsCode/weapons/Grenade.h"
-#include "ObjectsCode/weapons/Safelock.h"
+#include "ObjectsCode/WEAPONS/Weapon.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/Ammo.h"
+#include "ObjectsCode/WEAPONS/Barricade.h"
+#include "ObjectsCode/WEAPONS/FarmBlock.h"
+#include "ObjectsCode/WEAPONS/Grenade.h"
+#include "ObjectsCode/WEAPONS/Safelock.h"
 
-#include "Rendering/Deffered/D3DMiscFunctions.h"
+#include "RENDERING/Deffered/D3DMiscFunctions.h"
 
 #include "GameCode/UserProfile.h"
 #include "GameCode/UserSettings.h"
 #include "Gameplay_Params.h"
 #include "GameLevel.h"
 
-#include "ui/m_LoadingScreen.h"
-#include "ui/HUDDisplay.h"
-#include "ui/HUDPause.h"
-#include "ui/HUDSafelock.h"
-#include "ui/HUDTrade.h"
+#include "UI/m_LoadingScreen.h"
+#include "UI/HUDDisplay.h"
+#include "UI/HUDPause.h"
+#include "UI/HUDSafelock.h"
+#include "UI/HUDTrade.h"
 
 #include "HWInfo.h"
 extern CHWInfo g_HardwareInfo;
@@ -294,7 +294,7 @@ r3dPoint3D ClientGameLogic::AdjustSpawnPositionToGround(const r3dPoint3D& pos)
 	if(!g_pPhysicsWorld->raycastSingle(PxVec3(pos.x, pos.y+1.0f, pos.z), PxVec3(0,-1,0), 1.2f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter))
 		return pos + r3dPoint3D(0, 1.0f, 0);
 		
-	return r3dPoint3D(hit.impact.x, hit.impact.y + 0.1f, hit.impact.z);
+	return r3dPoint3D(hit.position.x, hit.position.y + 0.1f, hit.position.z);
 }
 
 IMPL_PACKET_FUNC(ClientGameLogic, PKT_C2S_ValidateConnectingPeer)
@@ -1100,7 +1100,7 @@ IMPL_PACKET_FUNC(ClientGameLogic, PKT_S2C_CreatePlayer)
 	bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(n.spawnPos.x, n.spawnPos.y + 0.5f, n.spawnPos.z), PxVec3(0, -1, 0), 500.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 	r3dPoint3D posForWater = n.spawnPos;
 	if( hitResult )
-		posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);	// This is the ground position underwater.
+		posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);	// This is the ground position underwater.
 
 	float waterDepth = getWaterDepthAtPos(posForWater);
 	const float allowedDepth = 1.5f;
@@ -1859,7 +1859,9 @@ void ClientGameLogic::SendScreenshot(IDirect3DTexture9* texture)
 __int64 ClientGameLogic::GetServerGameTime() const
 {
 	float secs = (r3dGetTime() - gameStartTime_) * (float)GPP->c_iGameTimeCompression;
-	__int64 gameUtcTime = gameStartUtcTime_ + __int64(secs);
+	// [PORT] __int64(secs) is a functional cast, which ISO C++ allows only on a
+	// single-token type name.
+	__int64 gameUtcTime = gameStartUtcTime_ + (__int64)secs;
 	return gameUtcTime;
 }
 

@@ -3,7 +3,7 @@
 #include "shellapi.h"
 
 #include "UserRewards.h"
-#include "backend/WOBackendAPI.h"
+#include "Backend/WOBackendAPI.h"
 
 	CGameRewards*	g_GameRewards = NULL;
 

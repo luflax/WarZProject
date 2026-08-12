@@ -69,6 +69,6 @@ void DumbWCHAR( WCHAR* dest, const char* source ) ;
 void DumbANSI( char* dest, const WCHAR* source ) ;
 
 
-#endif	__R3D_UTILS_H
+#endif // __R3D_UTILS_H
 
 

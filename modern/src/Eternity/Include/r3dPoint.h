@@ -413,17 +413,17 @@ void r3dBox3D::Grow(const r3dPoint3D& vMove, r3dBoundBox &b) const
 {
 	float	d;		// delta of coordinate movement
 
-  // d = Position.##n - PrevPosition.##n;	   	
+  // d = Position.n - PrevPosition.n;	   	
 
 #define CALC_AXIS(n) 				\
-  d = vMove.##n;				\
+  d = vMove.n;				\
   if(d > 0.0f) {				\
-    b.Org.##n  = Org.##n - d;			\
-    b.Size.##n = Size.##n + d +d;			\
+    b.Org.n  = Org.n - d;			\
+    b.Size.n = Size.n + d +d;			\
   }                                             \
   else {                                        \
-    b.Org.##n  = Org.##n  + d;      		\
-    b.Size.##n = Size.##n - d;			\
+    b.Org.n  = Org.n  + d;      		\
+    b.Size.n = Size.n - d;			\
   }
 
   CALC_AXIS( X );

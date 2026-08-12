@@ -5,7 +5,9 @@
 #include "SupervisorConfig.h"
 #include "GameWatcher.h"
 
-#include "Pdh.h"
+// [PORT] lowercase: MinGW ships pdh.h. Quoted rather than angled originally, but it
+// is a platform header either way.
+#include <pdh.h>
 
 class CSupervisorServer : public r3dNetCallback
 {

@@ -3,11 +3,11 @@
 
 #include "r3d.h"
 #include "r3dLight.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 
 #include "GameCommon.h"
 #include "RoadEditor.h"
-#include "ObjectsCode/world/obj_Road.h"
+#include "ObjectsCode/WORLD/obj_Road.h"
 
 #include "ObjectManipulator3d.h"
 #include "r3dBackgroundTaskDispatcher.h"

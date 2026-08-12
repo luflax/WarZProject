@@ -260,6 +260,10 @@ void RenderLUT1DColorCorrection( r3dScreenBuffer* SourceTex, bool hsv );
 void RenderRadialBlur( r3dScreenBuffer* SourceTex );
 void CopyScreen( r3dScreenBuffer* SourceTex );
 
+// PORT NOTE: member functions below referenced the global g_ColorCorrectionSettings,
+// which is declared at the END of this struct ("} extern g_ColorCorrectionSettings;").
+// A class body cannot see names declared later in the enclosing scope, and the
+// methods are members of this very struct -- so they now use their own members.
 struct ColorCorrectionSettings
 {
 	r3dBezierGradient 	RGBCurves[3];
@@ -282,9 +286,9 @@ struct ColorCorrectionSettings
 	{
 		for( int i = 0, e = 3; i < e; i ++ )
 		{
-			g_ColorCorrectionSettings.RGBCurves[ i ].Reset();
-			g_ColorCorrectionSettings.RGBCurves[ i ].Values[ 0 ].val[0] = 0.0f;
-			g_ColorCorrectionSettings.RGBCurves[ i ].Values[ 1 ].val[0] = 1.0f;
+			RGBCurves[ i ].Reset();
+			RGBCurves[ i ].Values[ 0 ].val[0] = 0.0f;
+			RGBCurves[ i ].Values[ 1 ].val[0] = 1.0f;
 		}
 	}
 
@@ -292,13 +296,13 @@ struct ColorCorrectionSettings
 	{
 		for( int i = 0, e = 3; i < e; i ++ )
 		{
-			g_ColorCorrectionSettings.HSVCurves[ i ].Reset();
-			g_ColorCorrectionSettings.HSVCurves[ i ].Values[ 0 ].val[0] = 0.0f;
-			g_ColorCorrectionSettings.HSVCurves[ i ].Values[ 1 ].val[0] = 1.0f;
+			HSVCurves[ i ].Reset();
+			HSVCurves[ i ].Values[ 0 ].val[0] = 0.0f;
+			HSVCurves[ i ].Values[ 1 ].val[0] = 1.0f;
 		}
 
-		g_ColorCorrectionSettings.HSVCurves[ 0 ].Values[ 0 ].val[0] = 0.0f;
-		g_ColorCorrectionSettings.HSVCurves[ 0 ].Values[ 1 ].val[0] = 0.0f;
+		HSVCurves[ 0 ].Values[ 0 ].val[0] = 0.0f;
+		HSVCurves[ 0 ].Values[ 1 ].val[0] = 0.0f;
 	}
 
 	ColorCorrectionSettings();

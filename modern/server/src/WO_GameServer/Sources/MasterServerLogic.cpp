@@ -8,7 +8,7 @@
 #include "../../MasterServer/Sources/NetPacketsServerBrowser.h"
 using namespace NetPacketsServerBrowser;
 
-#include "ObjectsCode/weapons/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #include "ServerGameLogic.h"
 

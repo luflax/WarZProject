@@ -4,10 +4,10 @@
 #include "GameCommon.h"
 #include "obj_DroppedItem.h"
 
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "../EFFECTS/obj_ParticleSystem.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "../EFFECTS/obj_ParticleSystem.H"
 #include "../../multiplayer/ClientGameLogic.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 
 extern bool g_bEditMode;
 
@@ -139,7 +139,7 @@ void obj_DroppedItem::UpdateObjectPositionAfterCreation()
 		if(g_pPhysicsWorld->raycastSingle(PxVec3(pxCenter.x, pxCenter.y, pxCenter.z), PxVec3(0, -1, 0), 50.0f, PxSceneQueryFlag::eIMPACT, hit, filter))
 		{
 			float diff = GetPosition().y - pxBbox.minimum.y;
-			SetPosition(r3dPoint3D(hit.impact.x, hit.impact.y+diff, hit.impact.z));
+			SetPosition(r3dPoint3D(hit.position.x, hit.position.y+diff, hit.position.z));
 		}
 	}
 }

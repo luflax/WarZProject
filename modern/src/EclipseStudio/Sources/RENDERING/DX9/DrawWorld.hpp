@@ -1,5 +1,5 @@
 
-#include "rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 
 #include "../SF/Console/Config.h"
 #include "../../ObjectsCode/Nature/obj_LocalColorCorrection.h"
@@ -67,7 +67,11 @@ static void FillAORays ()
 		float r = sinf( (ring) * fDeltaRingAngle );
 		float y = cosf( (ring) * fDeltaRingAngle );
 		for( unsigned int seg = 0; seg < (dwNumSphereSegments+1); seg++ )
-			D3DXVec3Normalize ( &g_vAORays[ iRay++ ], &D3DXVECTOR3 ( r*cosf( seg * fDeltaSegAngle ), y, r*sinf( seg * fDeltaSegAngle ) ) );
+		{
+			// [PORT] taking the address of a temporary is an MSVC extension.
+			const D3DXVECTOR3 dir( r*cosf( seg * fDeltaSegAngle ), y, r*sinf( seg * fDeltaSegAngle ) );
+			D3DXVec3Normalize ( &g_vAORays[ iRay++ ], &dir );
+		}
 	}
 
 	{

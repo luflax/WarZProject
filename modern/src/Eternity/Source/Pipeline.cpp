@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "pipeline.h"
+#include "Pipeline.h"
 
 
 r3dRenderPipeline::r3dRenderPipeline()

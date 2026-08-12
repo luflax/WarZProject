@@ -430,7 +430,7 @@ R3D_FORCEINLINE unsigned char r3dUnitNormByte( float val )
 
 	r3d_assert( val >= 0.f && val <= 1.f );
 
-	return unsigned char( R3D_MIN( R3D_MAX( int( val * 255.f), 0 ), 255 ) );
+	return (unsigned char)( R3D_MIN( R3D_MAX( int( val * 255.f), 0 ), 255 ) );
 }
 
 //------------------------------------------------------------------------

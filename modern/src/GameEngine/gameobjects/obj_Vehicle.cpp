@@ -20,9 +20,9 @@
 
 #include "../../EclipseStudio/Sources/ObjectsCode/Gameplay/obj_Zombie.h"
 #include "../../EclipseStudio/Sources/ObjectsCode/WEAPONS/Barricade.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/EFFECTS/obj_ParticleSystem.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/weapons/ExplosionVisualController.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/world/MaterialTypes.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/EFFECTS/obj_ParticleSystem.H"
+#include "../../EclipseStudio/Sources/ObjectsCode/WEAPONS/ExplosionVisualController.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/WORLD/MaterialTypes.h"
 #include "../../EclipseStudio/Sources/UI/HUDDisplay.h"
 #include "../../EclipseStudio/Sources/UI/HUDPause.h"
 
@@ -858,15 +858,25 @@ void obj_Vehicle::SendUpdate()
 
 	PxVehicleWheels* wheels = vd->vehicle;
 
+	// [PORT] PhysX 4 removed PxVehicleWheelsDynData::getSuspJounce and ::getSteer --
+	// both values are now produced by PxVehicleUpdates into a PxVehicleWheelQueryResult,
+	// which VehicleManager supplies (see VehicleManager::GetWheelQueryResults). Wheel
+	// rotation angle is still read from the dyn data. A vehicle that has not been
+	// simulated yet has no results, so those two fields stay zero for that frame.
+	const PxVehicleWheelQueryResult* wqr = g_pPhysicsWorld->m_VehicleManager->GetWheelQueryResults(wheels);
+
 	// get wheel turn angle and speed
 	for (uint32_t i = 0; i < vd->numWheels; ++i)
 	{
+		const PxWheelQueryResult* wq =
+			(wqr && i < wqr->nbWheelQueryResults) ? &wqr->wheelQueryResults[i] : NULL;
+
 		// get suspension travel
-		moveRel.wheelSuspTravel[ i ] = (short)floor(wheels->mWheelsDynData.getSuspJounce(i) * 65535 / 1000);
+		moveRel.wheelSuspTravel[ i ] = wq ? (short)floor(wq->suspJounce * 65535 / 1000) : 0;
 
 		// get rotations
 		moveRel.wheelRotation[i] = (short)floor(wheels->mWheelsDynData.getWheelRotationAngle(i) * 65535 / 1000);
-		moveRel.wheelTurnAngle[i] = (short)floor(wheels->mWheelsDynData.getSteer(i) * 65535 / 1000);
+		moveRel.wheelTurnAngle[i] = wq ? (short)floor(wq->steerAngle * 65535 / 1000) : 0;
 	}
 
 	moveRel.engineRpm = (int)GetEngineRpm();
@@ -925,14 +935,14 @@ void obj_Vehicle::UpdatePositionFromPhysx()
 			return;
 	}
 
-	PxRigidDynamicFlags f;
+	PxRigidBodyFlags f;
 	
 	if (!isTank)
-		vd->vehicle->getRigidDynamicActor()->getRigidDynamicFlags();
+		vd->vehicle->getRigidDynamicActor()->getRigidBodyFlags();
 	else
-		vd->tank->getRigidDynamicActor()->getRigidDynamicFlags();
+		vd->tank->getRigidDynamicActor()->getRigidBodyFlags();
 
-	if ( !(f & PxRigidDynamicFlag::eKINEMATIC) )
+	if ( !(f & PxRigidBodyFlag::eKINEMATIC) )
 	{
 		PxTransform t;
 		
@@ -1106,9 +1116,9 @@ void obj_Vehicle::SwitchToDrivable(bool doDrive)
 	if (vd)
 	{
 		if (vd->hasTracks == 0)
-			vd->vehicle->getRigidDynamicActor()->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, !doDrive);
+			vd->vehicle->getRigidDynamicActor()->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, !doDrive);
 		else
-			vd->tank->getRigidDynamicActor()->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, !doDrive);
+			vd->tank->getRigidDynamicActor()->setRigidBodyFlag(PxRigidBodyFlag::eKINEMATIC, !doDrive);
 	}
 
 	if (doDrive)
@@ -1123,14 +1133,14 @@ void obj_Vehicle::SyncPhysicsPoseWithObjectPose()
 		return;
 
 
-	PxRigidDynamicFlags f;
+	PxRigidBodyFlags f;
 	
 	if (!isTank)
-		f = vd->vehicle->getRigidDynamicActor()->getRigidDynamicFlags();
+		f = vd->vehicle->getRigidDynamicActor()->getRigidBodyFlags();
 	else
-		f = vd->tank->getRigidDynamicActor()->getRigidDynamicFlags();
+		f = vd->tank->getRigidDynamicActor()->getRigidBodyFlags();
 
-	if (!(f & PxRigidDynamicFlag::eKINEMATIC))
+	if (!(f & PxRigidBodyFlag::eKINEMATIC))
 		return;
 
 	r3dPoint3D pos(GetPosition());
@@ -1154,9 +1164,9 @@ void obj_Vehicle::SyncPhysicsObjectPose()
 
 	PxActor* actor = PhysicsObject->getPhysicsActor();
 
-	if(actor->isRigidActor())
+	if(actor->is<PxRigidActor>())
 	{
-		PxRigidActor* dyn = actor->isRigidActor();
+		PxRigidActor* dyn = actor->is<PxRigidActor>();
 
 		r3dPoint3D pos(GetPosition());
 		D3DXMATRIX rotM(GetRotationMatrix());
@@ -1301,7 +1311,7 @@ float obj_Vehicle::DrawPropertyEditor(float scrx, float scry, float scrw, float 
 	y += imgui_Static(scrx, y, "Gears:");
 	PxVehicleGearsData &gd = vd->gearsData;
 	y += imgui_Value_Slider(scrx, y, "Switch time", &gd.mSwitchTime, 0.0f, 3.0f, "%-02.2f");
-	for(uint32_t i = 0; i < gd.mNumRatios; ++i)
+	for(uint32_t i = 0; i < gd.mNbRatios; ++i)
 	{
 		char gearName[10];
 		if (i == 0)
@@ -1316,9 +1326,9 @@ float obj_Vehicle::DrawPropertyEditor(float scrx, float scry, float scrw, float 
 	
 	y += 10.0f;
 	if (imgui_Button(scrx, y, 80.0f, 30.0f, "Add Gear"))
-		gd.mNumRatios++;
+		gd.mNbRatios++;
 	if (imgui_Button(scrx + 80, y, 80.0f, 30.0f, "Remove Gear"))
-		gd.mNumRatios--;
+		gd.mNbRatios--;
 
 	PxVehicleDifferential4WData &dd = vd->diffData;
 	y += 30.0f;
@@ -1474,7 +1484,7 @@ void obj_Vehicle::DrawDebugInfo() const
 			}
 
 			Font_Editor->PrintF(position.x, position.y + 36, r3dColor(255,255,255), "Gear: %d", vd->vehicle->mDriveDynData.getCurrentGear());
-			Font_Editor->PrintF(position.x, position.y + 48, r3dColor(255,255,255), "Gear Num Ratios: %d", vd->vehicle->mDriveSimData.getGearsData().mNumRatios);
+			Font_Editor->PrintF(position.x, position.y + 48, r3dColor(255,255,255), "Gear Num Ratios: %d", vd->vehicle->mDriveSimData.getGearsData().mNbRatios);
 			Font_Editor->PrintF(position.x, position.y + 60, r3dColor(255,255,255), "Gear Final Ratio: %.3f", vd->vehicle->mDriveSimData.getGearsData().mFinalRatio);
 			Font_Editor->PrintF(position.x, position.y + 72, r3dColor(255,255,255), "Gear Ratio: %.3f", vd->vehicle->mDriveSimData.getGearsData().mRatios[vd->vehicle->mDriveDynData.getCurrentGear()]);
 			Font_Editor->PrintF(position.x, position.y + 84, r3dColor(255,255,255), "Gear Switch Time: %.3f", vd->vehicle->mDriveSimData.getGearsData().mSwitchTime);
@@ -1810,7 +1820,7 @@ void obj_Vehicle::UpdateSounds()
 		bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(GetPosition().x, GetPosition().y + 0.5f, GetPosition().z), PxVec3(0, -1, 0), 1.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 		if( hitResult )
 		{
-			if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+			if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 			{
 				PxU32 faceIndex = hit.faceIndex;
 				{
@@ -2091,14 +2101,14 @@ void obj_Vehicle::IsGoingToCollide(r3dPoint3D dir)
 	{
 		PhysicsCallbackObject* target = NULL;
 
-		if (sweepHits[i].shape && (target = static_cast<PhysicsCallbackObject*>(sweepHits[i].shape->getActor().userData)))
+		if (sweepHits[i].shape && (target = static_cast<PhysicsCallbackObject*>(sweepHits[i].shape->getActor()->userData)))
 		{
 			GameObject* gameObj = target->isGameObject();
 			if (!gameObj)
 				continue;
 
 			PxRaycastHit hit;
-			r3dPoint3D impact(sweepHits[i].impact.x, sweepHits[i].impact.y, sweepHits[i].impact.z);
+			r3dPoint3D impact(sweepHits[i].position.x, sweepHits[i].position.y, sweepHits[i].position.z);
 			r3dVector testDir = (impact - vehicle).Normalize();
 			float distance = (impact - vehicle).Length();
 
@@ -2111,7 +2121,7 @@ void obj_Vehicle::IsGoingToCollide(r3dPoint3D dir)
 					{
 						PhysicsCallbackObject* targetTest = NULL;
 
-						if (hit.shape && (targetTest = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+						if (hit.shape && (targetTest = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 						{
 							GameObject* gameObjTest = targetTest->isGameObject();
 							if (gameObjTest && gameObjTest->isObjType(OBJTYPE_Human))
@@ -2131,7 +2141,7 @@ void obj_Vehicle::IsGoingToCollide(r3dPoint3D dir)
 					{
 						PhysicsCallbackObject* targetTest = NULL;
 
-						if (hit.shape && (targetTest = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+						if (hit.shape && (targetTest = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 						{
 							GameObject* gameObjTest = targetTest->isGameObject();
 							if (gameObjTest && gameObjTest->isObjType(OBJTYPE_Zombie))

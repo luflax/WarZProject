@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "r3dDeviceQueue.h"
 
@@ -67,7 +67,7 @@ void UnblockDeviceQueue()
 	LeaveCriticalSection( &gDeviceQueueCS ) ;
 }
 
-static void ProcessItem( const DeviceQueueItem& item )
+/* [PORT] not static: declared friend elsewhere */ void ProcessItem( const DeviceQueueItem& item )
 {
 	switch( item.Type )
 	{

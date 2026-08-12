@@ -3,7 +3,7 @@
 
 #include "GameCommon.h"
 #include "GameLevel.h"
-#include "obj_Terrain.h"
+#include "obj_Terrain.H"
 
 //CQuadTerrain	*Terrain;
 

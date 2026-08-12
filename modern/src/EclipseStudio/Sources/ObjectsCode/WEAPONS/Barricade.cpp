@@ -4,9 +4,9 @@
 #include "Barricade.h"
 #include "WeaponConfig.h"
 #include "WeaponArmory.h"
-#include "..\ai\AI_Player.H"
-#include "..\..\multiplayer\ClientGameLogic.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/world/MaterialTypes.h"
+#include "../AI/AI_Player.H"
+#include "../../multiplayer/ClientGameLogic.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/WORLD/MaterialTypes.h"
 #ifdef VEHICLES_ENABLED
 #include "../../GameEngine/gameobjects/obj_Vehicle.h"
 #endif
@@ -93,7 +93,7 @@ BOOL obj_Barricade::OnCreate()
 		PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK, 0, 0, 0), PxSceneQueryFilterFlag::eSTATIC);
 		if(g_pPhysicsWorld->raycastSingle(PxVec3(GetPosition().x, GetPosition().y+1, GetPosition().z), PxVec3(0, -1, 0), 50.0f, PxSceneQueryFlag::eIMPACT, hit, filter))
 		{
-			SetPosition(r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z));
+			SetPosition(r3dPoint3D(hit.position.x, hit.position.y, hit.position.z));
 		}
 	}
 	SetRotationVector(r3dPoint3D(m_RotX, 0, 0));

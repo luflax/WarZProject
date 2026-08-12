@@ -1,12 +1,16 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
+// [PORT] for std::find / std::sort / std::shuffle; MSVC pulled <algorithm> in
+// transitively, libstdc++ does not.
+#include <algorithm>
+
 #include "GameCommon.h"
 
 #include "multiplayer/P2PMessages.h"
 #include "ServerGameLogic.h"
-#include "ObjectsCode/Weapons/WeaponArmory.h"
-#include "ObjectsCode/Weapons/HeroConfig.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/HeroConfig.h"
 
 #include "sobj_Zombie.h"
 #include "sobj_ZombieSpawn.h"
@@ -302,7 +306,9 @@ void obj_Zombie::AILog(int level, const char* fmt, ...)
 	StringCbVPrintfA(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 	
-	r3dOutToLog("AIZombie%p[%d] %s", this, navAgent->m_navBot->GetVisualDebugId(), buf);
+	// [PORT] Kynapse gave every bot a visual-debug id; Detour has no such handle, so the
+	// agent's index in the dtCrowd pool identifies it in the log instead.
+	r3dOutToLog("AIZombie%p[%d] %s", this, navAgent ? navAgent->m_crowdAgentIdx : -1, buf);
 }
 
 void obj_Zombie::CreateNavAgent()
@@ -388,10 +394,13 @@ int obj_Zombie::CheckMoveWatchdog()
 	
 	if((GetPosition() - moveWatchPos).Length() < 0.5f)
 	{
-		AILog(1, "!!! move watchdog %d %d %d at %f %f %f\n", //@ was 1
-			navAgent->m_navBot->GetProgressOnLivePathStatus(), 
-			navAgent->m_navBot->GetLivePath().GetPathValidityStatus(),
-			navAgent->m_navBot->GetTrajectory() ? navAgent->m_navBot->GetTrajectory()->m_avoidanceResult : -1,
+		// [PORT] the three Kynapse path diagnostics (live-path progress, path validity,
+		// trajectory avoidance result) have no Detour counterpart. The agent's own
+		// status and avoidance result carry the same signal for this watchdog.
+		AILog(1, "!!! move watchdog status=%d avoid=%d crowd=%d at %f %f %f\n", //@ was 1
+			int(navAgent->m_status),
+			int(navAgent->m_avoidanceResult),
+			navAgent->m_crowdAgentIdx,
 			GetPosition().x, GetPosition().y, GetPosition().z);
 		//DisableZombie();
 		return 0;
@@ -428,10 +437,12 @@ int obj_Zombie::CheckMoveStatus()
 		
 		case AutodeskNavAgent::PathNotFound:
 		{
-			Kaim::BaseAStarQuery* baseAStarQuery = (Kaim::BaseAStarQuery*)navAgent->m_navBot->GetPathFinderQuery();
-			AILog(5, "PATH_NOT_FOUND %d to %f,%f,%f from %f,%f,%f\n", 
-				baseAStarQuery->GetResult(),
-				baseAStarQuery->GetDestPos().x, baseAStarQuery->GetDestPos().z, baseAStarQuery->GetDestPos().y,
+			// [PORT] Kynapse exposed the failed A* query object, which carried both a
+			// result code and the destination it was asked for. Detour reports failure
+			// through dtStatus at the point of the call, so the destination is read
+			// back off the agent instead.
+			AILog(5, "PATH_NOT_FOUND to %f,%f,%f from %f,%f,%f\n",
+				navAgent->m_targetPos.x, navAgent->m_targetPos.z, navAgent->m_targetPos.y,
 				moveStartPos.x, moveStartPos.y, moveStartPos.z);
 
 			StopNavAgent();
@@ -512,7 +523,9 @@ int obj_Zombie::CheckMoveStatus()
 			return 0;
 
 		case AutodeskNavAgent::Failed:
-			AILog(5, "!!! Failed with %d\n", navAgent->m_navBot->GetProgressOnLivePathStatus());
+			// [PORT] Kynapse's live-path progress status has no Detour counterpart; the
+			// agent's own avoidance result is what remains.
+			AILog(5, "!!! Failed with avoid=%d\n", int(navAgent->m_avoidanceResult));
 			return 2;
 	}
 	
@@ -532,24 +545,19 @@ GameObject* obj_Zombie::FindBarricade()
 		if((GetPosition() - shield->GetPosition()).Length() > shield->m_Radius + _zai_AttackRadius)
 			continue;
 
-		// get obstacle, TODO: rework to point vs OBB logic
-		Kaim::WorldElement* e = gAutodeskNavMesh.obstacles[shield->m_ObstacleId];
-		r3d_assert(e);
-		if(e->GetType() != Kaim::TypeBoxObstacle)
-			continue;
-		Kaim::BoxObstacle* boxObstacle = static_cast<Kaim::BoxObstacle*>(e);
-		
-		// search for every spatial cylinder there
-		for(KyUInt32 cidx = 0; cidx < boxObstacle->GetSpatializedCylinderCount(); cidx++)
+		// [PORT] this walked the Kynapse box obstacle's "spatialized cylinders" -- the
+		// per-obstacle collision primitives Kynapse generated -- to get a tighter
+		// distance than the barricade's bounding radius. Detour's dynamic obstacles
+		// (dtTileCache) carry no such decomposition, so the test is now against the
+		// barricade itself, which is what the original TODO on this line asked for
+		// anyway. Slightly more permissive: a zombie can now latch onto a barricade
+		// from a corner the cylinder test would have rejected.
+		r3dPoint3D p1 = r3dPoint3D(GetPosition().x, 0, GetPosition().z);
+		r3dPoint3D p2 = r3dPoint3D(shield->GetPosition().x, 0, shield->GetPosition().z);
+		float dist = (p1 - p2).Length() - shield->m_Radius;
+		if(dist < _zai_AttackRadius * 0.7f)
 		{
-			const Kaim::SpatializedCylinder& cyl = boxObstacle->GetSpatializedCylinder(cidx);
-			r3dPoint3D p1 = r3dPoint3D(GetPosition().x, 0, GetPosition().z);
-			r3dPoint3D p2 = r3dPoint3D(cyl.GetPosition().x, 0, cyl.GetPosition().y); // KY_R3D
-			float dist = (p1 - p2).Length() - cyl.GetRadius();
-			if(dist < _zai_AttackRadius * 0.7f)
-			{
-				return shield;
-			}
+			return shield;
 		}
 	}
 	return NULL;
@@ -557,7 +565,10 @@ GameObject* obj_Zombie::FindBarricade()
 
 bool obj_Zombie::CheckForBarricadeBlock()
 {
-	if(navAgent->m_navBot->GetTrajectory() == NULL)
+	// [PORT] Kynapse exposed a trajectory object that existed only while the bot was
+	// actively following a path; a null trajectory meant "not moving under nav control".
+	// The agent's status is the direct equivalent.
+	if(navAgent == NULL || navAgent->m_status != AutodeskNavAgent::Moving)
 		return false;
 		
 	if( IsSuperZombie() )
@@ -598,8 +609,10 @@ bool obj_Zombie::CheckForBarricadeBlock()
 	else
 	{
 		// we detect barricade by checking for them every sec if we're in avoidance mode.
-		Kaim::IAvoidanceComputer::AvoidanceResult ares = navAgent->m_navBot->GetTrajectory()->GetAvoidanceResult();
-		if(ares == Kaim::IAvoidanceComputer::NoAvoidance)
+		// [PORT] the avoidance result now comes off the agent (DetourCrowd computes local
+		// avoidance itself) rather than off a Kynapse trajectory object.
+		AutodeskNavAgentEnums::EAvoidanceResult ares = navAgent->GetAvoidanceResult();
+		if(ares == AutodeskNavAgentEnums::NoAvoidance)
 		{
 			moveAvoidTime = 0;
 			moveAvoidPos  = GetPosition();
@@ -914,7 +927,7 @@ bool obj_Zombie::CheckViewToPlayer(const GameObject* obj)
 		AILog(20, "view obstructed\n");
 
 		PhysicsCallbackObject* target = NULL;
-		if(hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+		if(hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 		{
 			GameObject* obj = target->isGameObject();
 			if(obj)
@@ -1159,7 +1172,7 @@ bool obj_Zombie::CallForHelp(const GameObject* trg)
 	{
 		// Are there enough zombies around to make the call worthwhile?
 		uint32_t numZombies = 0;
-		std::tr1::unordered_set<uint32_t> PoiTypesSet;
+		std::unordered_set<uint32_t> PoiTypesSet;
 		PoiTypesSet.insert(AutodeskNavAgent::PoiZombie);
 		PoiTypesSet.insert(AutodeskNavAgent::PoiSuperZombie);
 		AutodeskNavAgent** pZombies = gAutodeskNavMesh.GetNavAgentsInAABB( GetPosition(), spawnObject->m_CFHExtents, PoiTypesSet, numZombies );
@@ -1514,7 +1527,9 @@ void obj_Zombie::UpdateSprint(const GameObject& target, const float& distToTarge
 {
 	if( g_enable_zombie_sprint->GetBool() && 
 		CanSprint &&
-		navAgent->m_velocity.GetSquareLength() > ( RunSpeed * RunSpeed - 0.1f ) )
+		// [PORT] m_velocity is an r3dPoint3D rather than a Kaim::Vec3f; r3d spells this
+		// LengthSq.
+		navAgent->m_velocity.LengthSq() > ( RunSpeed * RunSpeed - 0.1f ) )
 	{
 		// NOTE: Currently only called from Update, after
 		//		 the state has been assured, so the extra
@@ -1646,10 +1661,14 @@ BOOL obj_Zombie::Update()
 		
 		if(navAgent->m_status == AutodeskNavAgent::Moving)
 		{
-			Kaim::Vec3f rot  = navAgent->m_velocity;
-			if(rot.GetSquareLength2d() > 0.001f)
+			// [PORT] Kynapse handed back a Kaim::Vec3f in its own axis convention (the
+			// r3dPoint3D(rot[0], rot[2], rot[1]) swizzle below undid it). RecastNavAgent
+			// stores velocity as an r3dPoint3D already in world axes, so the horizontal
+			// magnitude test is direct and the swizzle is gone.
+			const r3dPoint3D rot = navAgent->m_velocity;
+			if((rot.x * rot.x + rot.z * rot.z) > 0.001f)
 			{
-				r3dVector heading = r3dPoint3D(rot[0], rot[2], rot[1]);
+				r3dVector heading = r3dPoint3D(rot.x, rot.y, rot.z);
 				if( EZombieStates::ZState_TurnLeft != ZombieState &&
 					EZombieStates::ZState_TurnRight != ZombieState )
 				{
@@ -1766,7 +1785,7 @@ BOOL obj_Zombie::Update()
 				{
 					// Alert the nearby Zombies
 					uint32_t numZombies = 0;
-					std::tr1::unordered_set<uint32_t> PoiTypesSet;
+					std::unordered_set<uint32_t> PoiTypesSet;
 					PoiTypesSet.insert(AutodeskNavAgent::PoiZombie);
 					PoiTypesSet.insert(AutodeskNavAgent::PoiSuperZombie);
 					AutodeskNavAgent** pZombies = gAutodeskNavMesh.GetNavAgentsInAABB( GetPosition(), spawnObject->m_CFHExtents, PoiTypesSet, numZombies );
@@ -2250,13 +2269,16 @@ void obj_Zombie::DebugSingleZombie()
 	if(!_zai_DebugAI)
 		return;
 
-	static KyUInt32 debugVisualId = 0;
+	// [PORT] the id read from zdebug.txt used to be Kynapse's visual-debug id. Detour
+	// has no such handle, so it now selects by the agent's index in the dtCrowd pool --
+	// which is what AILog prints, so the two still line up.
+	static int debugVisualId = 0;
 	FILE* f = fopen("zdebug.txt", "rt");
 	if(!f) return;
 	fscanf(f, "%d", &debugVisualId);
 	fclose(f);
 	
-	if(navAgent->m_navBot->GetVisualDebugId() != debugVisualId)
+	if(navAgent == NULL || navAgent->m_crowdAgentIdx != debugVisualId)
 		return;
 		
 	if(ZombieDisabled)

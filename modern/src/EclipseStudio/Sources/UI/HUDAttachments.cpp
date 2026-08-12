@@ -1,7 +1,8 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
-#include "../../../Eternity/sf/Console/config.h"
+#include "../../../Eternity/SF/Console/Config.h"
 #include "HUDPause.h"
 #include "HUDVault.h"
 #include "HUDSafelock.h"
@@ -12,12 +13,12 @@
 #include "HUDRepair.h"
 #include "HUDCrafting.h"
 
-#include "FrontendShared.h"
+#include "FrontEndShared.h"
 
-#include "../multiplayer/clientgamelogic.h"
+#include "../multiplayer/ClientGameLogic.h"
 #include "../ObjectsCode/AI/AI_Player.H"
-#include "../ObjectsCode/weapons/Weapon.h"
-#include "../ObjectsCode/weapons/WeaponArmory.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
+#include "../ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../GameLevel.h"
 
 HUDAttachments::HUDAttachments()

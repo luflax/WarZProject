@@ -11,7 +11,7 @@
 #include "UserClans.h"
 #include "UserServerRental.h"
 #include "UserSkills.h"
-#include "backend/WOBackendAPI.h"
+#include "Backend/WOBackendAPI.h"
 
 #include "ObjectsCode/WEAPONS/WeaponConfig.h"
 #include "ObjectsCode/WEAPONS/WeaponArmory.h"
@@ -314,7 +314,7 @@ static void parseCharAttachments(const char* slotData, wiWeaponAttachment& attm)
 
 static void parseInventoryItem(pugi::xml_node xmlItem, wiInventoryItem& itm)
 {
-	itm.InventoryID = xmlItem.attribute("id").as_int64();
+	itm.InventoryID = xmlItem.attribute("id").as_llong();
 	itm.itemID      = xmlItem.attribute("itm").as_uint();
 	itm.quantity    = xmlItem.attribute("qt").as_uint();
 	// if Var2/Var2/Var3 isn't supplied - set them -1 by default
@@ -361,7 +361,7 @@ static void parseCharBackpack(pugi::xml_node xmlItem, wiCharDataFull& w)
 	return;
 }
 
-void CUserProfile::ParseLoadouts(pugi::xml_node& xmlItem)
+void CUserProfile::ParseLoadouts(pugi::xml_node xmlItem)
 {
 	// reset current backpacks
 	for(int i=0; i<ProfileData.NumSlots; i++) {
@@ -393,7 +393,7 @@ void CUserProfile::ParseLoadouts(pugi::xml_node& xmlItem)
 		w.Thirst      = xmlItem.attribute("Thirst").as_float();
 		w.Toxic       = xmlItem.attribute("Toxic").as_float();
 		st.Reputation = xmlItem.attribute("Reputation").as_int();
-		w.DeathUtcTime= xmlItem.attribute("DeathTime").as_int64();
+		w.DeathUtcTime= xmlItem.attribute("DeathTime").as_llong();
 		w.SecToRevive = xmlItem.attribute("SecToRevive").as_int();
 		// premium account have 10 min revive time comparing to 20 min regular accounts
 		if(ProfileData.PremiumAcc > 0 && w.Alive == 0)
@@ -404,7 +404,7 @@ void CUserProfile::ParseLoadouts(pugi::xml_node& xmlItem)
 		w.GamePos = r3dPoint3D(0, 0, 0);
 		sscanf(xmlItem.attribute("GamePos").value(), "%f %f %f %f", &w.GamePos.x, &w.GamePos.y, &w.GamePos.z, &w.GameDir);
 		w.GameFlags   = xmlItem.attribute("GameFlags").as_int();
-		w.SecFromLastGame = xmlItem.attribute("SecFromLastGame").as_int64();
+		w.SecFromLastGame = xmlItem.attribute("SecFromLastGame").as_llong();
 
 		w.HeroItemID  = xmlItem.attribute("HeroItemID").as_int();
 		w.HeadIdx     = xmlItem.attribute("HeadIdx").as_int();
@@ -449,7 +449,7 @@ void CUserProfile::ParseLoadouts(pugi::xml_node& xmlItem)
 }
 
 bool g_warn_about_full_inventory = false;
-void CUserProfile::ParseInventory(pugi::xml_node& xmlItem)
+void CUserProfile::ParseInventory(pugi::xml_node xmlItem)
 {
 	ProfileData.NumItems = 0;
 
@@ -471,7 +471,7 @@ void CUserProfile::ParseInventory(pugi::xml_node& xmlItem)
 	}
 }
 
-void CUserProfile::ParseBackpacks(pugi::xml_node& xmlItem)
+void CUserProfile::ParseBackpacks(pugi::xml_node xmlItem)
 {
 	// enter into items list
 	xmlItem = xmlItem.first_child();
@@ -498,7 +498,7 @@ void CUserProfile::ParseBackpacks(pugi::xml_node& xmlItem)
 	}
 }
 
-void CUserProfile::ParseCharData(wiCharDataFull& loadout, pugi::xml_node& xmlItem)
+void CUserProfile::ParseCharData(wiCharDataFull& loadout, pugi::xml_node xmlItem)
 {
 	// parse recipes
 	pugi::xml_node xmlRecipes = xmlItem.child("recipes");
@@ -710,7 +710,7 @@ void CUserProfile::DeriveGamePricesFromItems()
 #ifndef WO_SERVER
 
 class GameObject;
-#include "ObjectsCode/Weapons/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 CClientUserProfile::CClientUserProfile()
 {

@@ -7,11 +7,18 @@
 
 //////////////////////////////////////////////////////////////////////////
 
+// [PORT] Editor_Level lives at global scope (EclipseStudio/Sources/Editors/LevelEditor.h).
+// The friend declaration below must therefore name ::Editor_Level -- a friend
+// declaration that is also the name's FIRST declaration introduces it into the nearest
+// enclosing namespace, so `friend struct Editor_Level;` inside namespace Nav befriended
+// a never-defined Nav::Editor_Level and left the real one without access.
+struct Editor_Level;
+
 namespace Nav
 {
 	class ConvexRegionsManager
 	{
-		friend struct Editor_Level;
+		friend struct ::Editor_Level;
 		struct Convex
 		{
 			typedef r3dgameVector(r3dPoint2D) Points;

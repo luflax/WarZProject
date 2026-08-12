@@ -1,4 +1,4 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "MasterServerLogic.h"
@@ -6,7 +6,7 @@
 
 #include "ServerWeapons/ServerWeapon.h"
 #include "ServerWeapons/ServerGear.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../EclipseStudio/Sources/ObjectsCode/Gameplay/ZombieStates.h"
 
 #include "multiplayer/P2PMessages.h"
@@ -1770,14 +1770,14 @@ bool obj_ServerPlayer::IsSwimming()
 	bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(GetPosition().x, GetPosition().y + 0.5f, GetPosition().z), PxVec3(0, -1, 0), 500.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 	r3dPoint3D posForWater = GetPosition();
 	if( hitResult )
-		posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);	// This is the ground position underwater.
+		posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);	// This is the ground position underwater.
 
 	float waterDepth = getWaterDepthAtPos(posForWater);
 
 	const float allowedDepth = 1.5f;
 	if(waterDepth > allowedDepth) // too deep, start swimming
 	{
-		float waterLevel = hit.impact.y + waterDepth;
+		float waterLevel = hit.position.y + waterDepth;
 		if( waterLevel >= GetPosition().y )
 		{
 			// Keep the player from sinking too far into the water,
@@ -1801,11 +1801,11 @@ bool obj_ServerPlayer::IsSwimming()
 //	if( !hitResult )
 //		return false;
 //
-//	r3dPoint3D posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);	// This is the ground position over/underwater.
+//	r3dPoint3D posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);	// This is the ground position over/underwater.
 //	waterDepth = getWaterDepthAtPos(posForWater);
 //	if( waterDepth < 0 )
 //		return false;
-//	float waterLevel = hit.impact.y + waterDepth;
+//	float waterLevel = hit.position.y + waterDepth;
 //
 //	return GetPosition().y >= waterLevel;
 //}
@@ -3406,9 +3406,11 @@ void obj_ServerPlayer::OnNetPacket(const PKT_C2S_CraftItem_s& n)
 	// craft
 	AddItemToBackpackSlot(SlotTo, craftItm);
 
-	PKT_S2C_CraftAns_s n;
-	n.ans = 1;
-	gServerLogic.p2pSendToPeer(peerId_, this, &n, sizeof(n));
+	// [PORT] this local was also called `n`, shadowing the packet parameter of
+	// OnNetPacket(const PKT_C2S_CraftItem_s& n).
+	PKT_S2C_CraftAns_s ans;
+	ans.ans = 1;
+	gServerLogic.p2pSendToPeer(peerId_, this, &ans, sizeof(ans));
 
 	if(resN.ResMetal || resN.ResStone || resN.ResWood)
 		gServerLogic.p2pSendToPeer(peerId_, this, &resN, sizeof(resN));

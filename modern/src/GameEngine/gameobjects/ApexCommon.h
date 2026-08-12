@@ -15,8 +15,8 @@
 
 #include "NxApex.h"
 #include "NxUserRenderResourceManager.h"
-#include "module\destructible\public\NxModuleDestructible.h"
-#include "module\destructible\public\NxDestructibleActor.h"
-#include "module\destructible\public\NxDestructibleAsset.h"
+#include "module/destructible/public/NxModuleDestructible.h"
+#include "module/destructible/public/NxDestructibleActor.h"
+#include "module/destructible/public/NxDestructibleAsset.h"
 
 #endif

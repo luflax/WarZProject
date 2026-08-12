@@ -1,11 +1,11 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "GameObjects\gameobj.h"
-#include "GameObjects\objmanag.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 #include "Utils/Utils.h"
 
-#include "Lamp.h"
+#include "Lamp.H"
 #include "GameStart.h"
 
 //

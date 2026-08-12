@@ -2,13 +2,13 @@
 #include "r3d.h"
 
 #include "FrontEndShared.h"
-#include "../ObjectsCode/weapons/Weapon.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
 #include "APIScaleformGfx.h"
 
-#include "../ObjectsCode/weapons/WeaponArmory.h"
-#include "../ObjectsCode/weapons/Weapon.h"
-#include "../ObjectsCode/weapons/Ammo.h"
-#include "../ObjectsCode/weapons/Gear.h"
+#include "../ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
+#include "../ObjectsCode/WEAPONS/Ammo.h"
+#include "../ObjectsCode/WEAPONS/Gear.h"
 
 
 HashTableDynamic<const char*, FixedString256, NameHashFunc_T, 1024> dictionaryHash_;

@@ -1,8 +1,8 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "GameObjects\objmanag.h"
-#include "gameobjects\obj_Dummy.h"
+#include "gameobjects/ObjManag.h"
+#include "gameobjects/obj_Dummy.h"
 
 // temporary server object that will immidiatly destroy itself
 class ServerDummyObject : public GameObject

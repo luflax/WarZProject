@@ -2,7 +2,7 @@
 #include "r3d.h"
 #include "r3dBudgeter.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "r3dDeviceQueue.h"
 

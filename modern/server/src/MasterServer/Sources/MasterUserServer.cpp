@@ -1,5 +1,9 @@
 #include "r3dPCH.h"
 #include "r3d.h"
+// [PORT] for std::find / std::sort / std::shuffle; MSVC pulled <algorithm> in
+// transitively, libstdc++ does not.
+#include <algorithm>
+
 #include "r3dNetwork.h"
 #include <shellapi.h>
 

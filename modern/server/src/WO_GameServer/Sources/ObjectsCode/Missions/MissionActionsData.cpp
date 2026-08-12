@@ -6,12 +6,16 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
+// [PORT] for std::find / std::sort / std::shuffle; MSVC pulled <algorithm> in
+// transitively, libstdc++ does not.
+#include <algorithm>
+
 #include "MissionActionsData.h"
 #include "MissionActions.h"
 #include "MissionCommands.h"
-#include "..\obj_ServerMissionArea.h"
-#include "..\obj_ServerPlayer.h"
-#include "..\Zombies\sobj_Zombie.h"
+#include "../obj_ServerMissionArea.h"
+#include "../obj_ServerPlayer.h"
+#include "../Zombies/sobj_Zombie.h"
 
 //-------------------------------------------------------------------------
 

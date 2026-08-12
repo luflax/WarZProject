@@ -1,34 +1,35 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "GameCommon.h"
 #include "r3dDebug.h"
 
-#include "FrontendWarZ.h"
-#include "GameCode\UserFriends.h"
-#include "GameCode\UserRewards.h"
-#include "GameCode\UserSkills.h"
-#include "GameCode\UserClans.h"
-#include "GameCode\UserSettings.h"
+#include "FrontEndWarZ.h"
+#include "GameCode/UserFriends.h"
+#include "GameCode/UserRewards.h"
+#include "GameCode/UserSkills.h"
+#include "GameCode/UserClans.h"
+#include "GameCode/UserSettings.h"
 
 #include "CkHttpRequest.h"
 #include "CkHttpResponse.h"
-#include "backend/HttpDownload.h"
-#include "backend/WOBackendAPI.h"
+#include "Backend/HttpDownload.h"
+#include "Backend/WOBackendAPI.h"
 
-#include "../rendering/Deffered/CommonPostFX.h"
-#include "../rendering/Deffered/PostFXChief.h"
+#include "../RENDERING/Deffered/CommonPostFX.h"
+#include "../RENDERING/Deffered/PostFXChief.h"
 
 #include "multiplayer/MasterServerLogic.h"
 #include "multiplayer/FriendsServerLogic.h"
 #include "multiplayer/LoginSessionPoller.h"
 
-#include "../ObjectsCode/weapons/WeaponArmory.h"
-#include "../ObjectsCode/weapons/Weapon.h"
-#include "../ObjectsCode/weapons/Ammo.h"
-#include "../ObjectsCode/weapons/Gear.h"
-#include "../ObjectsCode/ai/AI_Player.h"
-#include "../ObjectsCode/ai/AI_PlayerAnim.h"
+#include "../ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
+#include "../ObjectsCode/WEAPONS/Ammo.h"
+#include "../ObjectsCode/WEAPONS/Gear.h"
+#include "../ObjectsCode/AI/AI_Player.H"
+#include "../ObjectsCode/AI/AI_PlayerAnim.h"
 #include "../ObjectsCode/Gameplay/UIWeaponModel.h"
 #include "GameLevel.h"
 #include "Scaleform/Src/Render/D3D9/D3D9_Texture.h"
@@ -49,7 +50,7 @@
 #define NTDDI_VERSION NTDDI_WINXP
 #include <iphlpapi.h>
 #include <icmpapi.h>
-#pragma comment(lib, "iphlpapi.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "iphlpapi.lib")
 
 extern	char		_p2p_masterHost[MAX_PATH];
 extern	int		_p2p_masterPort;

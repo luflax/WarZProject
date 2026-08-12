@@ -1,11 +1,11 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "UI\r3dMenu.h"
-#include "UI\UIimEdit.h"
-#include "UI\UICurveEditor.h"
+#include "UI/r3dMenu.h"
+#include "UI/UIimEdit.h"
+#include "UI/UICurveEditor.h"
 
-#include "UI\UIimEdit2.h"
+#include "UI/UIimEdit2.h"
 
 #pragma warning(disable: 4244)
 

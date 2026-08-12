@@ -2,7 +2,7 @@
 
 #include "r3dNetwork.h"
 #include <list>
-#include <hash_map>
+#include <unordered_map>
 
 #include "../../ServerNetPackets/NetPacketsGameInfo.h"
 #include "../../MasterServer/Sources/NetPacketsServerBrowser.h"
@@ -37,7 +37,7 @@ class CSupervisorGameServer : public r3dNetCallback
 	};
 	peer_s		peers_[MAX_PEERS_COUNT];
 
-	typedef stdext::hash_map<DWORD, DWORD> TGamesList;
+	typedef std::unordered_map<DWORD, DWORD> TGamesList;
 	TGamesList	games_;			// gameId<->peer map
 	
 	void		DisconnectIdlePeers();

@@ -1,7 +1,7 @@
 #ifndef __GO_TERRAIN_H
 #define __GO_TERRAIN_H
 
-#include "TrueNature2\Terrain3.h"
+#include "TrueNature2/Terrain3.h"
 
 class obj_Terrain : public GameObject
 {

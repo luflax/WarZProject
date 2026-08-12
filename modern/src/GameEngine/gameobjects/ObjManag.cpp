@@ -8,22 +8,22 @@
 
 #include "GameObj.h"
 #include "ObjManag.h"
-#include "../../EclipseStudio/Sources/rendering/Deffered/RenderDeffered.h"
+#include "../../EclipseStudio/Sources/RENDERING/Deffered/RenderDeffered.h"
 #include "../TrueNature/Sun.h"
 
 #include "CollMain.hpp"
 
-#include "ObjectsCode/World/Lamp.h"
-#include "ObjectsCode/World/obj_road.h"
+#include "ObjectsCode/WORLD/Lamp.H"
+#include "ObjectsCode/WORLD/obj_Road.h"
 #include "obj_Mesh.h"
 #include "obj_Dummy.h"
-#include "ObjectsCode/effects/obj_ParticleSystem.H"
-#include "..\..\Eternity\Include\ParallelQuickSort.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
+#include "../../Eternity/Include/ParallelQuickSort.h"
 
 
 #include "JobChief.h"
 
-#include "../../EclipseStudio/Sources/ObjectsCode/weapons/BulletShellManager.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/WEAPONS/BulletShellManager.h"
 #include "../../EclipseStudio/Sources/Editors/CollectionElementProxyObject.h"
 #include "../../EclipseStudio/Sources/Editors/CollectionsManager.h"
 #include "obj_Apex.hpp"

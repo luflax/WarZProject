@@ -3,7 +3,7 @@
 #include "r3d.h"
 
 #include "GameCommon.h"
-#include "Occluder.h"
+#include "Occluder.H"
 
 //
 //

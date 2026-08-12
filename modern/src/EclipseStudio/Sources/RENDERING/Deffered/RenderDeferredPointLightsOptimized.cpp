@@ -3,7 +3,7 @@
 //	Copyright (C) Arktos 2011.
 //=========================================================================
 
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 #include "RenderDeferredPointLightsOptimized.h"
 #include "GameCommon.h"
@@ -382,7 +382,7 @@ void PointLightsRenderer::RasterizeLightToTileCache
 			}
 			else
 			{
-				_asm nop;
+				((void)0); // [PORT] was: _asm nop
 			}
 		}
 	}

@@ -1,12 +1,16 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
+// [PORT] for std::find / std::sort / std::shuffle; MSVC pulled <algorithm> in
+// transitively, libstdc++ does not.
+#include <algorithm>
+
 #include "GameCommon.h"
 
 #include "multiplayer/P2PMessages.h"
 
 #include "ServerGameLogic.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #include "ObjectsCode/obj_ServerItemSpawnPoint.h"
 #include "ObjectsCode/sobj_SpawnedItem.h"

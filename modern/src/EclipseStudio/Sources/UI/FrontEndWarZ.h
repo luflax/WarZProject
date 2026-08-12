@@ -6,9 +6,9 @@
 #include "CkHttp.h"
 
 #include "FrontEndShared.h"
-#include "GameCode\UserProfile.h"
-#include "GameCode\UserClans.h"
-#include "GameCode\UserServerRental.h"
+#include "GameCode/UserProfile.h"
+#include "GameCode/UserClans.h"
+#include "GameCode/UserServerRental.h"
 
 class FrontendWarZ : public UIMenu, public r3dIResource
 {
@@ -213,6 +213,8 @@ private:
 	// Async Function Calls
 	//
 	typedef void (FrontendWarZ::*fn_finish)();
+	// [PORT] the return type was parenthesised -- "(unsigned int)(WINAPI *fn_thread)(void*)"
+	// -- which only MSVC accepts.
 	typedef unsigned int (WINAPI *fn_thread)(void*);
 
 	float		lastServerReqTime_;

@@ -1,15 +1,15 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
 #include "../SF/Console/Config.h"
-#include "UI\Hud_spectator.h"
-#include "Editors\LevelEditor.h"
+#include "UI/HUD_Spectator.h"
+#include "Editors/LevelEditor.h"
 
-#include "ObjectsCode\Gameplay\obj_ZombieDummy.h"
-#include "ObjectsCode\Gameplay\obj_DeerDummy.h"
-#include "..\Editors\LevelEditor_Collections.h"
+#include "ObjectsCode/Gameplay/obj_ZombieDummy.h"
+#include "ObjectsCode/Gameplay/obj_DeerDummy.h"
+#include "../Editors/LevelEditor_Collections.h"
 
 #include "GameCommon.h"
 #include "GameLevel.h"
@@ -29,7 +29,7 @@ float GameFOV = VIEW_FOV;
 
 static int enablemouselook = 1;
 
-#include "Editors\LevelEditor.h"
+#include "Editors/LevelEditor.h"
 
 
 BaseHUD  		*Hud = NULL;
@@ -441,7 +441,9 @@ bool hud_ProcessCameraPick(float mx, float my)
 	}
 
 	if ( Terrain && Terrain->IsLoaded() ) {
-		extern BOOL terra_FindIntersection(r3dPoint3D &vFrom, r3dPoint3D &vTo, r3dPoint3D &colpos, int iterations);
+		// [PORT] this local redeclaration had dropped the const on the first two params that
+		// ITerrain.h declares, so the temporaries passed below could not bind.
+		extern BOOL terra_FindIntersection(const r3dPoint3D &vFrom, const r3dPoint3D &vTo, r3dPoint3D &colpos, int iterations);
 		r3dPoint3D v3;
 
 		if(terra_FindIntersection(gCam, gCam + dir*20000, v3, 20000)) 

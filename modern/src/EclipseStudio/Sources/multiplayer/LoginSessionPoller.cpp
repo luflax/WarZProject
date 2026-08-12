@@ -35,7 +35,9 @@ CLoginSessionPoller::~CLoginSessionPoller()
     }
 }
 
-static unsigned int WINAPI PollingThread_Entry(void* param)
+// [PORT] not static: LoginSessionPoller.h names this as a friend, which gives it external
+// linkage -- a static definition is a linkage conflict, not just a warning.
+unsigned int WINAPI PollingThread_Entry(void* param)
 {
 	r3dThreadAutoInstallCrashHelper crashHelper;
 	CLoginSessionPoller* This = (CLoginSessionPoller*)param;

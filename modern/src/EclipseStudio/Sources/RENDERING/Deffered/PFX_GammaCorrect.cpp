@@ -35,7 +35,9 @@ void PFX_GammaCorrect::PrepareImpl( r3dScreenBuffer* dest, r3dScreenBuffer* src 
 {
 	r3d_assert( mPow > 0.f );
 
-	D3D_V( r3dRenderer->pd3ddev->SetPixelShaderConstantF ( 0, (float*)&D3DXVECTOR4 ( 1.f / mPow, 0.0f, 0.0f, 0.0f ), 1 ) );
+	// [PORT] Taking the address of a temporary is an MSVC extension; ISO C++ needs a named local.
+	const D3DXVECTOR4 constants( 1.f / mPow, 0.0f, 0.0f, 0.0f );
+	D3D_V( r3dRenderer->pd3ddev->SetPixelShaderConstantF ( 0, (const float*)&constants, 1 ) );
 }
 
 void PFX_GammaCorrect::FinishImpl()

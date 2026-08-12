@@ -1,21 +1,21 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "Grenade.h"
-#include "ObjectsCode\weapons\WeaponArmory.h"
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
-#include "..\world\DecalChief.h"
-#include "..\world\MaterialTypes.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
+#include "../WORLD/DecalChief.h"
+#include "../WORLD/MaterialTypes.h"
 #include "ExplosionVisualController.h"
 #include "FlashbangVisualController.h"
 #include "Gameplay_Params.h"
 
-#include "..\..\multiplayer\ClientGameLogic.h"
-#include "..\ai\AI_Player.H"
+#include "../../multiplayer/ClientGameLogic.h"
+#include "../AI/AI_Player.H"
 #include "WeaponConfig.h"
 #include "Weapon.h"
 
-#include "..\..\ui\HUDDisplay.h"
+#include "../../UI/HUDDisplay.h"
 extern HUDDisplay*	hudMain;
 
 IMPLEMENT_CLASS(obj_Grenade, "obj_Grenade", "Object");

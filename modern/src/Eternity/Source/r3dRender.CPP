@@ -12,8 +12,8 @@
 #include "NVApi/nvapi.h"
 #include "ATICrossfireDetect/atimgpud.h"
 #define R3D_NVAPI "NVApi: "
-#pragma comment(lib, "../External/NVApi/x86/nvapi.lib")
-#pragma comment(lib, "../External/ATICrossfireDetect/atimgpud_s_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../External/NVApi/x86/nvapi.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../External/ATICrossfireDetect/atimgpud_s_x86.lib")
 #endif
 
 #include "../SF/Console/Config.h"
@@ -25,6 +25,18 @@
 // PunkBuster SDK
 #ifdef __WITH_PB__
 #include "../../External/PunkBuster/pbcommon.h"
+
+// PORT NOTE: "__asm int 3" replaced with a portable debug-break.
+#ifndef R3D_DEBUGBREAK
+  #if defined(_MSC_VER)
+    #define R3D_DEBUGBREAK() __debugbreak()
+  #elif defined(__GNUC__) || defined(__clang__)
+    #define R3D_DEBUGBREAK() __builtin_trap()
+  #else
+    #define R3D_DEBUGBREAK() ((void)0)
+  #endif
+#endif
+
 #endif
 
 #ifndef FINAL_BUILD
@@ -6521,7 +6533,7 @@ void r3dCSHolder::EnterWithStallDetection( CRITICAL_SECTION& cs )
 
 		if( r3dGetTime() - start > R3D_STALL_TOLERANCE )
 		{
-			__asm int 3;
+			R3D_DEBUGBREAK();
 		}
 	}
 }
@@ -6545,7 +6557,7 @@ r3dCSHolderWithDeviceQueue::r3dCSHolderWithDeviceQueue(CRITICAL_SECTION& in_cs)
 #if R3D_ENABLE_STALL_DETECTION
 			if( r3dGetTime() - start > R3D_STALL_TOLERANCE )
 			{
-				__asm int 3;
+				R3D_DEBUGBREAK();
 			}
 #endif
 		}

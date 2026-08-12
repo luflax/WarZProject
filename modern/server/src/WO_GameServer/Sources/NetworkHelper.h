@@ -77,7 +77,7 @@ class INetworkHelper
   public:
 	INetworkHelper();
 
-	virtual DefaultPacket*	NetGetCreatePacket(int* out_size) = NULL;
+	virtual DefaultPacket*	NetGetCreatePacket(int* out_size) = 0;
 
 	bool		GetVisibility(DWORD peerId) const
 	{
@@ -87,8 +87,8 @@ class INetworkHelper
 	
 	// persistent objects functions
 	virtual int	GetServerObjectSerializationType() { return 0; }
-	virtual void	LoadServerObjectData() = NULL;	// fill objects data from srvObjParams_
-	virtual void	SaveServerObjectData() = NULL;  // fill srvObjParams_ with current objects data
+	virtual void	LoadServerObjectData() = 0;	// fill objects data from srvObjParams_
+	virtual void	SaveServerObjectData() = 0;  // fill srvObjParams_ with current objects data
 };
 
 // for now it'll be placed here, need to move somewhere to utils

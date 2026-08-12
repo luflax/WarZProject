@@ -8,7 +8,7 @@
 
 #include "MissionTimer.h"
 //#include "GameCommon.h"
-#include "..\obj_ServerPlayer.h"
+#include "../obj_ServerPlayer.h"
 //#include "..\obj_ServerMissionArea.h"
 //#include "..\..\AsyncFuncs.h"
 

@@ -1,8 +1,8 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "GameObjects/ObjManag.h"
-#include "ObjectsCode/WORLD/obj_Group.h"
+#include "gameobjects/ObjManag.h"
+#include "ObjectsCode/WORLD/obj_Group.H"
 
 #include "TrueNature2/Terrain3.h"
 

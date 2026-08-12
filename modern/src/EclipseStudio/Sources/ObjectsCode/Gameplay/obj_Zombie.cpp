@@ -4,16 +4,17 @@
 //=========================================================================
 
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "obj_Zombie.h"
 #include "../AI/r3dPhysSkeleton.h"
 #include "obj_ZombieSpawn.h"
-#include "ObjectsCode/Weapons/WeaponArmory.h"
-#include "ObjectsCode/Weapons/HeroConfig.h"
-#include "ObjectsCode/Weapons/Barricade.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/HeroConfig.h"
+#include "ObjectsCode/WEAPONS/Barricade.h"
 #include "../../multiplayer/ClientGameLogic.h"
-#include "..\world\MaterialTypes.h"
+#include "../WORLD/MaterialTypes.h"
 #include "../AI/AI_Player.H"
 #include "../../../../GameEngine/ai/AutodeskNav/AutodeskNavAgent.h"
 #include "r3dInterpolator.h"
@@ -391,7 +392,7 @@ void obj_Zombie::DrawDebugInfo() const
 				if(g_pPhysicsWorld->PhysXScene->raycastSingle(porigin, pdir, dist, flags, hit, filter))
 				{
 					PhysicsCallbackObject* target = NULL;
-					if(hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+					if(hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 					{
 						GameObject* obj = target->isGameObject();
 						if(obj)
@@ -1421,7 +1422,7 @@ void obj_Zombie::ProcessMovement()
 		PxRaycastHit hit;
 		if (g_pPhysicsWorld->raycastSingle(PxVec3(nextPos.x, nextPos.y + 0.5f, nextPos.z), PxVec3(0, -1, 0), 1, queryFlags, hit, filter))
 		{
-			nextPos.y = hit.impact.y;
+			nextPos.y = hit.position.y;
 		}
 #endif
 		SetPosition(nextPos);

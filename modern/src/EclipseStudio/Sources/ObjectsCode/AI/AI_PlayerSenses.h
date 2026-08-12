@@ -5,6 +5,12 @@
 
 #pragma once
 
+// [PORT] SerializeAISettingsXML below is a template calling SerializeXMLNode /
+// SerializeXMLVal on non-dependent arguments, so two-phase lookup requires them to be
+// visible HERE, at the point of definition -- not merely at instantiation. MSVC's
+// delayed template parsing made the include unnecessary.
+#include "XMLHelpers.h"
+
 //////////////////////////////////////////////////////////////////////////
 
 class obj_Zombie;

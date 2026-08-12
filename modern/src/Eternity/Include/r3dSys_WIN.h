@@ -1,6 +1,15 @@
 #ifndef	__R3DSYS_WIN_H
 #define	__R3DSYS_WIN_H
 
+
+// PORT NOTE: MSVC inline _asm replaced with SSE intrinsics.
+// The original x87/SSE assembly is unusable outside 32-bit MSVC -- MSVC itself
+// rejects __asm entirely when targeting x64, so this blocked any 64-bit build,
+// not just cross-compilation. Intrinsics are portable across MSVC/GCC/Clang and
+// x86/x64 and generate the same instructions.
+#include <xmmintrin.h>
+#include <cmath>
+
 #include "r3dTypedefs.h"
 
 #define extern_nspace(nspace, var)  namespace nspace { extern var; };
@@ -149,13 +158,9 @@ inline int 	r3dFloatToInt_2(float _fvar)
 
 __forceinline int 	r3dFloatToInt(float _fvar)
 {
-  int r3d__IConvTemp;
-  _asm 
-  {
-    fld		dword ptr _fvar;
-    fistp	dword ptr r3d__IConvTemp;
-  }
-  return r3d__IConvTemp;
+  // fld/fistp used the current x87 rounding mode (round-to-nearest by default).
+  // _mm_cvtss_si32 uses the MXCSR rounding mode, likewise round-to-nearest.
+  return _mm_cvtss_si32(_mm_set_ss(_fvar));
 }
 
 
@@ -169,13 +174,11 @@ inline INT r3dFloatToInt( FLOAT F )
 
 inline INT r3dFloor( FLOAT F )
 {
-	const DWORD mxcsr_floor = 0x00003f80;
-	const DWORD mxcsr_default = 0x00001f80;
-
-	__asm ldmxcsr [mxcsr_floor]		// Round toward -infinity.
-	__asm cvtss2si eax,[F]
-	__asm ldmxcsr [mxcsr_default]	// Round to nearest
-	// return value in eax.
+  // The original switched MXCSR to round-toward-negative-infinity, ran cvtss2si,
+  // then restored it -- and relied on the value being left in eax with no return
+  // statement, which is undefined behaviour. Mutating global rounding state is
+  // also unsafe with any concurrent FP work.
+  return (INT)std::floor( F );
 }
 
 //
@@ -184,27 +187,17 @@ inline INT r3dFloor( FLOAT F )
 //
 inline FLOAT r3dInvSqrt( FLOAT F )
 {
-	const FLOAT fThree = 3.0f;
-	const FLOAT fOneHalf = 0.5f;
-	FLOAT temp;
+  // rsqrtss (12-bit estimate) + one Newton-Raphson step:
+  //   X1 = 0.5 * X0 * (3 - (Y * X0) * X0)
+  const __m128 y  = _mm_set_ss( F );
+  const __m128 x0 = _mm_rsqrt_ss( y );
 
-	__asm
-	{
-		movss	xmm1,[F]
-		rsqrtss	xmm0,xmm1			// 1/sqrt estimate (12 bits)
-		
-		// Newton-Raphson iteration (X1 = 0.5*X0*(3-(Y*X0)*X0))
-		movss	xmm3,[fThree]
-		movss	xmm2,xmm0
-		mulss	xmm0,xmm1			// Y*X0
-		mulss	xmm0,xmm2			// Y*X0*X0
-		mulss	xmm2,[fOneHalf]		// 0.5*X0
-		subss	xmm3,xmm0			// 3-Y*X0*X0
-		mulss	xmm3,xmm2			// 0.5*X0*(3-Y*X0*X0)
-		movss	[temp],xmm3
-	}
+  const __m128 yx0   = _mm_mul_ss( y, x0 );
+  const __m128 yx0x0 = _mm_mul_ss( yx0, x0 );
+  const __m128 half  = _mm_mul_ss( x0, _mm_set_ss( 0.5f ) );
+  const __m128 three = _mm_sub_ss( _mm_set_ss( 3.0f ), yx0x0 );
 
-	return temp;
+  return _mm_cvtss_f32( _mm_mul_ss( three, half ) );
 }
 
 //
@@ -213,36 +206,21 @@ inline FLOAT r3dInvSqrt( FLOAT F )
 //
 inline FLOAT r3dSqrt( FLOAT F )
 {
-	const FLOAT fZero = 0.0f;
-	const FLOAT fThree = 3.0f;
-	const FLOAT fOneHalf = 0.5f;
-	FLOAT temp;
+  // sqrt(f) = f * (1/sqrt(f)), with the input-is-zero case masked to zero
+  // exactly as the original andps did.
+  const __m128 y  = _mm_set_ss( F );
+  const __m128 x0 = _mm_rsqrt_ss( y );
 
-	__asm
-	{
-		movss	xmm1,[F]
-		rsqrtss xmm0,xmm1			// 1/sqrt estimate (12 bits)
-		
-		// Newton-Raphson iteration (X1 = 0.5*X0*(3-(Y*X0)*X0))
-		movss	xmm3,[fThree]
-		movss	xmm2,xmm0
-		mulss	xmm0,xmm1			// Y*X0
-		mulss	xmm0,xmm2			// Y*X0*X0
-		mulss	xmm2,[fOneHalf]		// 0.5*X0
-		subss	xmm3,xmm0			// 3-Y*X0*X0
-		mulss	xmm3,xmm2			// 0.5*X0*(3-Y*X0*X0)
+  const __m128 yx0   = _mm_mul_ss( y, x0 );
+  const __m128 yx0x0 = _mm_mul_ss( yx0, x0 );
+  const __m128 half  = _mm_mul_ss( x0, _mm_set_ss( 0.5f ) );
+  const __m128 three = _mm_sub_ss( _mm_set_ss( 3.0f ), yx0x0 );
 
-		movss	xmm4,[fZero]
-		cmpss	xmm4,xmm1,4			// not equal
+  __m128 r = _mm_mul_ss( three, half );
+  r = _mm_mul_ss( r, y );
+  r = _mm_and_ps( r, _mm_cmpneq_ss( _mm_set_ss( 0.0f ), y ) );
 
-		mulss	xmm3,xmm1			// sqrt(f) = f * 1/sqrt(f)
-
-		andps	xmm3,xmm4			// seet result to zero if input is zero
-
-		movss	[temp],xmm3
-	}
-
-	return temp;
+  return _mm_cvtss_f32( r );
 }
 
 

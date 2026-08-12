@@ -17,9 +17,9 @@
 #include "../../MasterServer/Sources/NetPacketsServerBrowser.h"
 using namespace NetPacketsServerBrowser;
 
-#include "ObjectsCode/weapons/WeaponConfig.h"
+#include "ObjectsCode/WEAPONS/WeaponConfig.h"
 #include "ServerWeapons/MasterServerWeaponArmory.h"
-#include "../../EclipseStudio/Sources/backend/WOBackendAPI.h"
+#include "../../EclipseStudio/Sources/Backend/WOBackendAPI.h"
 
 #include "../EclipseStudio/Sources/GameLevel.h"
 #include "../EclipseStudio/Sources/GameLevel.cpp"

@@ -1,21 +1,22 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 
 #include <functional>
 
 #include <limits>
 
 #ifndef FINAL_BUILD
-#include <ShellAPI.h>
+#include <shellapi.h>
 #include <psapi.h>
-#include <Shlwapi.h>
-#pragma comment(lib,"Psapi.lib")
+#include <shlwapi.h>
+// [PORT] linking handled by CMake: #pragma comment(lib,"Psapi.lib")
 #endif
 
 #include "r3d.h"
 #include "r3dLight.h"
 #include "r3dBudgeter.h"
 #include "r3dUtils.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 
 #include "GameCommon.h"
 #include "GameLevel.h"
@@ -23,7 +24,7 @@
 
 #include "r3dProfilerRender.h"
 
-#include "ObjectsCode\World\Lamp.h"
+#include "ObjectsCode/WORLD/Lamp.H"
 
 #include "../ObjectsCode/Nature/obj_LocalColorCorrection.h"
 #include "../ObjectsCode/Nature/GrassMap.h"
@@ -32,31 +33,31 @@
 #include "../ObjectsCode/Nature/GrassEditorPlanes.h"
 #include "../ObjectsCode/WORLD/obj_EnvmapProbe.h"
 #include "../ObjectsCode/WORLD/EnvmapProbes.h"
-#include "../ObjectsCode/WORLD/WaterPlane.h"
-#include "../ObjectsCode/WORLD/obj_Group.h"
+#include "../ObjectsCode/WORLD/WaterPlane.H"
+#include "../ObjectsCode/WORLD/obj_Group.H"
 #include "../ObjectsCode/WORLD/tree.h"
-#include "../ObjectsCode/AI/AI_Player.h"
+#include "../ObjectsCode/AI/AI_Player.H"
 #include "../ObjectsCode/WORLD/obj_DebugTexture.h"
-#include "../ObjectsCode/effects/obj_ParticleSystem.h"
+#include "../ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "../ObjectsCode/Nature/wind.h"
-#include "../ui/FrontendShared.h"
-#include "../ui/m_LoadingScreen.h"
+#include "../UI/FrontEndShared.h"
+#include "../UI/m_LoadingScreen.h"
 
 #include "Particle.h"
 
-#include "rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 #include "ObjectManipulator3d.h"
 
 #include "LevelEditor.h"
-#include "ObjectsCode\WORLD\obj_Road.h"
+#include "ObjectsCode/WORLD/obj_Road.h"
 
-#include "ObjectsCode\world\DecalChief.h"
-#include "ObjectsCode\world\MaterialTypes.h"
-#include "ObjectsCode\weapons\ExplosionVisualController.h"
-#include "ObjectsCode\weapons\HeroConfig.h"
-#include "ObjectsCode\weapons\WeaponArmory.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
+#include "ObjectsCode/WEAPONS/ExplosionVisualController.h"
+#include "ObjectsCode/WEAPONS/HeroConfig.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
-#include "Rendering\Deffered\VisibilityGrid.h"
+#include "RENDERING/Deffered/VisibilityGrid.h"
 #include "SectorMaster.h"
 
 
@@ -78,7 +79,7 @@
 #include "CameraSpotsManager.h"
 #include "../ObjectsCode/WORLD/PrefabUndoActions.h"
 
-#include "TrueNature2\Terrain3.h"
+#include "TrueNature2/Terrain3.h"
 
 #include "Terrain3Editor.h"
 
@@ -95,7 +96,7 @@
 
 bool g_bEditMode = false;
 
-#include "..\rendering\Deffered\RenderDeffered.h"
+#include "../RENDERING/Deffered/RenderDeffered.h"
 extern ShadowSlice ShadowSlices[NumShadowSlices];
 
 #include "../ObjectsCode/WORLD/PrefabManager.h"
@@ -311,6 +312,16 @@ void Serialize( pugi::xml_node node, r3dSSScatterParams* params )
 	SerializeXMLVal<W> ( "ambient"			, node, &params->ambient			) ;
 	SerializeXMLVal<W> ( "translucency"		, node, &params->translucency	) ;
 }
+
+// [PORT] These are DEFINED further down this same file (around line 690), but they
+// are used above by the Serialize<W> templates. They are non-dependent names, so ISO
+// C++ resolves them at the template's definition point and needs them declared here;
+// MSVC's delayed template parsing did not.
+extern int _NEAR_DOF;
+extern int _FAR_DOF;
+extern int _SunGlare;
+extern int SG_SlicesNum;
+extern r3dSSScatterParams gSSSParams;
 
 extern int g_RenderRadialBlur;
 extern int   g_cameraMotionBlurEnabled;
@@ -1388,7 +1399,7 @@ extern	gobjid_t	UI_TargetObjID;
 extern	r3dMaterial	*UI_TargetMaterial;
 extern char	LevelEditName[64];
 
-#include "..\..\bin\Data\Shaders\DX9_P1\system\LibSM\shadow_config.h" // shader config file
+#include "../../bin/Data/Shaders/DX9_P1/system/LibSM/shadow_config.h" // shader config file
 
 #define LEVELEDITOR_SETTINGS_FILE	"%s/EditorSettings.xml"
 
@@ -4493,7 +4504,7 @@ void Editor_Level :: Process(bool enable)
 			PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK,0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eSTATIC|PxSceneQueryFilterFlag::eDYNAMIC));
 			if(g_pPhysicsWorld->raycastSingle(PxVec3(pos.x, pos.y, pos.z), PxVec3(dir.x, dir.y, dir.z), 20000, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter))
 			{
-				gExplosionVisualController.AddExplosion(r3dVector(hit.impact.x, hit.impact.y, hit.impact.z), 20.0f);
+				gExplosionVisualController.AddExplosion(r3dVector(hit.position.x, hit.position.y, hit.position.z), 20.0f);
 			}
 		}
 	}
@@ -15784,7 +15795,7 @@ void Editor_Level::ProcessAutodeskNavigation(float SliderX, float SliderY)
 				PxRaycastHit hit;
 				if (g_pPhysicsWorld->raycastSingle(randomVec, PxVec3(0, -1, 0), 20000.0f, queryFlags, hit, filter))
 				{
-					randomVec.y = hit.impact.y;
+					randomVec.y = hit.position.y;
 				}
 
 				AutodeskNavAgent *a = gAutodeskNavMesh.CreateNavAgent(r3dPoint3D(randomVec.x, randomVec.y, randomVec.z));
@@ -15795,16 +15806,28 @@ void Editor_Level::ProcessAutodeskNavigation(float SliderX, float SliderY)
 	}
 	else
 	{
-		Kaim::GeneratorParameters &gc = gAutodeskNavMesh.buildGlobalConfig;
+		// [PORT] This panel drove Kynapse's Kaim::GeneratorParameters. Autodesk Navigation
+		// is gone (see ../../../DEPENDENCIES.md); Recast & Detour replaces it, and its
+		// build parameters are a different set -- not a rename -- so the sliders are the
+		// Recast ones. The agent dimensions carry over directly; the rest are Recast's own
+		// voxelisation and region controls.
+		//
+		// Nothing here builds a navmesh yet: generation belongs in the asset cook, exactly
+		// as Kynapse's generator did. These values are the input that step will read.
+		RecastNavMesh::RecastBuildConfig &gc = gAutodeskNavMesh.buildGlobalConfig;
 
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Entity Height (m)", &gc.m_entityHeight, 0.5f, 2.5f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Entity Radius (m)", &gc.m_entityRadius, 0.1f, 0.7f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Step Max (m)", &gc.m_stepMax, 0.1f, 1.5f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Slope Max (deg)", &gc.m_slopeMax, 0.1f, 90.0f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Raster Precision (m)", &gc.m_rasterPrecision, 0.01f, 1.0f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Cell size (m)", &gc.m_cellSize, 1.0f, 40.0f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "Alt. Precision (m)", &gc.m_altitudeTolerance, 0.05f, 2.0f, "%-02.02f");
-		SliderY += imgui_Value_Slider(SliderX, SliderY, "V. Sample Step (m)", &gc.m_advancedParameters.m_altitudeToleranceSamplingStep, 0.01f, 0.7f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Agent Height (m)", &gc.agentHeight, 0.5f, 2.5f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Agent Radius (m)", &gc.agentRadius, 0.1f, 0.7f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Max Climb (m)", &gc.agentMaxClimb, 0.1f, 1.5f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Max Slope (deg)", &gc.agentMaxSlope, 0.1f, 90.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Cell Size (m)", &gc.cellSize, 0.01f, 1.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Cell Height (m)", &gc.cellHeight, 0.05f, 1.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Min Region Size", &gc.regionMinSize, 0.0f, 150.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Merge Region Size", &gc.regionMergeSize, 0.0f, 150.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Max Edge Length", &gc.edgeMaxLen, 0.0f, 50.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Max Edge Error", &gc.edgeMaxError, 0.1f, 3.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Detail Sample Dist", &gc.detailSampleDist, 0.0f, 16.0f, "%-02.02f");
+		SliderY += imgui_Value_Slider(SliderX, SliderY, "Detail Max Error", &gc.detailSampleMaxError, 0.0f, 16.0f, "%-02.02f");
 
 		static int visNavMesh = 1;
 		SliderY += imgui_Checkbox(SliderX, SliderY, "Visualize Navigation Mesh", &visNavMesh, 1);

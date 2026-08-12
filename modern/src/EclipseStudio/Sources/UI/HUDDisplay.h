@@ -4,7 +4,7 @@
 #include "r3d.h"
 #include "APIScaleformGfx.h"
 #include "../GameCode/UserProfile.h"
-#include "../ObjectsCode/weapons/Weapon.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
 
 #define MAX_HUD_ACHIEVEMENT_QUEUE 8
 

@@ -4,8 +4,8 @@
 #include "GameCommon.h"
 #include "UIWeaponModel.h"
 
-#include "../weapons/WeaponArmory.h"
-#include "../weapons/Weapon.h"
+#include "../WEAPONS/WeaponArmory.h"
+#include "../WEAPONS/Weapon.h"
 
 #if 0
 IMPLEMENT_CLASS(UIWeaponModel, "UIWeaponModel", "Object");

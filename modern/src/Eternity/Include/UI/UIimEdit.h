@@ -1,7 +1,7 @@
 #pragma once
 
-#include "Tsg_stl\HashTable.h"
-#include "Tsg_stl\TString.h"
+#include "Tsg_stl/HashTable.h"
+#include "Tsg_stl/TString.h"
 #include "r3dSpline.h"
 
 typedef r3dgameVector(r3dSTLString) stringlist_t;

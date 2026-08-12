@@ -3,7 +3,7 @@
 //	Copyright (C) 2011.
 //=========================================================================
 
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 #include "NightVisionController.h"
 #include "../RENDERING/Deffered/CommonPostFX.h"

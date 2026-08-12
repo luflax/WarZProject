@@ -1,8 +1,8 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "r3dSkeleton.h"
-#include "r3dAnimation.h"
+#include "r3dSkeleton.H"
+#include "r3dAnimation.H"
 
 extern void r3dDumpSkeleton(const r3dSkeleton* skel, int bone);
 

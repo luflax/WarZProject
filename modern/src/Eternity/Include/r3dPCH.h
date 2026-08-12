@@ -55,7 +55,7 @@
 #include <map>
 #include <limits>
 #include <string>
-#include <hash_map>
+#include <unordered_map>
 #include <unordered_map>
 #include <unordered_set>
 
@@ -154,8 +154,15 @@
 
 #ifndef DISABLE_PHYSX  // DISABLE_PHYSX defined for server
 #include "PxPhysicsAPI.h"
-#include "CharacterKinematic/PxControllerManager.h"
+// PORT NOTE: the vendored SDK is PhysX 4.1 (BSD-3); this codebase targets 3.x.
+// Px3xCompat.h reinstates the renamed/removed 3.x spellings.
+#include "Px3xCompat.h"
+#include "characterkinematic/PxControllerManager.h"
 using namespace physx;
+#else
+// PORT NOTE: engine headers name PhysX types unconditionally (PhysObj.h:188),
+// so forward declarations are still needed when the SDK is compiled out.
+#include "PhysX/include/PxForwardDecls.h"
 #endif
 
 #define ENABLE_RAGDOLL 1

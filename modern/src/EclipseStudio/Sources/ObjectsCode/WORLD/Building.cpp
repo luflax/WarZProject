@@ -3,12 +3,12 @@
 
 #include "GameCommon.h"
 
-#include "ObjectsCode\Effects/obj_ParticleSystem.H"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "Particle.h"
 
 #include "Editors/LevelEditor.h"
 
-#include "building.h"
+#include "Building.h"
 
 #include "DamageLib.h"
 

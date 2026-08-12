@@ -2,7 +2,7 @@
 #include "r3d.h"
 
 #include "UserClans.h"
-#include "backend/WOBackendAPI.h"
+#include "Backend/WOBackendAPI.h"
 
 CUserClans::CUserClans()
 {
@@ -510,7 +510,7 @@ void CUserClans::SetCurrentData(pugi::xml_node& xmlNode)
 	ParseClanApplications(xmlClans.child("clapps"));
 }
 
-void CUserClans::ParseClanCurrentData(pugi::xml_node& xmlNode)
+void CUserClans::ParseClanCurrentData(pugi::xml_node xmlNode)
 {
 	clanCurData_.ClanID         = xmlNode.attribute("ID").as_int();
 	clanCurData_.ClanRank       = xmlNode.attribute("rank").as_int();
@@ -518,7 +518,7 @@ void CUserClans::ParseClanCurrentData(pugi::xml_node& xmlNode)
 	clanCurData_.MaxClanMembers = xmlNode.attribute("cm2").as_int();
 }
 
-void CUserClans::ParseClanApplications(pugi::xml_node& xmlNode)
+void CUserClans::ParseClanApplications(pugi::xml_node xmlNode)
 {
 	clanApplications_.clear();
 	pugi::xml_node xmlApply = xmlNode.first_child();
@@ -541,7 +541,7 @@ void CUserClans::ParseClanApplications(pugi::xml_node& xmlNode)
 	}
 }
 
-void CUserClans::ParseClanInvites(pugi::xml_node& xmlNode)
+void CUserClans::ParseClanInvites(pugi::xml_node xmlNode)
 {
 	clanInvites_.clear();
 	pugi::xml_node xmlInvites = xmlNode.first_child();

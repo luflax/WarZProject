@@ -7,7 +7,7 @@
 
 #include "r3dProtect.h"
 
-#include "..\..\GameCode\UserProfile.h"
+#include "../../GameCode/UserProfile.h"
 #include "WeaponConfig.h"
 
 class Ammo;

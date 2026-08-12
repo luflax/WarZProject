@@ -4,12 +4,12 @@
 
 #include "GameCommon.h"
 
-#include "GameObjects\GameObj.h"
-#include "GameObjects\ObjManag.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 
-#include "rendering/Deffered/DeferredHelpers.h"
+#include "RENDERING/Deffered/DeferredHelpers.h"
 
-#include "MapBorder.h"
+#include "MapBorder.H"
 
 IMPLEMENT_CLASS(obj_MapBorder, "obj_MapBorder", "Object");
 AUTOREGISTER_CLASS(obj_MapBorder);

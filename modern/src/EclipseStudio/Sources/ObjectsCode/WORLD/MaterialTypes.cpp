@@ -6,7 +6,7 @@
 #include "MaterialTypes.h"
 
 #include "GameCommon.h"
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "Particle.h"
 
 MaterialTypes* g_pMaterialTypes = 0;

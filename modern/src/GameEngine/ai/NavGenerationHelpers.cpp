@@ -287,7 +287,7 @@ namespace Nav
 		PxU32 numIndices = nbTris * 3;
 		mesh.indices.Resize(numIndices);
 
-		if (tm->has16BitTriangleIndices())
+		if (tm->getTriangleMeshFlags().isSet(PxTriangleMeshFlag::e16_BIT_INDICES))
 		{
 			//	Convert indices to 32 bit
 			const unsigned short *i16 = reinterpret_cast<const unsigned short*>(typelessTris);
@@ -329,7 +329,7 @@ namespace Nav
 		if (!a)
 			return rv;
 
-		PxRigidActor *ra = a->isRigidActor();
+		PxRigidActor *ra = a->is<PxRigidActor>();
 		if (!ra)
 			return rv;
 

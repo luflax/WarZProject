@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "ObjectsCode/weapons/WeaponConfig.h"
+#include "ObjectsCode/WEAPONS/WeaponConfig.h"
 #include "MasterServerWeaponArmory.h"
 
 MSWeaponArmory* gMSWeaponArmory = NULL;

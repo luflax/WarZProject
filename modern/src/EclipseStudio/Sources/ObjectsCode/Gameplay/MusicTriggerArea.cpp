@@ -3,13 +3,13 @@
 
 #include "GameCommon.h"
 
-#include "GameObjects\GameObj.h"
-#include "GameObjects\ObjManag.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 #include "../../Editors/ObjectManipulator3d.h"
 #include "../../multiplayer/ClientGameLogic.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 
-#include "rendering/Deffered/DeferredHelpers.h"
+#include "RENDERING/Deffered/DeferredHelpers.h"
 
 #include "MusicTriggerArea.h"
 

@@ -1,7 +1,7 @@
 #ifndef __R3D_HUD_SYSTEM_H_1
 #define __R3D_HUD_SYSTEM_H_1
 
-#include "hud_base.h"
+#include "HUD_Base.h"
 
 enum HUD_CameraMode {
 	hud_TopdownCamera = 0,

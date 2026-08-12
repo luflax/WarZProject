@@ -21,7 +21,7 @@ class obj_ServerMissionStateObject : public GameObject
 	DECLARE_CLASS(obj_ServerMissionStateObject, GameObject)
 
 public:
-	std::tr1::unordered_set<uint32_t>	m_missionIDs;
+	std::unordered_set<uint32_t>	m_missionIDs;
 
 public:
 	obj_ServerMissionStateObject();

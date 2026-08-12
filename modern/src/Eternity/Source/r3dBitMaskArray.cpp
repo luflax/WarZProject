@@ -42,8 +42,8 @@ r3dBitMaskArray::r3dBitMaskArray ()
 }
 
 r3dBitMaskArray::r3dBitMaskArray ( const r3dBitMaskArray& cpy )
+	: r3dBitMaskArray()   // [PORT] was: this->r3dBitMaskArray::r3dBitMaskArray();
 {
-	this->r3dBitMaskArray::r3dBitMaskArray() ;
 	*this = cpy ;
 }
 

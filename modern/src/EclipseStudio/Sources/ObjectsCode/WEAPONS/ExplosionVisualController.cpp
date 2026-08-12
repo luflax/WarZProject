@@ -3,13 +3,13 @@
 //	Copyright (C) Arktos 2011.
 //=========================================================================
 
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 #include "ExplosionVisualController.h"
-#include "../../rendering/Deffered/PostFX.h"
-#include "../../rendering/Deffered/PostFXChief.h"
-#include "../../rendering/Deffered/PFX_ExplosionBlur.h"
-#include "../../rendering/Deffered/PFX_ExtractBloom.h"
+#include "../../RENDERING/Deffered/PostFX.h"
+#include "../../RENDERING/Deffered/PostFXChief.h"
+#include "../../RENDERING/Deffered/PFX_ExplosionBlur.h"
+#include "../../RENDERING/Deffered/PFX_ExtractBloom.h"
 
 extern PFX_ExplosionBlur gPFX_ExplosionBlur;
 extern PFX_ExtractBloom gPFX_ExtractBloom;

@@ -5,6 +5,7 @@
 
 #pragma once
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] std::find_if
 #include "r3d.h"
 
 #ifdef VEHICLES_ENABLED
@@ -414,8 +415,8 @@ bool VehicleDescriptor::Load(const r3dMesh *m)
 	//	Gears data
 	pugi::xml_node gearsNode = xml.child("gears");
 	GetXMLVal("switch_time", gearsNode, &gearsData.mSwitchTime);
-	gearsData.mNumRatios = gearsNode.attribute("num_ratios").as_uint();
-	for(uint32_t i = 0; i < gearsData.mNumRatios; ++i)
+	gearsData.mNbRatios = gearsNode.attribute("num_ratios").as_uint();
+	for(uint32_t i = 0; i < gearsData.mNbRatios; ++i)
 	{
 		char ratio[5];
 		sprintf(ratio, "r%d", i);
@@ -447,7 +448,7 @@ bool VehicleDescriptor::Load(const r3dMesh *m)
 	pugi::xml_node diffNode = xml.child("differential");
 	int type = diffData.mType;
 	GetXMLVal("type", diffNode, &type);
-	diffData.mType = type;
+	diffData.mType = static_cast<PxVehicleDifferential4WData::Enum>(type);
 	GetXMLVal("front_rear_torque_split", diffNode, &diffData.mFrontRearSplit);
 // 	GetXMLVal("front_left_right_torque_split", diffNode, &diffData.mFrontLeftRightSplit);
 // 	GetXMLVal("rear_left_right_torque_split", diffNode, &diffData.mRearLeftRightSplit);
@@ -532,8 +533,8 @@ bool VehicleDescriptor::Save(const char *fileName)
 	pugi::xml_node gears = v.append_child();
 	gears.set_name("gears");
 	SetXMLVal("switch_time", gears, &gearsData.mSwitchTime);
-	gears.append_attribute("num_ratios") = gearsData.mNumRatios;
-	for(uint32_t i = 0; i < gearsData.mNumRatios; ++i)
+	gears.append_attribute("num_ratios") = gearsData.mNbRatios;
+	for(uint32_t i = 0; i < gearsData.mNbRatios; ++i)
 	{
 		char ratio[5];
 		sprintf(ratio, "r%d", i);
@@ -616,7 +617,7 @@ void VehicleDescriptor::ConfigureVehicleSimulationData(PxVehicleDriveSimData4W *
 
 void VehicleDescriptor::InitToDefault()
 {
-	gearsData.mNumRatios = 5;
+	gearsData.mNbRatios = 5;
 	gearsData.mRatios[ 0 ] = -8.0f;
 	gearsData.mRatios[ 1 ] = 0.0f;
 	gearsData.mRatios[ 2 ] = 8.0f;
@@ -760,9 +761,9 @@ PxReal VehicleDescriptor::GetMaxSpeed()
 
 	// The following simplifies to what is used.
 	//PxReal maxRPMs = engineData.mMaxOmega * 60.0f / (2 * R3D_PI);
-	//return (2 * R3D_PI * wheelsData[ 0 ].wheelData.mRadius * maxRPMs / (gearsData.mRatios[ gearsData.mNumRatios - 1 ] * gearsData.mFinalRatio)) / 60.0f;
+	//return (2 * R3D_PI * wheelsData[ 0 ].wheelData.mRadius * maxRPMs / (gearsData.mRatios[ gearsData.mNbRatios - 1 ] * gearsData.mFinalRatio)) / 60.0f;
 
-	return wheelsData[ 0 ].wheelData.mRadius * engineData.mMaxOmega / (gearsData.mRatios[ gearsData.mNumRatios - 1 ] * gearsData.mFinalRatio);
+	return wheelsData[ 0 ].wheelData.mRadius * engineData.mMaxOmega / (gearsData.mRatios[ gearsData.mNbRatios - 1 ] * gearsData.mFinalRatio);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -791,8 +792,8 @@ void VehicleDescriptor::ReadSerializedData(pugi::xml_node& node)
 	//	Gears data
 	pugi::xml_node gearsNode = xml.child("gears");
 	GetXMLVal("switch_time", gearsNode, &gearsData.mSwitchTime);
-	gearsData.mNumRatios = gearsNode.attribute("num_ratios").as_uint();
-	for(uint32_t i = 0; i < gearsData.mNumRatios; ++i)
+	gearsData.mNbRatios = gearsNode.attribute("num_ratios").as_uint();
+	for(uint32_t i = 0; i < gearsData.mNbRatios; ++i)
 	{
 		char ratio[5];
 		sprintf(ratio, "r%d", i);
@@ -822,7 +823,7 @@ void VehicleDescriptor::ReadSerializedData(pugi::xml_node& node)
 	pugi::xml_node diffNode = xml.child("differential");
 	int type = diffData.mType;
 	GetXMLVal("type", diffNode, &type);
-	diffData.mType = type;
+	diffData.mType = static_cast<PxVehicleDifferential4WData::Enum>(type);
 	GetXMLVal("front_rear_torque_split", diffNode, &diffData.mFrontRearSplit);
 // 	GetXMLVal("front_left_right_torque_split", diffNode, &diffData.mFrontLeftRightSplit);
 // 	GetXMLVal("rear_left_right_torque_split", diffNode, &diffData.mRearLeftRightSplit);
@@ -886,4 +887,4 @@ void VehicleDescriptor::ReadSerializedData(pugi::xml_node& node)
 
 #endif
 
-#endif VEHICLES_ENABLED
+#endif // VEHICLES_ENABLED

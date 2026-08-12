@@ -6,8 +6,8 @@
 #include "CkHttpResponse.h"
 #include "CkByteData.h"
 
-#include "backend/ServerUserProfile.h"
-#include "../../EclipseStudio/Sources/backend/WOBackendAPI.h"
+#include "Backend/ServerUserProfile.h"
+#include "../../EclipseStudio/Sources/Backend/WOBackendAPI.h"
 
 #include "ObjectsCode/WEAPONS/WeaponConfig.h"
 #include "ObjectsCode/WEAPONS/WeaponArmory.h"

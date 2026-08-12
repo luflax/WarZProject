@@ -14,18 +14,18 @@ r3dPoint3D	__SND_ListenerPos;
 
 // libs
 /*#ifdef _DEBUG
-#pragma comment(lib, "fmodexL_vc.lib")
-#pragma comment(lib, "fmod_eventL.lib")
-#pragma comment(lib, "fmod_event_netL.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmodexL_vc.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmod_eventL.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmod_event_netL.lib")
 #else
-#pragma comment(lib, "fmodex_vc.lib")
-#pragma comment(lib, "fmod_event.lib")
-#pragma comment(lib, "fmod_event_net.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmodex_vc.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmod_event.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmod_event_net.lib")
 #endif*/
 // ptumik: only link with release libs, as debug sometimes are very slow to load sound library
-#pragma comment(lib, "fmodex_vc.lib")
-#pragma comment(lib, "fmod_event.lib")
-#pragma comment(lib, "fmod_event_net.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmodex_vc.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmod_event.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "fmod_event_net.lib")
 
 
 //

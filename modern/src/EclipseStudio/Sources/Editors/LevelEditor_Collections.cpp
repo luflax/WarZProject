@@ -2,7 +2,7 @@
 #include "LevelEditor_Collections.h"
 #include "../SF/RenderBuffer.h"
 
-#include "ObjectsCode\Nature\wind.h"
+#include "ObjectsCode/Nature/wind.h"
 #include "CollectionElementProxyObject.h"
 #include "../../../GameEngine/gameobjects/GenericQuadTree.h"
 #include "CollectionsManager.h"

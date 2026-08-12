@@ -7,7 +7,7 @@
 #include "obj_VehicleSpawnPoint.h"
 #include "obj_Vehicle.h"
 
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #ifdef VEHICLES_ENABLED
 

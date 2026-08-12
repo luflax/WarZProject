@@ -1,9 +1,28 @@
+// PORT NOTE: this header uses Microsoft STL internal macros. libstdc++ has no
+// equivalents, so define them here:
+//   _THROW0()  MSVC's empty exception specification. throw() was REMOVED in C++20,
+//              so it maps to noexcept, which is what it always meant.
+//   _FARQ      a far-pointer qualifier left over from 16-bit Windows; expands to
+//              nothing on every modern target, MSVC included.
+#ifndef _MSC_VER
+  #ifndef _THROW0
+    #define _THROW0() noexcept
+  #endif
+  #ifndef _FARQ
+    #define _FARQ
+  #endif
+  #ifndef _THROW
+    #define _THROW(x, y) noexcept(false)
+  #endif
+#endif
+
 //=========================================================================
 //    Module: r3dSTLAllocators.h
 //=========================================================================
 
 #if     _MSC_VER > 1000 /*IFSTRIP=IGN*/
 #pragma once
+
 #endif
 #ifdef  _MSC_VER
 #pragma pack(push,8)
@@ -51,11 +70,11 @@ public:
 	/*constructors and destructor
 	*-nothing to do because the allocator has no state
 	*/
-	r3dSTLCustomAllocator() throw() {}
-	r3dSTLCustomAllocator(const r3dSTLCustomAllocator&) throw() {}
+	r3dSTLCustomAllocator() noexcept {}
+	r3dSTLCustomAllocator(const r3dSTLCustomAllocator&) noexcept {}
 	template <class U>
-	r3dSTLCustomAllocator(const r3dSTLCustomAllocator<U, AT>&) throw() {}
-	~r3dSTLCustomAllocator() throw() {}
+	r3dSTLCustomAllocator(const r3dSTLCustomAllocator<U, AT>&) noexcept {}
+	~r3dSTLCustomAllocator() noexcept {}
 
 	//return maximum number of elements that can be allocated
 	size_type max_size() const throw()
@@ -99,13 +118,13 @@ public:
 //return that all specializations of this allocator are interchangeable
 template <class T1, class T2, int AT>
 bool operator== (const r3dSTLCustomAllocator<T1, AT>&,
-	const r3dSTLCustomAllocator<T2, AT>&) throw()
+	const r3dSTLCustomAllocator<T2, AT>&) noexcept
 {
 	return true;
 }
 template <class T1, class T2, int AT>
 bool operator!= (const r3dSTLCustomAllocator<T1, AT>&,
-	const r3dSTLCustomAllocator<T2, AT>&) throw()
+	const r3dSTLCustomAllocator<T2, AT>&) noexcept
 {
 	return false;
 }

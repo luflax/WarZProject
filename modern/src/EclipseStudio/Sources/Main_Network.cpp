@@ -11,10 +11,10 @@
 #pragma warning (disable: 4305)
 #pragma warning (disable: 4101)
 
-#include "cvar.h"
-#include "fmod/soundsys.h"
+#include "CVar.h"
+#include "fmod/SoundSys.h"
 
-#include "APIScaleformGFX.h"
+#include "APIScaleformGfx.h"
 #include "GameCommon.h"
 #include "GameLevel.h"
 
@@ -31,8 +31,8 @@
 #include "ObjectsCode/Gameplay/BasePlayerSpawnPoint.h"
 #include "ObjectsCode/Gameplay/BaseItemSpawnPoint.h"
 
-#include "UI\FrontEndWarZ.h"
-#include "UI\m_LoadingScreen.h"
+#include "UI/FrontEndWarZ.h"
+#include "UI/m_LoadingScreen.h"
 
 #include "Editors/CollectionsManager.h"
 
@@ -58,7 +58,9 @@ extern void GameFrameStart();
 extern bool IsNeedExit();
 extern void InputUpdate();
 
-extern EGameResult PlayNetworkGame();
+// [PORT] was declared extern here but defined static below, and no other translation
+// unit references it -- so the declaration follows the definition.
+static EGameResult PlayNetworkGame();
 
 void tempDoMsgLoop()
 {

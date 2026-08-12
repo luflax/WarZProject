@@ -109,10 +109,12 @@ struct SBPKT_S2M_DisableSlot_s : public r3dNetPacketMixin<SBPKT_S2M_DisableSlot>
 	WORD		slot;
 };
 
+/* [PORT] the `##` before xx was a superfluous paste: there is no left-hand token to
+   paste against, which MSVC ignores and ISO C++ rejects. */
 #define DEFINE_GAME_RELAYING_PACKET(xx) \
 	DWORD		gameId;		/* relayed gameId - MAKE VERY SURE that first DWORD of that packet is gameId */ \
-	private: ##xx() {}		/* hide constructor without gameid */ \
-	public:  ##xx(DWORD in_gameId) { \
+	private: xx() {}		/* hide constructor without gameid */ \
+	public:  xx(DWORD in_gameId) { \
 	  gameId = in_gameId; \
 	}
 	

@@ -1,16 +1,17 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] std::sort
 
 #include "r3d.h"
 
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
-#include "GameObjects/GameObj.h"
-#include "ObjectsCode/world/obj_Road.h"
-#include "ObjectsCode/world/MaterialTypes.h"
-#include "ObjectsCode/world/DecalChief.h"
+#include "gameobjects/GameObj.h"
+#include "ObjectsCode/WORLD/obj_Road.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
 
-#include "GameObjects/PhysXWorld.h"
-#include "GameObjects/PhysObj.h"
+#include "gameobjects/PhysXWorld.h"
+#include "gameobjects/PhysObj.h"
 
 #include "TrueNature/Sun.h"
 
@@ -23,6 +24,13 @@
 #include "r3dBackgroundTaskDispatcher.h"
 
 #include "Terrain3.h"
+
+// PORT NOTE: _CrtCheckMemory is an MSVC CRT debug-heap function with no libstdc++
+// equivalent. It is a diagnostic assertion only, so it degrades to "heap is fine".
+#ifndef _MSC_VER
+  #define _CrtCheckMemory() (1)
+#endif
+
 
 #ifdef ARTIFICIAL_FINAL_BUILD
 #define FINAL_BUILD
@@ -6138,7 +6146,8 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 
 		for( int i = 0, e = (int)oTempData->Count(); i < e; i ++ )
 		{
-			union
+			// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+			union R3D_Rgb565
 			{
 				struct
 				{
@@ -6148,17 +6157,17 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 				};
 
 				UINT16 sample;
-			};
+			} rgb565;
 
-			sample = (*oTempData)[ i ];
+			rgb565.sample = (*oTempData)[ i ];
 
-			if( r )
+			if( rgb565.r )
 				chanPresent[ 0 ] = 1;
 
-			if( g )
+			if( rgb565.g )
 				chanPresent[ 1 ] = 1;
 
-			if( b )
+			if( rgb565.b )
 				chanPresent[ 2 ] = 1;
 		}
 
@@ -6252,7 +6261,8 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 
 			for( int i = 0, e = (int)oTempData->Count(); i < e; i ++ )
 			{
-				union
+				// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+				union R3D_Rgb565
 				{
 					struct
 					{
@@ -6262,17 +6272,17 @@ r3dTerrain3::OptimizeLayerMasks( int isAutoSave, r3dTL::TArray< UINT16 > * oTemp
 					};
 
 					UINT16 sample;
-				};
+				} rgb565;
 
-				sample = (*oTempData)[ i ];
+				rgb565.sample = (*oTempData)[ i ];
 
-				if( r )
+				if( rgb565.r )
 					r_present = 1;
 
-				if( g )
+				if( rgb565.g )
 					b_present = 1;
 
-				if( b )
+				if( rgb565.b )
 					g_present = 1;
 			}
 
@@ -6603,7 +6613,11 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 
 						for( int i = 0, e = (int)unpackedMask.Count(); i < e; i ++ )
 						{
-							union
+							// PORT NOTE: this was an anonymous union holding an anonymous
+							// struct, declared as a local. GCC rejects an anonymous struct
+							// that is not inside a NAMED type, so the union gets a tag. The
+							// inner struct stays anonymous, keeping .r/.g/.b member access.
+							union R3D_Rgb565
 							{
 								struct
 								{
@@ -6613,13 +6627,13 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 								};
 
 								UINT16 sample;
-							};
+							} rgb565;
 
-							sample = unpackedMask[ i ];
+							rgb565.sample = unpackedMask[ i ];
 
-							int r_conv = r * 255 / 31;
-							int g_conv = g * 255 / 63;
-							int b_conv = b * 255 / 31;
+							int r_conv = rgb565.r * 255 / 31;
+							int g_conv = rgb565.g * 255 / 63;
+							int b_conv = rgb565.b * 255 / 31;
 
 							int cidx = midx * LAYERS_PER_MASK;
 
@@ -6703,7 +6717,8 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 						int cidx = midx * LAYERS_PER_MASK;
 						for( int i = 0, e = unpackedMask.Count(); i < e; i ++ )
 						{
-							union
+							// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+							union R3D_Rgb565
 							{
 								struct
 								{
@@ -6713,21 +6728,21 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 								};
 
 								UINT16 sample;
-							};
+							} rgb565;
 
-							r = unpackedChannels[ cidx + 0 ][ i ] * 31 / 255;
+							rgb565.r = unpackedChannels[ cidx + 0 ][ i ] * 31 / 255;
 
 							if( cidx + 1 < (int)unpackedChannels.Count() )
-								g = unpackedChannels[ cidx + 1 ][ i ] * 63 / 255;
+								rgb565.g = unpackedChannels[ cidx + 1 ][ i ] * 63 / 255;
 							else
-								g = 0;
+								rgb565.g = 0;
 
 							if( cidx + 2 < (int)unpackedChannels.Count() )
-								b = unpackedChannels[ cidx + 2 ][ i ] * 31 / 255;
+								rgb565.b = unpackedChannels[ cidx + 2 ][ i ] * 31 / 255;
 							else
-								b = 0;
+								rgb565.b = 0;
 
-							unpackedMask[ i ] = sample;
+							unpackedMask[ i ] = rgb565.sample;
 						}
 
 						UpdateMask( &unpackedMask, packedTempMask, unpackedTempMask, tx, tz, L, midx + startMaskIdx );
@@ -6815,7 +6830,13 @@ void r3dTerrain3::DeleteLayer( int lidx, IDirect3DTexture9* packedTempMask, IDir
 
 				if( eraseIdx >= 0 )
 				{
-					info.LayerList.Erase( info.LayerList.GetIterator( eraseIdx ) );
+					// PORT NOTE: Erase takes Iterator& (non-const), and GetIterator returns by
+					// value. MSVC allowed binding a temporary to a non-const reference; ISO
+					// C++ does not. Materialise the iterator into a named local.
+					{
+						auto eraseIt = info.LayerList.GetIterator( eraseIdx );
+						info.LayerList.Erase( eraseIt );
+					}
 				}
 			}
 		}
@@ -8755,7 +8776,8 @@ r3dTerrain3::PreparePhysXHeightFieldDesc_NoAlloc( PxHeightFieldDesc* hfDesc )
 	hfDesc->nbColumns			= w;
 	hfDesc->nbRows				= h;
 	hfDesc->convexEdgeThreshold	= 0;
-	hfDesc->thickness			= -1000.0f;
+	// [PORT] PxHeightFieldDesc::thickness was removed in PhysX 4.
+	// hfDesc->thickness			= -1000.0f;
 
 	// allocate storage for samples
 	hfDesc->samples.stride		= sizeof(PxU32);
@@ -9203,14 +9225,19 @@ void r3dTerrain3::DoCreatePhysHeightField( PhysicsChunk& chunk, int chunkX, int 
 	chunk.PhysicsHeightFieldDesc.nbColumns				= physicsTileCellCount + PHYS_TILE_BORDER;
 	chunk.PhysicsHeightFieldDesc.nbRows					= physicsTileCellCount + PHYS_TILE_BORDER;
 	chunk.PhysicsHeightFieldDesc.convexEdgeThreshold	= 0;
-	chunk.PhysicsHeightFieldDesc.thickness				= -1000.0f;
+	// [PORT] PxHeightFieldDesc::thickness was removed in PhysX 4.
+	// chunk.PhysicsHeightFieldDesc.thickness				= -1000.0f;
 
 	// allocate storage for samples
 	chunk.PhysicsHeightFieldDesc.samples.stride	= sizeof(PxU32);
 
 	R3DPROFILE_START( "Finalize" );
 
-	chunk.PhysicsHeightField = g_pPhysicsWorld->PhysXSDK->createHeightField( chunk.PhysicsHeightFieldDesc );
+	// [PORT] PhysX 4 moved descriptor-based heightfield creation from PxPhysics to
+	// PxCooking. PxPhysics::createHeightField now only accepts a cooked PxInputStream.
+	chunk.PhysicsHeightField = g_pPhysicsWorld->Cooking->createHeightField(
+		chunk.PhysicsHeightFieldDesc,
+		g_pPhysicsWorld->PhysXSDK->getPhysicsInsertionCallback() );
 
 	int kx = R3D_MAX( tdesc.CellCountX / physicsTileCellCount, 1 );
 	int kz = R3D_MAX( tdesc.CellCountZ / physicsTileCellCount, 1 );
@@ -9228,7 +9255,7 @@ void r3dTerrain3::DoCreatePhysHeightField( PhysicsChunk& chunk, int chunkX, int 
 
 	chunk.PhysicsTerrain = g_pPhysicsWorld->PhysXSDK->createRigidStatic(pose);
 
-	PxShape* aHeightFieldShape = chunk.PhysicsTerrain->createShape(shapeGeom, *g_pPhysicsWorld->defaultMaterial);
+	PxShape* aHeightFieldShape = PxRigidActorExt::createExclusiveShape(*chunk.PhysicsTerrain, shapeGeom, *g_pPhysicsWorld->defaultMaterial);
 
 	PxFilterData filterData(PHYSCOLL_STATIC_GEOMETRY, 0, 0, 0);
 	aHeightFieldShape->setSimulationFilterData(filterData);
@@ -15397,7 +15424,8 @@ void r3dTerrain3::DoLoadMegaTexTileMaskFromFile( T file, INT64 offset, D3DSURFAC
 		{
 			int baseLayer = index * LAYERS_PER_MASK;
 
-			union
+			// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+			union R3D_Rgb565
 			{
 				struct
 				{
@@ -15407,21 +15435,21 @@ void r3dTerrain3::DoLoadMegaTexTileMaskFromFile( T file, INT64 offset, D3DSURFAC
 				};
 
 				UINT16 val;
-			};
+			} rgb565;
 
 			for( int i = 0, e = (int)m_UnpackedMask.Count(); i < e; i ++ )
 			{
-				val = m_UnpackedMask[ i ];
+				rgb565.val = m_UnpackedMask[ i ];
 
 				UINT8& dominantValue = (*dominantLayerValues)[ i ];
 
-				if( b > 17 )
+				if( rgb565.b > 17 )
 				{
-					dominantValue = b;
+					dominantValue = rgb565.b;
 					(*dominantLayerData)[ i ] = baseLayer + 1;
 				}
 
-				int g2 = g / 2;
+				int g2 = rgb565.g / 2;
 
 				if( g2 > 17 )
 				{
@@ -15429,9 +15457,9 @@ void r3dTerrain3::DoLoadMegaTexTileMaskFromFile( T file, INT64 offset, D3DSURFAC
 					(*dominantLayerData)[ i ] = baseLayer + 2;
 				}
 
-				if( r > 17 )
+				if( rgb565.r > 17 )
 				{
-					dominantValue = r;
+					dominantValue = rgb565.r;
 					(*dominantLayerData)[ i ] = baseLayer + 3;
 				}
 			}
@@ -17501,7 +17529,10 @@ int r3dTerrain3::DeleteLayerMasks( MaskIdSet& masksForDeletion, int startMaskIdx
 
 				if( gridX == gX && gridZ == gZ )
 				{
-					offsetEntryMap.insert( OffsetToEntryMap::value_type( i->second.Value, &*i ) );
+					// [PORT] i->second.Value is a bit-field, and value_type takes a reference.
+			// A bit-field has no address, so it must be copied into a local first.
+			const UINT64 offsetValue = i->second.Value;
+			offsetEntryMap.insert( OffsetToEntryMap::value_type( offsetValue, &*i ) );
 				}
 			}
 
@@ -17633,7 +17664,11 @@ int r3dTerrain3::DeleteLayerMasks( MaskIdSet& masksForDeletion, int startMaskIdx
 							if( m_MegaTexGridFile_Map.find( id ) == m_MegaTexGridFile_Map.end() )
 							{
 								r3dOutToLog( "Optimizing (%d,%d,%d,%d)\n", tx, tz, L, m );
-								info.LayerList.Erase( info.LayerList.GetIterator( i ) );
+								{
+				// [PORT] Erase takes a non-const Iterator&; GetIterator returns by value.
+				auto eraseIt = info.LayerList.GetIterator( i );
+				info.LayerList.Erase( eraseIt );
+			}
 								e --;
 							}
 							else
@@ -18486,7 +18521,8 @@ void r3dTerrain3::UpdateLayerMaskMipFromLevelBelow( int tx, int tz, int L, int m
 					int gsum = 0;
 					int bsum = 0;
 
-					union
+					// PORT NOTE: anonymous struct must live inside a NAMED type on GCC.
+					union R3D_Rgb565
 					{
 						struct
 						{
@@ -18496,26 +18532,26 @@ void r3dTerrain3::UpdateLayerMaskMipFromLevelBelow( int tx, int tz, int L, int m
 						};
 
 						UINT16 sample;
-					};
+					} rgb565;
 
 					for( int i = 0; i < 4; i ++ )
 					{
-						sample = tempUShorts0[ srcIdxes[ i ] ];
+						rgb565.sample = tempUShorts0[ srcIdxes[ i ] ];
 
-						rsum += r;
-						gsum += g;
-						bsum += b;
+						rsum += rgb565.r;
+						gsum += rgb565.g;
+						bsum += rgb565.b;
 					}
 
 					rsum /= 4;
 					gsum /= 4;
 					bsum /= 4;
 
-					r = rsum;
-					g = gsum;
-					b = bsum;
+					rgb565.r = rsum;
+					rgb565.g = gsum;
+					rgb565.b = bsum;
 
-					tempUShorts1[ z * qs.MaskAtlasTileDim + x ] = sample;
+					tempUShorts1[ z * qs.MaskAtlasTileDim + x ] = rgb565.sample;
 				}
 			}
 		}

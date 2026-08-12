@@ -17,9 +17,9 @@ class r3dNetCallback
 	  net_ = NULL;
 	}
 virtual ~r3dNetCallback() {}
-virtual	void		OnNetPeerConnected(DWORD peerId) = NULL;
-virtual	void		OnNetPeerDisconnected(DWORD peerId) = NULL;
-virtual	void		OnNetData(DWORD peerId, const r3dNetPacketHeader* packetData, int packetSize) = NULL;
+virtual	void		OnNetPeerConnected(DWORD peerId) = 0;
+virtual	void		OnNetPeerDisconnected(DWORD peerId) = 0;
+virtual	void		OnNetData(DWORD peerId, const r3dNetPacketHeader* packetData, int packetSize) = 0;
 };
 
 class r3dNetwork

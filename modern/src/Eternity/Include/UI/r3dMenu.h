@@ -1,6 +1,6 @@
 #pragma once
 
-#include "UI\UIElements.h"
+#include "UI/UIElements.h"
 
 #define MAX_STRING_SIZE  64
 
@@ -71,14 +71,14 @@ class MenuLayer
   public:
 			MenuLayer();
 virtual			~MenuLayer();
-virtual	int		DoModal() = NULL;
+virtual	int		DoModal() = 0;
 
 	int		mReset();
 	int		mUpdate();
 
 	int		mAddZone(int zone_id, int x, int y, int w, int h);
 	int		mFindZone(int zone_id);
-	ZoneInfo&	MenuLayer::mGetZone(int zone_id);
+	ZoneInfo&	mGetZone(int zone_id);
 
 	void		DisableZone(int ZoneID = -1);
 	void		EnableZone(int ZoneID = -1);
@@ -160,12 +160,12 @@ class MenuLayer2 : public MenuLayer
 	bool		layerExclusive;		// true if this layer is exclusive (Modal) - focus can't switch out from this layer
 
   protected:
-virtual void		Init()       = NULL;
-virtual void		Destroy()    = NULL;
-virtual void		Activate()   = NULL;
-virtual void		Deactivate() = NULL;
-virtual	int		Update()     = NULL;
-virtual void		Draw()       = NULL;
+virtual void		Init()       = 0;
+virtual void		Destroy()    = 0;
+virtual void		Activate()   = 0;
+virtual void		Deactivate() = 0;
+virtual	int		Update()     = 0;
+virtual void		Draw()       = 0;
 
   public:
 	MenuLayer2();

@@ -2,7 +2,7 @@
 
 #include "r3d.h"
 
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "HUDCameraEffects.h"
 

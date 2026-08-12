@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dLight.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 #include "r3dConePrim.h"
 
 #include "../GameEngine/TrueNature2/Terrain3.h"
@@ -12,27 +12,27 @@
 #include "CommonPostFX.h"
 #include "RenderDeferredPointLightsOptimized.h"
 
-#include "rendering/Deffered/CommonPostFX.h"
-#include "rendering/Deffered/PostFXChief.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/PostFXChief.h"
 
-#include "ObjectsCode/world/DecalChief.h"
-#include "ObjectsCode/world/EnvmapProbes.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/WORLD/EnvmapProbes.h"
 #include "ObjectsCode/Nature/GrassMap.h"
 
 #include "Editors/LevelEditor_Collections.h"
 
-#include "../../ObjectsCode/weapons/ExplosionVisualController.h"
-#include "../../ObjectsCode/weapons/FlashbangVisualController.h"
-#include "../../ObjectsCode/ai/AI_Player.H"
+#include "../../ObjectsCode/WEAPONS/ExplosionVisualController.h"
+#include "../../ObjectsCode/WEAPONS/FlashbangVisualController.h"
+#include "../../ObjectsCode/AI/AI_Player.H"
 #include "../../Editors/CollectionsManager.h"
 
 #include "Particle.h"
 
 #include "../SF/Console/Config.h"
 
-#include "rendering/Deffered/D3DMiscFunctions.h"
+#include "RENDERING/Deffered/D3DMiscFunctions.h"
 
-#include "..\..\..\bin\Data\Shaders\DX9_P1\system\LibSM\shadow_config.h" // shader config file
+#include "../../../bin/Data/Shaders/DX9_P1/system/LibSM/shadow_config.h" // shader config file
 
 r3dScreenBuffer*	DynamicEnvMap0;
 r3dScreenBuffer*	DynamicEnvMap1;
@@ -5146,7 +5146,7 @@ void r3dDefferedRenderer::Close()
 
 
 #include "RenderDefferedScene.hpp"
-#include "RenderShadowMap.hpp"
+#include "rendershadowmap.hpp"
 
 
 extern float __CurTime;

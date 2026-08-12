@@ -1,21 +1,21 @@
 #include "r3dPCH.h"
 
 #include "r3d.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 
 #include "GameCommon.h"
-#include "UI\HUD_EditorGame.h"
+#include "UI/HUD_EditorGame.h"
 
-#include "rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 
 #include "HUDCameraEffects.h"
 
-#include "ObjectsCode\AI\AI_Player.h"
-#include "ObjectsCode\AI\AI_PlayerAnim.h"
-#include "ObjectsCode\weapons\Weapon.h"
-#include "ObjectsCode\weapons\WeaponArmory.h"
+#include "ObjectsCode/AI/AI_Player.H"
+#include "ObjectsCode/AI/AI_PlayerAnim.h"
+#include "ObjectsCode/WEAPONS/Weapon.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
-#include "multiplayer\ClientGameLogic.h"
+#include "multiplayer/ClientGameLogic.h"
 
 extern float GameFOV;
 

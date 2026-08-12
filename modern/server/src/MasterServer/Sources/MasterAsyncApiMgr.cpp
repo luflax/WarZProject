@@ -5,7 +5,7 @@
 #include "MasterAsyncApiMgr.h"
 #include "MasterGameServer.h"
 
-#include "../../EclipseStudio/Sources/backend/WOBackendAPI.h"
+#include "../../EclipseStudio/Sources/Backend/WOBackendAPI.h"
 
 char* g_ServerApiKey = "Fg5jaBgj3uy3ja";
 

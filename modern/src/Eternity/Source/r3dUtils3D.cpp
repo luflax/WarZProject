@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "r3dGeoSphere.h"
 #include "r3dChamferBox.h"
@@ -142,14 +142,14 @@ void BBox_Grow(const r3dPoint3D& PrevPosition, const r3dPoint3D& Position, r3dBo
 	float	d;		// delta of coordinate movement
 
 #define CALC_AXIS(n) 					\
-  d = Position.##n - PrevPosition.##n;			\
+  d = Position.n - PrevPosition.n;			\
   if(d > 0.0f) {					\
-    b.Org.##n  = OrgBox.Org.##n;			\
-    b.Size.##n = OrgBox.Size.##n + d;			\
+    b.Org.n  = OrgBox.Org.n;			\
+    b.Size.n = OrgBox.Size.n + d;			\
   }                                                    	\
   else {                                                \
-    b.Org.##n  = OrgBox.Org.##n  + d;      		\
-    b.Size.##n = OrgBox.Size.##n - d;			\
+    b.Org.n  = OrgBox.Org.n  + d;      		\
+    b.Size.n = OrgBox.Size.n - d;			\
   }
 
   CALC_AXIS( X );

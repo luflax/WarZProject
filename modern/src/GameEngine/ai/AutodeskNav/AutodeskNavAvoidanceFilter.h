@@ -1,23 +1,7 @@
-//=========================================================================
-//	Module: AutodeskNavAvoidanceFilter.h
-//	Copyright (C) Online Warmongers Group Inc. 2013.
-//=========================================================================
-
+// COMPAT: Autodesk Navigation -> Recast & Detour.
+//
+// There is no counterpart to this file. DetourCrowd performs local avoidance as
+// part of its update, so the separate avoidance filter disappears entirely; the
+// results are read back off the crowd agent in RecastNavAgent::Update.
 #pragma once
-
-#if ENABLE_AUTODESK_NAVIGATION
-
-//////////////////////////////////////////////////////////////////////////
-
-#include "gwnavruntime/pathfollower/iavoidancefilter.h"
-
-class AutodeskNavAvoidanceFilterSuperZombie : public Kaim::IAvoidanceFilter
-{
-public:
-	AutodeskNavAvoidanceFilterSuperZombie();
-	virtual ~AutodeskNavAvoidanceFilterSuperZombie();
-
-	virtual Kaim::AvoidanceFilterResult Filter(const Kaim::Bot& /*referenceBot*/, const Kaim::SpatializedCylinder& obstacle);
-};
-
-#endif // ENABLE_AUTODESK_NAVIGATION
+#include "AutodeskNavMesh.h"

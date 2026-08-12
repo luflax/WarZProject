@@ -56,7 +56,7 @@ namespace r3dTL
 	size_t fwrite_be( const r3dTL::TArray<T>& cont, FILE* fout )
 	{
 		size_t res = 0;
-		for( r3dTL::uint32_t i = 0, e = cont.Count(); i < e; i ++ )
+		for( uint32_t i = 0, e = cont.Count(); i < e; i ++ )
 		{
 			res += fwrite_be( cont[ i ], fout );
 		}

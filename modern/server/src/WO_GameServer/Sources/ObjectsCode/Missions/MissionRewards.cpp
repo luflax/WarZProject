@@ -7,9 +7,9 @@
 #include "r3d.h"
 
 #include "MissionRewards.h"
-#include "..\obj_ServerPlayer.h"
-#include "..\sobj_DroppedItem.h"
-#include "ObjectsCode\Weapons\WeaponArmory.h"
+#include "../obj_ServerPlayer.h"
+#include "../sobj_DroppedItem.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 extern ServerGameLogic gServerLogic;
 extern wiInventoryItem RollItem(const class LootBoxConfig* lootCfg, int depth);

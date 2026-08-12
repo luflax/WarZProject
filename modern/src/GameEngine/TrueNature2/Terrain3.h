@@ -11,8 +11,8 @@
 #include "../SF/script.h"
 #include "../TrueNature/ITerrain.h"
 #include "r3dBitMaskArray.h"
-#include "XPSObject.h"
-#include "../../eternity/SF/script.h"
+#include "xpsobject.h"
+#include "../../Eternity/SF/script.h"
 #include "../UndoHistory/UndoHistory.h"
 #include "../DebugHelpers.h"
 

@@ -1,16 +1,16 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "skydome.h"
-#include "sun.h"
+#include "SkyDome.h"
+#include "Sun.h"
 #include "cubemap.h"
 
-#include "XPSObject.h"
+#include "xpsobject.h"
 
-#include "skydome.h"
-#include "sun.h"
+#include "SkyDome.h"
+#include "Sun.h"
 
-#include "rendering/Deffered/RenderDeffered.h"
+#include "RENDERING/Deffered/RenderDeffered.h"
 
 #include "r3dDeviceQueue.h"
 

@@ -18,6 +18,20 @@
 #pragma once
 
 // ---------------------------------------------------------------------------
+// Calling convention and file-system callback types
+// ---------------------------------------------------------------------------
+
+#ifndef F_CALLBACK
+  #ifdef _WIN32
+    #define F_CALLBACK __stdcall
+    #define F_API      __stdcall
+  #else
+    #define F_CALLBACK
+    #define F_API
+  #endif
+#endif
+
+// ---------------------------------------------------------------------------
 // Result codes
 // ---------------------------------------------------------------------------
 
@@ -30,6 +44,13 @@ enum FMOD_RESULT
     FMOD_ERR_INVALID_PARAM,
     FMOD_ERR_EVENT_NOTFOUND,
     FMOD_ERR_UNIMPLEMENTED,
+    FMOD_ERR_FILE_NOTFOUND,
+    FMOD_ERR_FILE_BAD,
+    FMOD_ERR_FILE_EOF,
+    FMOD_ERR_NET_SOCKET_ERROR,
+    FMOD_ERR_OUTPUT_CREATEBUFFER,
+    FMOD_ERR_MEMORY,
+    FMOD_ERR_INVALID_HANDLE_2,
 };
 
 // ---------------------------------------------------------------------------
@@ -42,20 +63,34 @@ enum FMOD_EVENT_PROPERTY
     FMOD_EVENTPROPERTY_PITCH,
     FMOD_EVENTPROPERTY_3D_MINDISTANCE,
     FMOD_EVENTPROPERTY_3D_MAXDISTANCE,
+    FMOD_EVENTPROPERTY_MODE,
+    FMOD_EVENTPROPERTY_NAME,
+    FMOD_EVENTPROPERTY_3D_POSITION,
+    FMOD_EVENTPROPERTY_SPAWNINTENSITY,
 };
 
-enum FMOD_EVENT_MODE
+// Bit flags, combined with | and assigned back, so a plain integer type rather
+// than a scoped enum (which would need casts at every call site).
+typedef unsigned int FMOD_EVENT_MODE;
+#define FMOD_EVENT_DEFAULT      0x00000000u
+#define FMOD_EVENT_NONBLOCKING  0x00000001u
+#define FMOD_EVENT_3D           0x00000002u
+
+enum FMOD_SPEAKERMODE
 {
-    FMOD_EVENT_DEFAULT      = 0x00000000,
-    FMOD_EVENT_NONBLOCKING  = 0x00000001,
-    FMOD_EVENT_3D          = 0x00000002,
+    FMOD_SPEAKERMODE_RAW = 0,
+    FMOD_SPEAKERMODE_MONO,
+    FMOD_SPEAKERMODE_STEREO,
+    FMOD_SPEAKERMODE_QUAD,
+    FMOD_SPEAKERMODE_SURROUND,
+    FMOD_SPEAKERMODE_5POINT1,
+    FMOD_SPEAKERMODE_7POINT1,
+    FMOD_SPEAKERMODE_MAX,
 };
 
-enum FMOD_EVENT_STATE
-{
-    FMOD_EVENT_STATE_READY   = 0x00000001,
-    FMOD_EVENT_STATE_PLAYING = 0x00000002,
-};
+typedef unsigned int FMOD_EVENT_STATE;
+#define FMOD_EVENT_STATE_READY   0x00000001u
+#define FMOD_EVENT_STATE_PLAYING 0x00000002u
 
 struct FMOD_VECTOR
 {
@@ -63,8 +98,124 @@ struct FMOD_VECTOR
 };
 
 using FMOD_MODE       = unsigned int;
+
+// File-system override callbacks (SoundSys.cpp routes FMOD through r3dFile).
+typedef FMOD_RESULT (F_CALLBACK *FMOD_FILE_OPENCALLBACK )(const char*, int, unsigned int*, void**, void**);
+typedef FMOD_RESULT (F_CALLBACK *FMOD_FILE_CLOSECALLBACK)(void*, void*);
+typedef FMOD_RESULT (F_CALLBACK *FMOD_FILE_READCALLBACK )(void*, void*, unsigned int, unsigned int*, void*);
+typedef FMOD_RESULT (F_CALLBACK *FMOD_FILE_SEEKCALLBACK )(void*, unsigned int, void*);
 using FMOD_INITFLAGS  = unsigned int;
 using FMOD_EVENT_INITFLAGS = unsigned int;
+
+
+// ---------------------------------------------------------------------------
+// Remaining surface referenced by GameEngine/fmod/SoundSys.{h,cpp}
+// ---------------------------------------------------------------------------
+
+#define FMOD_VERSION 0x00044400
+
+// Sound creation modes (bit flags on FMOD_MODE)
+#define FMOD_3D                       0x00000010
+
+// 3D position mode, compared against the value of FMOD_EVENTPROPERTY_3D_POSITION.
+#define FMOD_3D_HEADRELATIVE          0x00000400
+#define FMOD_3D_WORLDRELATIVE         0x00000800
+#define FMOD_CREATECOMPRESSEDSAMPLE   0x00000200
+#define FMOD_SOFTWARE                 0x00000040
+
+// System init flags
+#define FMOD_INIT_NORMAL              0x00000000
+#define FMOD_INIT_ENABLE_PROFILE      0x00000010
+
+// Event system flags
+#define FMOD_EVENT_INFOONLY           0x00000004u
+#define FMOD_EVENT_STATE_CHANNELSACTIVE 0x00000008u
+
+typedef unsigned int FMOD_CAPS;
+#define FMOD_CAPS_HARDWARE_EMULATED   0x00000002
+
+enum FMOD_OUTPUTTYPE
+{
+    FMOD_OUTPUTTYPE_AUTOSELECT = 0,
+    FMOD_OUTPUTTYPE_NOSOUND,
+    FMOD_OUTPUTTYPE_MAX,
+};
+
+enum FMOD_DSP_RESAMPLER
+{
+    FMOD_DSP_RESAMPLER_NOINTERP = 0,
+    FMOD_DSP_RESAMPLER_LINEAR,
+    FMOD_DSP_RESAMPLER_MAX,
+};
+
+enum FMOD_SOUND_FORMAT
+{
+    FMOD_SOUND_FORMAT_NONE = 0,
+    FMOD_SOUND_FORMAT_PCM16,
+    FMOD_SOUND_FORMAT_PCMFLOAT,
+    FMOD_SOUND_FORMAT_MAX,
+};
+
+struct FMOD_REVERB_PROPERTIES
+{
+    int   Instance;
+    int   Environment;
+    float EnvDiffusion;
+    int   Room;
+    int   RoomHF;
+    float DecayTime;
+    unsigned int Flags;
+};
+
+// Reverb presets. Values are irrelevant while audio is shimmed out; only the
+// names need to exist for ReverbZone.cpp / SoundSys.cpp to compile.
+#define FMOD_PRESET_OFF               { 0,  0, 1.0f, -10000, 0, 1.0f, 0x3f }
+#define FMOD_PRESET_GENERIC           FMOD_PRESET_OFF
+#define FMOD_PRESET_PADDEDCELL        FMOD_PRESET_OFF
+#define FMOD_PRESET_ROOM              FMOD_PRESET_OFF
+#define FMOD_PRESET_BATHROOM          FMOD_PRESET_OFF
+#define FMOD_PRESET_LIVINGROOM        FMOD_PRESET_OFF
+#define FMOD_PRESET_STONEROOM         FMOD_PRESET_OFF
+#define FMOD_PRESET_AUDITORIUM        FMOD_PRESET_OFF
+#define FMOD_PRESET_CONCERTHALL       FMOD_PRESET_OFF
+#define FMOD_PRESET_CAVE              FMOD_PRESET_OFF
+#define FMOD_PRESET_ARENA             FMOD_PRESET_OFF
+#define FMOD_PRESET_HANGAR            FMOD_PRESET_OFF
+#define FMOD_PRESET_CARPETTEDHALLWAY  FMOD_PRESET_OFF
+#define FMOD_PRESET_HALLWAY           FMOD_PRESET_OFF
+#define FMOD_PRESET_STONECORRIDOR     FMOD_PRESET_OFF
+#define FMOD_PRESET_ALLEY             FMOD_PRESET_OFF
+#define FMOD_PRESET_FOREST            FMOD_PRESET_OFF
+#define FMOD_PRESET_CITY              FMOD_PRESET_OFF
+#define FMOD_PRESET_MOUNTAINS         FMOD_PRESET_OFF
+#define FMOD_PRESET_QUARRY            FMOD_PRESET_OFF
+#define FMOD_PRESET_PLAIN             FMOD_PRESET_OFF
+#define FMOD_PRESET_PARKINGLOT        FMOD_PRESET_OFF
+#define FMOD_PRESET_SEWERPIPE         FMOD_PRESET_OFF
+#define FMOD_PRESET_UNDERWATER        FMOD_PRESET_OFF
+
+struct FMOD_EVENT_LOADINFO
+{
+    unsigned int size;
+    unsigned int encryptionKey;
+    void*        loadFromMemory;
+    unsigned int loadfrommemory_length;
+};
+
+struct FMOD_EVENT_PROJECTINFO
+{
+    char         name[256];
+    unsigned int index;
+};
+
+struct FMOD_EVENT_INFO
+{
+    int          memoryused;
+    unsigned int positionms;
+    unsigned int lengthms;
+    int          channelsplaying;
+    unsigned int projectid;
+};
 
 // ---------------------------------------------------------------------------
 // Interfaces
@@ -75,6 +226,12 @@ using FMOD_EVENT_INITFLAGS = unsigned int;
 
 namespace FMOD
 {
+
+class EventGroup;
+class EventProject;
+class Event;
+class Sound;
+
 
 class Sound
 {
@@ -93,18 +250,38 @@ public:
     virtual FMOD_RESULT isPlaying(bool* p)       { if (p) *p = false; return FMOD_OK; }
 };
 
+class EventParameter
+{
+public:
+    virtual ~EventParameter() = default;
+    virtual FMOD_RESULT setValue(float)      { return FMOD_OK; }
+    virtual FMOD_RESULT getValue(float* v)   { if (v) *v = 0.0f; return FMOD_OK; }
+    virtual FMOD_RESULT keyOff() { return FMOD_OK; }
+    virtual FMOD_RESULT getRange(float* lo, float* hi)
+    { if (lo) *lo = 0.0f; if (hi) *hi = 1.0f; return FMOD_OK; }
+};
+
 class Event
 {
 public:
     virtual ~Event() = default;
+    virtual FMOD_RESULT setPaused(bool)              { return FMOD_OK; }
+    virtual FMOD_RESULT getPaused(bool* p)           { if (p) *p = false; return FMOD_OK; }
+    virtual FMOD_RESULT getInfo(int*, char**, FMOD_EVENT_INFO*) { return FMOD_OK; }
+    virtual FMOD_RESULT getParameter(const char*, EventParameter** p)
+    { if (p) *p = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
+    virtual FMOD_RESULT getParameterByIndex(int, EventParameter** p)
+    { if (p) *p = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
+    virtual FMOD_RESULT getParentGroup(EventGroup** g)
+    { if (g) *g = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
     virtual FMOD_RESULT start()                          { return FMOD_OK; }
     virtual FMOD_RESULT stop(bool = false)               { return FMOD_OK; }
     virtual FMOD_RESULT release(bool = true, bool = false){ return FMOD_OK; }
     virtual FMOD_RESULT setVolume(float)                 { return FMOD_OK; }
     virtual FMOD_RESULT set3DAttributes(const FMOD_VECTOR*, const FMOD_VECTOR*, const FMOD_VECTOR* = nullptr) { return FMOD_OK; }
     virtual FMOD_RESULT getState(FMOD_EVENT_STATE* s)    { if (s) *s = FMOD_EVENT_STATE_READY; return FMOD_OK; }
-    virtual FMOD_RESULT setPropertyByIndex(int, void*, bool = false) { return FMOD_OK; }
-    virtual FMOD_RESULT getPropertyByIndex(int, void*)   { return FMOD_ERR_UNIMPLEMENTED; }
+    virtual FMOD_RESULT setPropertyByIndex(FMOD_EVENT_PROPERTY, void*, bool = false) { return FMOD_OK; }
+    virtual FMOD_RESULT getPropertyByIndex(FMOD_EVENT_PROPERTY, void*, bool = false) { return FMOD_ERR_UNIMPLEMENTED; }
 };
 
 class EventReverb
@@ -114,6 +291,7 @@ public:
     virtual FMOD_RESULT release()             { return FMOD_OK; }
     virtual FMOD_RESULT setActive(bool)       { return FMOD_OK; }
     virtual FMOD_RESULT set3DAttributes(const FMOD_VECTOR*, float, float) { return FMOD_OK; }
+    virtual FMOD_RESULT setProperties(const FMOD_REVERB_PROPERTIES*) { return FMOD_OK; }
 };
 
 class EventGroup
@@ -125,12 +303,33 @@ public:
         if (e) *e = nullptr;
         return FMOD_ERR_EVENT_NOTFOUND;
     }
+    virtual FMOD_RESULT freeEventData(Event* = nullptr, bool = true) { return FMOD_OK; }
+    virtual FMOD_RESULT getInfo(int* idx, char** name)
+    { if (idx) *idx = 0; if (name) *name = nullptr; return FMOD_OK; }
+    virtual FMOD_RESULT getParentGroup(EventGroup** g)
+    { if (g) *g = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
+    virtual FMOD_RESULT getParentProject(EventProject** p)
+    { if (p) *p = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
+};
+
+class EventCategory
+{
+public:
+    virtual ~EventCategory() = default;
+    virtual FMOD_RESULT setVolume(float) { return FMOD_OK; }
+    virtual FMOD_RESULT setPaused(bool)  { return FMOD_OK; }
+    virtual FMOD_RESULT stopAllEvents()  { return FMOD_OK; }
 };
 
 class EventProject
 {
 public:
     virtual ~EventProject() = default;
+    virtual FMOD_RESULT release() { return FMOD_OK; }
+    virtual FMOD_RESULT getInfo(FMOD_EVENT_PROJECTINFO* info)
+    { if (info) { info->name[0] = 0; info->index = 0; } return FMOD_OK; }
+    virtual FMOD_RESULT getEventByProjectID(unsigned int, FMOD_EVENT_MODE, Event** e)
+    { if (e) *e = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
     virtual FMOD_RESULT getGroup(const char*, bool, EventGroup** g)
     {
         if (g) *g = nullptr;
@@ -138,8 +337,37 @@ public:
     }
 };
 
+// Low-level system, reached via EventSystem::getSystemObject().
+class System
+{
+public:
+    virtual ~System() = default;
+    virtual FMOD_RESULT setOutput(FMOD_OUTPUTTYPE)                    { return FMOD_OK; }
+    virtual FMOD_RESULT setSoftwareFormat(int, FMOD_SOUND_FORMAT, int, int,
+                                          FMOD_DSP_RESAMPLER)         { return FMOD_OK; }
+    virtual FMOD_RESULT setSoftwareChannels(int)                      { return FMOD_OK; }
+    virtual FMOD_RESULT setFileSystem(FMOD_FILE_OPENCALLBACK, FMOD_FILE_CLOSECALLBACK,
+                                      FMOD_FILE_READCALLBACK, FMOD_FILE_SEEKCALLBACK,
+                                      void*, void*, int)              { return FMOD_OK; }
+    virtual FMOD_RESULT getDriverCaps(int, FMOD_CAPS* caps, int*, FMOD_SPEAKERMODE* mode)
+    { if (caps) *caps = 0; if (mode) *mode = FMOD_SPEAKERMODE_STEREO; return FMOD_OK; }
+    virtual FMOD_RESULT setSpeakerMode(FMOD_SPEAKERMODE)              { return FMOD_OK; }
+    virtual FMOD_RESULT getVersion(unsigned int* v)                   { if (v) *v = FMOD_VERSION; return FMOD_OK; }
+    virtual FMOD_RESULT createSound(const char*, FMOD_MODE, void*, Sound** s)
+    { if (s) *s = nullptr; return FMOD_ERR_INITIALIZATION; }
+    virtual FMOD_RESULT set3DSettings(float, float, float)            { return FMOD_OK; }
+    virtual FMOD_RESULT setReverbProperties(const FMOD_REVERB_PROPERTIES*) { return FMOD_OK; }
+    virtual FMOD_RESULT setReverbAmbientProperties(FMOD_REVERB_PROPERTIES*) { return FMOD_OK; }
+    virtual FMOD_RESULT getNumDrivers(int* n)        { if (n) *n = 0; return FMOD_OK; }
+    virtual FMOD_RESULT getDriverInfo(int, char* name, int len, void*)
+    { if (name && len > 0) name[0] = 0; return FMOD_OK; }
+    virtual FMOD_RESULT setDSPBufferSize(unsigned int, int) { return FMOD_OK; }
+};
+
 class EventSystem
 {
+public:
+    virtual FMOD_RESULT getSystemObject(System** sys) { if (sys) *sys = nullptr; return FMOD_ERR_INITIALIZATION; }
 public:
     virtual ~EventSystem() = default;
 
@@ -169,6 +397,16 @@ public:
         if (r) *r = nullptr;
         return FMOD_ERR_UNIMPLEMENTED;
     }
+    virtual FMOD_RESULT get3DListenerAttributes(int, FMOD_VECTOR*, FMOD_VECTOR*,
+                                                FMOD_VECTOR*, FMOD_VECTOR*) { return FMOD_OK; }
+    virtual FMOD_RESULT set3DNumListeners(int)                     { return FMOD_OK; }
+    virtual FMOD_RESULT getCategory(const char*, EventCategory** c)
+    { if (c) *c = nullptr; return FMOD_ERR_EVENT_NOTFOUND; }
+    virtual FMOD_RESULT getNumEvents(int* n)                       { if (n) *n = 0; return FMOD_OK; }
+    virtual FMOD_RESULT getReverbPreset(const char*, FMOD_REVERB_PROPERTIES*, int*)
+    { return FMOD_ERR_EVENT_NOTFOUND; }
+    virtual FMOD_RESULT preloadFSB(const char*, int, Sound* = nullptr) { return FMOD_OK; }
+    virtual FMOD_RESULT unloadFSB(const char*, int)                { return FMOD_OK; }
 };
 
 } // namespace FMOD
@@ -176,6 +414,22 @@ public:
 // ---------------------------------------------------------------------------
 // C entry points
 // ---------------------------------------------------------------------------
+
+namespace FMOD
+{
+
+class EventGroup;
+class EventProject;
+class Event;
+class Sound;
+
+// SoundSys.cpp calls FMOD::EventSystem_Create(...).
+inline FMOD_RESULT EventSystem_Create(EventSystem** system)
+{
+    if (system) *system = nullptr;
+    return FMOD_ERR_INITIALIZATION;
+}
+}
 
 inline FMOD_RESULT FMOD_EventSystem_Create(FMOD::EventSystem** system)
 {

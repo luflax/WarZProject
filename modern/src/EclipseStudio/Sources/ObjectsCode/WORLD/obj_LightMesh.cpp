@@ -7,7 +7,7 @@
 #include "r3d.h"
 
 #include "GameCommon.h"
-#include "Lamp.h"
+#include "Lamp.H"
 #include "../../Editors/ObjectManipulator3d.h"
 #include "obj_LightMesh.h"
 #include "multiplayer/ClientGameLogic.h"

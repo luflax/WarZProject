@@ -1,4 +1,4 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 #include "GameLevel.h"
 
@@ -8,8 +8,8 @@
 
 #include "GameCommon.h"
 #ifndef WO_SERVER
-#include "GameObjects\gameobj.h"
-#include "GameObjects\objmanag.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 #endif // WO_SERVER
 
 #include "water.h"
@@ -135,8 +135,8 @@ WaterBase::~WaterBase()
 }
 
 
-#include "waterplane.h"
-#include "lake.h"
+#include "WaterPlane.H"
+#include "Lake.H"
 #ifndef WO_SERVER
 bool TraceWater(const r3dPoint3D& start, const r3dPoint3D& finish, r3dPoint3D& waterSplashPos)
 {
@@ -382,7 +382,7 @@ bool WaterBase::Ripples(D3DXVECTOR4& camd)
 			}
 
 
-			r3dRenderer->DrawUP(D3DPT_TRIANGLEFAN, 2, sq, sizeof D3DXVECTOR3);
+			r3dRenderer->DrawUP(D3DPT_TRIANGLEFAN, 2, sq, sizeof(D3DXVECTOR3));
 			ripplesRT[curRipplesRT]->Deactivate();
 		}
 

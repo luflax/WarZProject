@@ -10,17 +10,17 @@
 #pragma warning (disable: 4305)
 #pragma warning (disable: 4101)
 
-#include "cvar.h"
-#include "fmod/soundsys.h"
+#include "CVar.h"
+#include "fmod/SoundSys.h"
 
-#include "APIScaleformGFX.h"
+#include "APIScaleformGfx.h"
 #include "GameCommon.h"
 #include "GameLevel.h"
 
-#include "ObjectsCode/world/EnvmapProbes.h"
-#include "ObjectsCode/world/DecalChief.h"
-#include "ObjectsCode/world/MaterialTypes.h"
-#include "ObjectsCode/world/WaterPlane.h"
+#include "ObjectsCode/WORLD/EnvmapProbes.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
+#include "ObjectsCode/WORLD/WaterPlane.H"
 
 #include "ObjectsCode/Nature/wind.h"
 
@@ -29,23 +29,23 @@
 #include "../SF/Console/EngineConsole.h"
 #include "../SF/Version.h"
 
-#include "Rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 
-#include "Menus\m_AppSelect.h"
-#include "Menus\m_Main.h"
+#include "Menus/m_AppSelect.h"
+#include "Menus/m_Main.h"
 
-#include "UI\m_LoadingScreen.h"
-#include "UI\FrontendShared.h"
+#include "UI/m_LoadingScreen.h"
+#include "UI/FrontEndShared.h"
 
 #include "UI/HUDCameraEffects.h"
 
 #include "Editors/ObjectManipulator3d.h"
 #include "Editors/LevelEditor_Collections.h"
 
-#include "RENDERING\Deffered\VisibilityGrid.h"
-#include "rendering\Deffered\D3DMiscFunctions.h"
+#include "RENDERING/Deffered/VisibilityGrid.h"
+#include "RENDERING/Deffered/D3DMiscFunctions.h"
 
-#include "ObjectsCode/weapons/ClientWeaponArmory.h"
+#include "ObjectsCode/WEAPONS/ClientWeaponArmory.h"
 
 #include "CkHttpRequest.h"
 #include "CkHttp.h"
@@ -56,7 +56,7 @@
 
 #include "JobChief.h"
 #include "r3dBackgroundTaskDispatcher.h"
-#include "Rendering/Deffered/RenderDeferredPointLightsOptimized.h"
+#include "RENDERING/Deffered/RenderDeferredPointLightsOptimized.h"
 
 #include "LangMngr.h"
 
@@ -78,8 +78,8 @@
 
 #include "r3dDeviceQueue.h"
 
-#include "GameCode\UserRewards.h"
-#include "GameCode\UserSettings.h"
+#include "GameCode/UserRewards.h"
+#include "GameCode/UserSettings.h"
 
 #include "SectorMaster.h"
 

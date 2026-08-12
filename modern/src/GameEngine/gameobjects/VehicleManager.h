@@ -89,6 +89,14 @@ class VehicleManager
 	//	One hit for each wheel in each car.
 	r3dTL::TArray<PxRaycastHit> batchHits;
 
+	//	[PORT] PhysX 3.x let you read per-wheel suspension jounce and steer angle back
+	//	off PxVehicleWheelsDynData. PhysX 4 removed those accessors: the values are now
+	//	produced by PxVehicleUpdates into a caller-supplied PxVehicleWheelQueryResult,
+	//	one per vehicle, each pointing at a slice of a flat per-wheel array. obj_Vehicle
+	//	reads them back through GetWheelQueryResults() when it builds its move packet.
+	r3dTL::TArray<PxWheelQueryResult>        wheelQueryStorage;
+	r3dTL::TArray<PxVehicleWheelQueryResult> wheelQueryResults;
+
 	//	Suspension raycasts batched query
 	physx::PxBatchQuery * batchSuspensionRaycasts;
 
@@ -118,6 +126,12 @@ class VehicleManager
 	
 	bool IsDrivableCarUsed();
 public:
+	/**
+	* Per-wheel simulation output for a vehicle, as of the last PxVehicleUpdates.
+	* Returns NULL when the vehicle is not currently being simulated.
+	*/
+	const PxVehicleWheelQueryResult* GetWheelQueryResults(const PxVehicleWheels* veh) const;
+
 	bool hasDrivableCar;
 	bool clearInputData;
 

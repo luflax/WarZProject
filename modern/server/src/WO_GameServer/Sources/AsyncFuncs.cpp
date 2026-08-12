@@ -19,7 +19,7 @@ extern GameBlocks::GBPublicSourceId g_GameBlocks_ServerID;
 #endif //ENABLE_GAMEBLOCKS
 
 
-#include "../../EclipseStudio/Sources/backend/WOBackendAPI.h"
+#include "../../EclipseStudio/Sources/Backend/WOBackendAPI.h"
 
 char* g_ServerApiKey = "Fg5jaBgj3uy3ja";
 

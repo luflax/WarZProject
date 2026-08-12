@@ -1,14 +1,14 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
-#include "ObjectsCode/AI/AI_Player.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "ObjectsCode/AI/AI_PlayerAnim.h"
-#include "UI/Hud_Character.h"
+#include "UI/HUD_Character.h"
 
-#include "../rendering/Deffered/CommonPostFX.h"
-#include "../rendering/Deffered/PostFXChief.h"
+#include "../RENDERING/Deffered/CommonPostFX.h"
+#include "../RENDERING/Deffered/PostFXChief.h"
 
 extern bool g_bEditMode;
 
@@ -465,7 +465,9 @@ void CharacterHUD :: Process()
 	D3DXVECTOR3 up(0,1,0);
 	D3DXVECTOR4 rup;
 	D3DXVECTOR4 rpos;
-	D3DXVec3Transform(&rpos, &pos, &(t0*mr));
+	// [PORT] &(t0*mr) took the address of a temporary -- an MSVC extension.
+	const D3DXMATRIX camXform = t0 * mr;
+	D3DXVec3Transform(&rpos, &pos, &camXform);
 	D3DXVec3Transform(&rup, &up, &(mr));
 
 // 	D3DXMatrixLookAtRH(&t1, &D3DXVECTOR3(rpos.x, rpos.y, rpos.z), &pos, &up);

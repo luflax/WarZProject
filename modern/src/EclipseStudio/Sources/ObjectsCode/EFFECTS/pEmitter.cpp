@@ -3,7 +3,7 @@
 
 #include "GameCommon.h"
 
-#include "PEmitter.h"
+#include "pEmitter.H"
 #include "PT_GeneralEmmiter.h"
 
 

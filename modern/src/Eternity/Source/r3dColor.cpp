@@ -41,7 +41,7 @@ r3dColorFormat *r3dRenderLayer::GetColorFormatData(D3DFORMAT Fmt)
 {
 #define MK_CASE(x)			\
   case D3DFMT_##x:			\
-    return &r3dColorConv::##x;
+    return &r3dColorConv::x;
 
   switch(Fmt)
   {

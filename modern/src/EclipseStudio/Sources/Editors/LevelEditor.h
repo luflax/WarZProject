@@ -1,7 +1,7 @@
 #pragma once
 
 
-#include "..\..\External\pugiXML\src\pugixml.hpp"
+#include "../../External/pugiXML/src/pugixml.hpp"
 #include "../UndoHistory/UndoHistory.h"
 #include "../../../GameEngine/gameobjects/GameObj.h"
 

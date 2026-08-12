@@ -164,7 +164,13 @@ public:
 template <typename T>
 ValueChangeUndo<T> * CreateUndoItem()
 {
-	Unsupported_type_Write_type_specialized_version_of_this_function;
+	// [PORT] This was a bare undeclared identifier used as a deliberate
+	// "you must specialize this" compile error. MSVC only parsed it on
+	// instantiation; GCC checks non-dependent names at definition time. A
+	// dependent static_assert has the same effect and fires only when used.
+	static_assert(sizeof(T) == 0,
+		"Unsupported type: write a type-specialized version of CreateUndoItem<T>()");
+	return nullptr;
 };
 
 template <>
@@ -297,7 +303,13 @@ void ValueChangeUndo<T>::Redo()
 template <typename T>
 UndoAction_e ValueChangeUndo<T>::ActionID()
 {
-	Unsupported_type_Write_type_specialized_version_of_this_function;
+	// [PORT] This was a bare undeclared identifier used as a deliberate
+	// "you must specialize this" compile error. MSVC only parsed it on
+	// instantiation; GCC checks non-dependent names at definition time. A
+	// dependent static_assert has the same effect and fires only when used.
+	static_assert(sizeof(T) == 0,
+		"Unsupported type: write a type-specialized version of ActionID<T>()");
+	return UndoAction_e();
 }
 
 template <>

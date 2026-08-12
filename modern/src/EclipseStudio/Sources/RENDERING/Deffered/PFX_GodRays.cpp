@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "TrueNature\Sun.h"
+#include "TrueNature/Sun.h"
 
 #include "PFX_GodRays.h"
 

@@ -10,8 +10,8 @@
 #include "../../multiplayer/ClientGameLogic.h"
 #include "gameobjects/ObjManag.h"
 #include "../../UI/HUD_EditorGame.h"
-#include "../ai/AI_Player.H"
-#include "../ai/r3dPhysSkeleton.h"
+#include "../AI/AI_Player.H"
+#include "../AI/r3dPhysSkeleton.h"
 #include "obj_ZombieSpawn.h"
 #include "fmod/SoundSys.h"
 

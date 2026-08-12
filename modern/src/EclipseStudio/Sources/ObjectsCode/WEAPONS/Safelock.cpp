@@ -4,8 +4,8 @@
 #include "Safelock.h"
 #include "WeaponConfig.h"
 #include "WeaponArmory.h"
-#include "..\ai\AI_Player.H"
-#include "..\..\multiplayer\ClientGameLogic.h"
+#include "../AI/AI_Player.H"
+#include "../../multiplayer/ClientGameLogic.h"
 
 
 IMPLEMENT_CLASS(obj_Safelock, "obj_Safelock", "Object");
@@ -55,7 +55,7 @@ BOOL obj_Safelock::OnCreate()
 	PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK, 0, 0, 0), PxSceneQueryFilterFlag::eSTATIC);
 	if(g_pPhysicsWorld->raycastSingle(PxVec3(GetPosition().x, GetPosition().y+1, GetPosition().z), PxVec3(0, -1, 0), 50.0f, PxSceneQueryFlag::eIMPACT, hit, filter))
 	{
-		SetPosition(r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z));
+		SetPosition(r3dPoint3D(hit.position.x, hit.position.y, hit.position.z));
 		SetRotationVector(r3dPoint3D(m_RotX, 0, 0));
 	}*/
 

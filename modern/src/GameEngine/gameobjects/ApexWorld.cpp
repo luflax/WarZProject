@@ -16,11 +16,11 @@
 #include "ApexFileStream.h"
 
 #ifdef _DEBUG
-#pragma comment(lib, "ApexFrameworkCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "ApexFrameworkCHECKED_x86.lib")
 #elif defined(FINAL_BUILD)
-#pragma comment(lib, "ApexFramework_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "ApexFramework_x86.lib")
 #else // RELEASE
-#pragma comment(lib, "ApexFrameworkPROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "ApexFrameworkPROFILE_x86.lib")
 #endif
 
 //////////////////////////////////////////////////////////////////////////

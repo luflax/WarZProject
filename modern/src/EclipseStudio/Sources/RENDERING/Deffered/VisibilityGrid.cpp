@@ -4,7 +4,7 @@
 
 #include "GameLevel.h"
 
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "VisibilityGrid.h"
 

@@ -2,18 +2,18 @@
 #ifndef FINAL_BUILD
 
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
-#include "UI\Hud_ParticleEditor.h"
+#include "UI/HUD_ParticleEditor.h"
 
 #include "GameCommon.h"
-#include "..\..\..\GameEngine\gameobjects\obj_Dummy.h"
-#include "..\Editors\EditedValueTracker.h"
+#include "../../../GameEngine/gameobjects/obj_Dummy.h"
+#include "../Editors/EditedValueTracker.h"
 
-#include "Editors\ObjectManipulator3d.h"
+#include "Editors/ObjectManipulator3d.h"
 
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "Particle.h"
 #include "Particle_Int.h"
 
@@ -279,7 +279,9 @@ void ParticleHUD :: ProcessPick( bool bSimple/* = false*/ )
 	  } 
 	  else 
 	  {
-		extern BOOL terra_FindIntersection(r3dPoint3D &vFrom, r3dPoint3D &vTo, r3dPoint3D &colpos, int iterations);
+		// [PORT] this local redeclaration had dropped the const on the first two params that
+		// ITerrain.h declares, so the temporaries passed below could not bind.
+		extern BOOL terra_FindIntersection(const r3dPoint3D &vFrom, const r3dPoint3D &vTo, r3dPoint3D &colpos, int iterations);
 		r3dPoint3D v3;
 		if(terra_FindIntersection(gCam, gCam + dir*2000, v3, 2000)) 
 		{

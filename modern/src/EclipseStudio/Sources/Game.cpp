@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dLight.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 #include "r3dProfilerRender.h"
 #include "r3dBudgeter.h"
 
@@ -12,37 +12,37 @@
 #include "GameCommon.h"
 #include "GameLevel.h"
 
-#include "ui/m_LoadingScreen.h"
+#include "UI/m_LoadingScreen.h"
 
-#include "GameObjects/EventTransport.h"
+#include "gameobjects/EventTransport.h"
 
-#include "Rendering/Deffered/CommonPostFX.h"
-#include "Rendering/Deffered/PostFXChief.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/PostFXChief.h"
 
 #include "../SF/CmdProcessor/CmdProcessor.h"
 #include "../SF/Console/EngineConsole.h"
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
-#include "ObjectsCode\world\DecalChief.h"
-#include "ObjectsCode\Nature\wind.h"
-#include "ObjectsCode\Nature\GrassMap.h"
-#include "ObjectsCode\Nature\GrassLib.h"
-#include "ObjectsCode\world\EnvmapProbes.h"
-#include "ObjectsCode/ai/AI_Player.H"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/Nature/wind.h"
+#include "ObjectsCode/Nature/GrassMap.h"
+#include "ObjectsCode/Nature/GrassLib.h"
+#include "ObjectsCode/WORLD/EnvmapProbes.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "MeshPropertyLib.h"
 
 #include "ObjectsCode/Gameplay/obj_Zombie.h"
 
 #include "TrueNature2/Terrain3.h"
 
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "ObjectsCode/weapons/ExplosionVisualController.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/ExplosionVisualController.h"
 
-#include "UI\HUD_Spectator.h"
-#include "UI\HUD_TPSGame.h"
-#include "UI\HUD_EditorGame.h"
-#include "UI\Hud_ParticleEditor.h"
-#include "UI\HUD_PhysicsEditor.h"
-#include "UI\HUD_Character.h"
+#include "UI/HUD_Spectator.h"
+#include "UI/HUD_TPSGame.h"
+#include "UI/HUD_EditorGame.h"
+#include "UI/HUD_ParticleEditor.h"
+#include "UI/HUD_PhysicsEditor.h"
+#include "UI/HUD_Character.h"
 
 #include "Editors/LevelEditor.h"
 #include "Editors/ObjectManipulator3d.h"
@@ -50,7 +50,7 @@
 #include "Editors/LevelEditor_CollectionsUndo.h"
 #include "Editors/CollectionsManager.h"
 
-#include "RENDERING\Deffered\VisibilityGrid.h"
+#include "RENDERING/Deffered/VisibilityGrid.h"
 #include "ObjectsCode/WORLD/DecalChiefUndoRedoActions.h"
 #include "Editors/EditedValueTracker.h"
 #include "Editors/ParticleEditorUndoSubsystem.h"
@@ -63,7 +63,7 @@
 #include "../../GameEngine/ai/AutodeskNav/AutodeskNavMesh.h"
 #include "ObjectsCode/WORLD/PrefabUndoActions.h"
 
-#include "rendering/Deffered/D3DMiscFunctions.h"
+#include "RENDERING/Deffered/D3DMiscFunctions.h"
 
 #include "r3dDeviceQueue.h"
 
@@ -124,7 +124,7 @@ void SectorLoadingChangeCallback(int oldI, float oldF)
 #endif
 }
 
-#include "loadworld.hpp"
+#include "LoadWorld.hpp"
 
 volatile LONG gGameLoadActive = 0;
 

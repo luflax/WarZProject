@@ -8,7 +8,7 @@
 
 #include "sobj_SpawnedItem.h"
 #include "obj_ServerItemSpawnPoint.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #ifdef ENABLE_GAMEBLOCKS
 #include "GBClient/Inc/GBClient.h"

@@ -209,9 +209,9 @@ public:
 	virtual BOOL Update();
 
 	INetworkHelper* GetNetworkHelper() { return dynamic_cast<INetworkHelper*>(this); }
-	DefaultPacket* INetworkHelper::NetGetCreatePacket(int* out_size);
-	void INetworkHelper::LoadServerObjectData() { r3dError("not implemented."); }
-	void INetworkHelper::SaveServerObjectData() { r3dError("not implemented."); }
+	DefaultPacket* NetGetCreatePacket(int* out_size);
+	void LoadServerObjectData() { r3dError("not implemented."); }
+	void SaveServerObjectData() { r3dError("not implemented."); }
 
 	virtual BOOL OnNetReceive(DWORD EventId, const void* packetData, int packetSize);
 	void		OnNetPacket(const PKT_C2C_VehicleMoveSetCell_s& n);

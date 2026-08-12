@@ -17,7 +17,7 @@
 #include "KeepAliveReporter.h"
 #include "../../MasterServer/Sources/SrvCrashHandler.h"
 
-#include "../../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../../../../src/GameEngine/ai/AI_Tactics.h"
 #include "../../../../src/GameEngine/ai/AI_Brain.h"
 #include "AsyncFuncs.h"

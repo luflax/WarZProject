@@ -1,5 +1,12 @@
 #pragma once
 
+// PORT NOTE: this header referenced "VertFVF", which is defined nowhere in the
+// codebase, and "Stats.BufferMem", which is not a member of r3dGPUStats (the
+// accessor is AddBufferMem). Both sat in class templates that are never
+// instantiated, so MSVC's delayed template parsing never checked the bodies.
+// GCC checks non-dependent names at definition time. VertFVF is replaced with 0
+// ("no FVF"), which is correct -- the engine uses vertex declarations.
+
 #include "../SF/RenderBuffer.h"
 
 template <class vert_s>
@@ -250,7 +257,7 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorUP(int StartX, int StartZ,int Wid
 /*	hr = r3dRenderer->pd3ddev->CreateVertexBuffer(
 		VertexSize * sizeof(vert_s),
 		dwFlags,
-		VertFVF,
+		0,
 		D3DPOOL_DEFAULT,
 		&pVB, NULL);
 
@@ -261,10 +268,10 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorUP(int StartX, int StartZ,int Wid
 		D3DPOOL_DEFAULT,
 		&pIB, NULL);*/
 
-	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), VertFVF, dwFlags & D3DUSAGE_DYNAMIC );
+	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), 0, dwFlags & D3DUSAGE_DYNAMIC );
 	pIB = gfx_new r3dIndexBuffer( IndexSize, dwFlags & D3DUSAGE_DYNAMIC, sizeof(DWORD) );
 
-	r3dRenderer->Stats.BufferMem += VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD);
+	r3dRenderer->Stats.AddBufferMem( VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD) );
 
 	sprintf(Name, "XPS: GRID CONN UP [%p(v:%d i:%d)]", this, VertexSize, IndexSize);
 
@@ -322,7 +329,7 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorDOWN(int StartX, int StartZ,int W
 	/*hr = r3dRenderer->pd3ddev->CreateVertexBuffer(
 		VertexSize * sizeof(vert_s),
 		dwFlags,
-		VertFVF,
+		0,
 		D3DPOOL_DEFAULT,
 		&pVB, NULL);
 
@@ -333,10 +340,10 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorDOWN(int StartX, int StartZ,int W
 		D3DPOOL_DEFAULT,
 		&pIB, NULL);*/
 
-	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), VertFVF, dwFlags & D3DUSAGE_DYNAMIC );
+	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), 0, dwFlags & D3DUSAGE_DYNAMIC );
 	pIB = gfx_new r3dIndexBuffer( IndexSize, dwFlags & D3DUSAGE_DYNAMIC, sizeof(DWORD) );
 
-	r3dRenderer->Stats.BufferMem += VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD);
+	r3dRenderer->Stats.AddBufferMem( VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD) );
 
 	sprintf(Name, "XPS: GRID CONN DOWN [%p(v:%d i:%d)]", this, VertexSize, IndexSize);
 
@@ -394,7 +401,7 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorLEFT(int StartX, int StartZ,int W
 	/*hr = r3dRenderer->pd3ddev->CreateVertexBuffer(
 		VertexSize * sizeof(vert_s),
 		dwFlags,
-		VertFVF,
+		0,
 		D3DPOOL_DEFAULT,
 		&pVB, NULL);
 
@@ -405,10 +412,10 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorLEFT(int StartX, int StartZ,int W
 		D3DPOOL_DEFAULT,
 		&pIB, NULL);*/
 
-	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), VertFVF, dwFlags & D3DUSAGE_DYNAMIC );
+	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), 0, dwFlags & D3DUSAGE_DYNAMIC );
 	pIB = gfx_new r3dIndexBuffer( IndexSize, dwFlags & D3DUSAGE_DYNAMIC, sizeof(DWORD) );
 
-	r3dRenderer->Stats.BufferMem += VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD);
+	r3dRenderer->Stats.AddBufferMem( VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD) );
 
 	sprintf(Name, "XPS: GRID CONN LEFT [%p(v:%d i:%d)]", this, VertexSize, IndexSize);
 
@@ -466,7 +473,7 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorRIGHT(int StartX, int StartZ,int 
 /*	hr = r3dRenderer->pd3ddev->CreateVertexBuffer(
 		VertexSize * sizeof(vert_s),
 		dwFlags,
-		VertFVF,
+		0,
 		D3DPOOL_DEFAULT,
 		&pVB, NULL);
 
@@ -478,10 +485,10 @@ int r3dXPSObject<vert_s>::InitGridSideConnectorRIGHT(int StartX, int StartZ,int 
 		&pIB, NULL);
 		*/
 
-	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), VertFVF, dwFlags & D3DUSAGE_DYNAMIC );
+	pVB = gfx_new r3dVertexBuffer( VertexSize, sizeof(vert_s), 0, dwFlags & D3DUSAGE_DYNAMIC );
 	pIB = gfx_new r3dIndexBuffer( IndexSize, dwFlags & D3DUSAGE_DYNAMIC, sizeof(DWORD) );
 
-	r3dRenderer->Stats.BufferMem += VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD);
+	r3dRenderer->Stats.AddBufferMem( VertexSize * sizeof(vert_s) + IndexSize * sizeof(DWORD) );
 
 	sprintf(Name, "XPS: GRID CONN RIGHT [%p(v:%d i:%d)]", this, VertexSize, IndexSize);
 
@@ -671,7 +678,10 @@ case 2:
 	if((VertexCount + NumVerts + 1 >= VertexSize) || (IndexCount + NumIdxs + 1 >= IndexSize)) {
 		if(!(Flags & POLYBUFFER_AutoFlush))
 			return 0;
-		Flush();
+		// [PORT] Flush() is declared nowhere in the codebase -- see the original
+		// author\'s own note further down: "I dont know what is it. But it is not
+		// compiling." Dead code in a template that is never instantiated.
+		// Flush();
 		LockAll();
 	}
 	break;
@@ -686,7 +696,7 @@ case 2:
 	IndexCount += NumIdxs;
 
 	// add vertices
-	for(i=0; i<NumVerts; i++) {
+	for(int i=0; i<NumVerts; i++) {
 		*pVerts++ = *v++;
 	}
 	VertexCount += NumVerts;
@@ -709,7 +719,10 @@ case 2:
 	if((VertexCount + 3 + 1 >= VertexSize) || (IndexCount + 3 + 1 >= IndexSize)) {
 		if(!(Flags & POLYBUFFER_AutoFlush))
 			return 0;
-		Flush();
+		// [PORT] Flush() is declared nowhere in the codebase -- see the original
+		// author\'s own note further down: "I dont know what is it. But it is not
+		// compiling." Dead code in a template that is never instantiated.
+		// Flush();
 		LockAll();
 	}
 	break;

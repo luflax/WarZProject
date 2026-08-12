@@ -1,4 +1,6 @@
 #include "r3dPCH.h"
+#include "extensions/PxCollectionExt.h"
+#include "extensions/PxSerialization.h"
 #include "r3d.h"
 
 #include "foundation/PxAllocatorCallback.h"
@@ -24,70 +26,70 @@
 #ifndef WO_SERVER
 #ifdef VEHICLES_ENABLED
 #include "../../EclipseStudio/Sources/multiplayer/ClientGameLogic.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/ai/AI_Player.H"
+#include "../../EclipseStudio/Sources/ObjectsCode/AI/AI_Player.H"
 #include "../../GameEngine/gameobjects/obj_Vehicle.h"
 #endif
 #endif
 
 // libs
 #ifdef _DEBUG
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
-#pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
-#pragma comment(lib, "PhysX3VehicleCHECKED.lib")
-#pragma comment(lib, "RepX3CHECKED.lib")
-#pragma comment(lib, "RepXUpgrader3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3VehicleCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3CHECKED.lib")
 #elif defined(FINAL_BUILD)
-#pragma comment(lib, "PhysX3_x86.lib")
-#pragma comment(lib, "PhysX3Cooking_x86.lib")
-#pragma comment(lib, "PhysX3_x86.lib")
-#pragma comment(lib, "PhysXProfileSDK.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDK.lib")
-#pragma comment(lib, "PhysX3Common_x86.lib")
-#pragma comment(lib, "PhysX3Extensions.lib")
-#pragma comment(lib, "PhysX3Vehicle.lib")
-#pragma comment(lib, "RepX3.lib")
-#pragma comment(lib, "RepXUpgrader3.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Cooking_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDK.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDK.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Common_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Extensions.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Vehicle.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3.lib")
 #else // RELEASE
 #ifndef WO_SERVER
-#pragma comment(lib, "PhysX3PROFILE_x86.lib")
-#pragma comment(lib, "PhysX3CookingPROFILE_x86.lib")
-#pragma comment(lib, "PhysX3PROFILE_x86.lib")
-#pragma comment(lib, "PhysXProfileSDKPROFILE.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDKPROFILE.lib")
-#pragma comment(lib, "PhysX3CommonPROFILE_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsPROFILE.lib")
-#pragma comment(lib, "PhysX3VehiclePROFILE.lib")
-#pragma comment(lib, "RepX3PROFILE.lib")
-#pragma comment(lib, "RepXUpgrader3PROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3PROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CookingPROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3PROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDKPROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDKPROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CommonPROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3ExtensionsPROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3VehiclePROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3PROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3PROFILE.lib")
 #else // WO_SERVER
 // use checked libs for server to get crash dump for nvidia
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
-#pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
-#pragma comment(lib, "PhysX3VehicleCHECKED.lib")
-#pragma comment(lib, "RepX3CHECKED.lib")
-#pragma comment(lib, "RepXUpgrader3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3VehicleCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3CHECKED.lib")
 #endif // WO_SERVER
 #endif
 
 //ptumik: for server just use already built lib for character controller, unless we will modify it
 #ifdef WO_SERVER
 #ifdef _DEBUG
-#pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
 #elif defined(FINAL_BUILD)
-#pragma comment(lib, "PhysX3CharacterKinematic_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CharacterKinematic_x86.lib")
 #else // RELEASE
 //#pragma comment(lib, "PhysX3CharacterKinematicPROFILE_x86.lib")
-#pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
 #endif
 #endif
 
@@ -110,7 +112,11 @@ PxTriangleMesh *r3dGOBAddPhysicsMesh(const char* fname)
 {
 	if(gPhysics_DisableCacheForEditor)
 	{
-		return g_pPhysicsWorld->PhysXSDK->createTriangleMesh(PhysxUserFileReadStream(fname));
+		{
+			// [PORT] create*Mesh takes a non-const PxInputStream&; a temporary cannot bind.
+			PhysxUserFileReadStream __stream(fname);
+			return g_pPhysicsWorld->PhysXSDK->createTriangleMesh(__stream);
+		}
 	}
 
 	for (int i=0;i<gob_NumMeshesInPhysicsFactoryCache;i++)
@@ -125,7 +131,11 @@ PxTriangleMesh *r3dGOBAddPhysicsMesh(const char* fname)
 
 	int i = gob_NumMeshesInPhysicsFactoryCache;
 	gob_PhysicsFactoryCache[i] = game_new PhysicsMesh;
-	gob_PhysicsFactoryCache[i]->mesh = g_pPhysicsWorld->PhysXSDK->createTriangleMesh(PhysxUserFileReadStream(fname));
+	{
+		// [PORT] create*Mesh takes a non-const PxInputStream&; a temporary cannot bind.
+		PhysxUserFileReadStream __stream(fname);
+		gob_PhysicsFactoryCache[i]->mesh = g_pPhysicsWorld->PhysXSDK->createTriangleMesh(__stream);
+	}
 	r3dscpy(gob_PhysicsFactoryCache[i]->filename, fname);
 	if(!gob_PhysicsFactoryCache[i]->mesh) 
 		return NULL;
@@ -159,7 +169,11 @@ PxConvexMesh *r3dGOBAddPhysicsConvexMesh(const char* fname)
 {
 	if(gPhysics_DisableCacheForEditor)
 	{
-		return g_pPhysicsWorld->PhysXSDK->createConvexMesh(PhysxUserFileReadStream(fname));
+		{
+			// [PORT] create*Mesh takes a non-const PxInputStream&; a temporary cannot bind.
+			PhysxUserFileReadStream __stream(fname);
+			return g_pPhysicsWorld->PhysXSDK->createConvexMesh(__stream);
+		}
 	}
 	for (int i=0;i<gob_NumConvexMeshesInPhysicsFactoryCache;i++)
 		if (strcmp(gob_PhysicsConvexFactoryCache[i]->filename, fname)==0) 
@@ -173,7 +187,11 @@ PxConvexMesh *r3dGOBAddPhysicsConvexMesh(const char* fname)
 
 	int i = gob_NumConvexMeshesInPhysicsFactoryCache;
 	gob_PhysicsConvexFactoryCache[i] = game_new PhysicsConvexMesh;
-	gob_PhysicsConvexFactoryCache[i]->mesh = g_pPhysicsWorld->PhysXSDK->createConvexMesh(PhysxUserFileReadStream(fname));
+	{
+		// [PORT] create*Mesh takes a non-const PxInputStream&; a temporary cannot bind.
+		PhysxUserFileReadStream __stream(fname);
+		gob_PhysicsConvexFactoryCache[i]->mesh = g_pPhysicsWorld->PhysXSDK->createConvexMesh(__stream);
+	}
 	r3dscpy(gob_PhysicsConvexFactoryCache[i]->filename, fname);
 	if(!gob_PhysicsConvexFactoryCache[i]->mesh) 
 		return NULL;
@@ -259,7 +277,7 @@ public:
 
 	virtual void reportError(PxErrorCode::Enum code, const char* message, const char* file, int line)
 	{
-		const char* errorCode = NULL;
+		const char* errorCode = 0;
 		switch (code)
 		{
 		case PxErrorCode::eINVALID_PARAMETER:
@@ -300,8 +318,8 @@ public:
 		for( PxU32 i = 0; i < count; ++i )
 		{
 			PxContactModifyPair& mp = pairs[ i ];
-			PhysicsCallbackObject* obj1 = reinterpret_cast<PhysicsCallbackObject*>(mp.shape[0]->getActor().userData);
-			PhysicsCallbackObject* obj2 = reinterpret_cast<PhysicsCallbackObject*>(mp.shape[1]->getActor().userData);
+			PhysicsCallbackObject* obj1 = reinterpret_cast<PhysicsCallbackObject*>(mp.shape[0]->getActor()->userData);
+			PhysicsCallbackObject* obj2 = reinterpret_cast<PhysicsCallbackObject*>(mp.shape[1]->getActor()->userData);
 
 			if(obj1)
 				obj1->OnContactModify(obj2, mp.contacts);
@@ -321,7 +339,7 @@ public:
 			const PxContactPair& cp = pairs[i];
 			if (cp.events == PxPairFlag::eNOTIFY_TOUCH_FOUND)
 			{
-				if ((cp.flags & PxContactPairFlag::eDELETED_SHAPE_0) || (cp.flags & PxContactPairFlag::eDELETED_SHAPE_1))
+				if ((cp.flags & PxContactPairFlag::eREMOVED_SHAPE_0) || (cp.flags & PxContactPairFlag::eREMOVED_SHAPE_1))
 					continue;
 
 				PhysicsCallbackObject* obj1 = reinterpret_cast<PhysicsCallbackObject*>(pairHeader.actors[0]->userData);
@@ -360,10 +378,10 @@ public:
             {
                 r3d_assert(pairs[i].triggerShape);
                 r3d_assert(pairs[i].otherShape);
-                PhysicsCallbackObject* triggerObj = (PhysicsCallbackObject*)pairs[i].triggerShape->getActor().userData;
+                PhysicsCallbackObject* triggerObj = (PhysicsCallbackObject*)pairs[i].triggerShape->getActor()->userData;
                 r3d_assert(triggerObj);
 
-                PhysicsCallbackObject* otherObj = (PhysicsCallbackObject*)pairs[i].otherShape->getActor().userData;
+                PhysicsCallbackObject* otherObj = (PhysicsCallbackObject*)pairs[i].otherShape->getActor()->userData;
 
                 triggerObj->OnTrigger(pairs[i].status, otherObj);
             }
@@ -372,6 +390,9 @@ public:
 	virtual void onSleep(PxActor** actors, PxU32 count) {}
 	virtual void onConstraintBreak(PxConstraintInfo* constraints, PxU32 count){}
 	virtual void onWake(PxActor** actors, PxU32 count) {}
+	// [PORT] PhysX 4 added onAdvance() as a pure virtual. It only fires for bodies
+	// flagged eENABLE_POSE_INTEGRATION_PREVIEW, which this game does not use.
+	virtual void onAdvance(const PxRigidBody*const*, const PxTransform*, const PxU32) {}
 
 } mySimulationEventCallback;
 
@@ -417,7 +438,7 @@ PxFilterFlags MyCollisionFilterShader(
 		return PxFilterFlag::eSUPPRESS;
 
 	// generate contacts for all that were not filtered above
-	pairFlags = PxPairFlag::eRESOLVE_CONTACTS | PxPairFlag::eNOTIFY_TOUCH_FOUND | PxPairFlag::eNOTIFY_CONTACT_POINTS;
+	pairFlags = PxPairFlag::eSOLVE_CONTACT | PxPairFlag::eNOTIFY_TOUCH_FOUND | PxPairFlag::eNOTIFY_CONTACT_POINTS;
 	if( filterData0.word2 != 0 && filterData0.word2 == filterData1.word2 )
 		pairFlags |= (PxPairFlag::Enum)filterData0.word2;
 
@@ -426,7 +447,7 @@ PxFilterFlags MyCollisionFilterShader(
 		PxU32 ShapeGroup01 = filterData0.word1 & 31;
 		PxU32 ShapeGroup11 = filterData1.word1 & 31;
 		if(ShapeGroup01 == PHYSCOLL2_FAST_MOVING_OBJECT || ShapeGroup11 == PHYSCOLL2_FAST_MOVING_OBJECT)
-			pairFlags |= PxPairFlag::eSWEPT_INTEGRATION_LINEAR;
+			pairFlags |= PxPairFlag::eDETECT_CCD_CONTACT;
 	}
 #endif
 
@@ -448,7 +469,9 @@ void PhysXWorld::Init()
 
 	PxTolerancesScale tolerancesScale;
 	tolerancesScale.length = 1.0f;
-	tolerancesScale.mass = 1000.0f;
+	// [PORT] PxTolerancesScale::mass was removed in PhysX 4; it is now derived
+	// from length and speed.
+	// tolerancesScale.mass = 1000.0f;
 	tolerancesScale.speed = 10.0f;
 
 	bool recordMemoryAllocations = false;
@@ -459,23 +482,25 @@ void PhysXWorld::Init()
 	if (!PhysXFoundation)
 		r3dError("PxCreateFoundation failed!");
 
-	PhysXProfileZoneMgr = &PxProfileZoneManager::createProfileZoneManager(PhysXFoundation);
-	if (!PhysXProfileZoneMgr)
-		r3dError("PxProfileZoneManager::createProfileZoneManager failed!");
+	// [PORT] The profile SDK was removed in PhysX 4. The final PxCreatePhysics
+	// parameter is now a PxPvd*, which is optional and left null here -- PVD is a
+	// debug-only feature and is not wired up in this configuration.
+	PhysXProfileZoneMgr = NULL;
 
-
-	PhysXSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PhysXFoundation, tolerancesScale, recordMemoryAllocations, PhysXProfileZoneMgr);
+	PhysXSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PhysXFoundation, tolerancesScale, recordMemoryAllocations, NULL);
 	if(!PhysXSDK)
 	{
 		r3dError("Failed to init PhysX SDK");
 	}
 
-	if(!PxInitExtensions(*PhysXSDK))
+	// [PORT] PxInitExtensions takes a PxPvd* in PhysX 4.
+	if(!PxInitExtensions(*PhysXSDK, NULL))
 	{
 		r3dError("Failed to init PhysX Extensions");
 	}
 
-	PxCookingParams cookingParams;
+	// [PORT] PxCookingParams has no default constructor in PhysX 4.
+	PxCookingParams cookingParams(tolerancesScale);
 	Cooking = PxCreateCooking(PX_PHYSICS_VERSION, PhysXSDK->getFoundation(), cookingParams);
 	if(!Cooking)
 	{
@@ -483,9 +508,18 @@ void PhysXWorld::Init()
 	}
 
 #ifndef FINAL_BUILD
-	PxVisualDebuggerConnectionFlags PVDFlags = PxVisualDebuggerConnectionFlag::Profile;
-	//PxVisualDebuggerConnectionFlags PVDFlags = PxVisualDebuggerConnectionFlag::Debug; // enable if you want to see physx scene in PVD
-	debuggerConnection = PxVisualDebuggerExt::createConnection(PhysXSDK->getPvdConnectionManager(), "localhost", 5425, 1000, PVDFlags);
+	// [PORT] PhysX 4 replaced the 3.x PVD connection API (PxVisualDebuggerExt +
+	// PxPhysics::getPvdConnectionManager) with PxPvd + PxPvdTransport, which must be
+	// created BEFORE PxCreatePhysics and passed into it. Reinstating PVD therefore
+	// means restructuring Init(), and PVD is a debug-only convenience -- so it is
+	// left disconnected rather than half-ported.
+	//
+	// To restore it:
+	//   PxPvd* pvd = PxCreatePvd(*PhysXFoundation);
+	//   PxPvdTransport* t = PxDefaultPvdSocketTransportCreate("localhost", 5425, 10);
+	//   pvd->connect(*t, PxPvdInstrumentationFlag::eALL);
+	//   ... then pass `pvd` to PxCreatePhysics and PxInitExtensions.
+	debuggerConnection = NULL;
 #endif
 
 	// set collision group BEFORE creating scene and cannot change after that
@@ -555,13 +589,13 @@ void PhysXWorld::Init()
 	
 	sceneDesc.filterShader = MyCollisionFilterShader;
 
-	sceneDesc.gpuDispatcher = NULL;
+	// [PORT] removed in PhysX 4: sceneDesc.gpuDispatcher = NULL;
 
 #if PHYSX_USE_CCD
-	sceneDesc.flags |= PxSceneFlag::eENABLE_SWEPT_INTEGRATION;
+	sceneDesc.flags |= PxSceneFlag::eENABLE_CCD;
 #endif
 
-	PhysXScene = PhysXSDK->createScene(sceneDesc);	
+	PhysXScene = PxAsScene3x( PhysXSDK->createScene(sceneDesc) );	
 	if (!PhysXScene) 
 		r3dError("PhysX: can't create physics scene!");
 
@@ -571,7 +605,8 @@ void PhysXWorld::Init()
 	defaultMaterial = PhysXSDK->createMaterial(0.8f, 0.8f, 0.05f);
 	noBounceMaterial = PhysXSDK->createMaterial(100.0f, 100.0f, 0.0f);
 	
-	CharacterManager = PxCreateControllerManager(PhysXSDK->getFoundation());
+	// [PORT] PxCreateControllerManager takes the PxScene in PhysX 4.
+	CharacterManager = PxCreateControllerManager(*PhysXScene);
 
 #ifndef WO_SERVER
 	m_PlayerObstaclesManager = CharacterManager->createObstacleContext();
@@ -776,8 +811,13 @@ bool PhysXWorld::raycastSingle(const PxVec3& origin, const PxVec3& unitDir, cons
     PxRaycastHit hits[32];
     bool blockingHit;
     // some weird PhysX shit. Sometimes raycastSingle will just return distance 0 and show collision with terrain!!! even though there is no even close terrain to the ray
-    outputFlags |= PxSceneQueryFlag::eDISTANCE; // always add, as we need distance to check for physX bug
-    int numHits = g_pPhysicsWorld->PhysXScene->raycastMultiple(origin, unitDir, distance, outputFlags, hits, 32, blockingHit, filterData);
+    outputFlags |= PxHitFlag::ePOSITION /* [PORT] eDISTANCE removed; distance always reported */; // always add, as we need distance to check for physX bug
+    // [PORT] PhysX 4 replaced raycastMultiple() with raycast() writing into a
+    // PxRaycastBuffer, which owns the touch array and the blocking-hit flag.
+    PxRaycastBuffer __rayBuf( hits, 32 );
+    g_pPhysicsWorld->PhysXScene->raycast(origin, unitDir, distance, __rayBuf, outputFlags, filterData);
+    const int numHits  = (int)__rayBuf.getNbTouches();
+    blockingHit        = __rayBuf.hasBlock;
     bool foundProperHit = false;
     float closestHit = 99999999.0f;
     if(numHits)
@@ -805,10 +845,11 @@ extern r3dScreenBuffer* ScreenBuffer;
 void PhysXWorld::UpdateDebugBounds()
 {
 #ifndef FINAL_BUILD
-	PxPoint center( gCam.x, gCam.y, gCam.z );
+	// [PORT] PxPoint does not exist in PhysX 4; the type is PxVec3.
+	PxVec3 center( gCam.x, gCam.y, gCam.z );
 
 	float range = d_physx_debug_range->GetFloat();
-	PxPoint extent( range, range, range );
+	PxVec3 extent( range, range, range );
 
 	PxBounds3 bounds( center - extent, center + extent );
 
@@ -983,7 +1024,10 @@ bool PhysXWorld::CookMesh(const r3dMesh* orig_mesh, const char* save_as)
 		r3dscpy(cookedMeshFilename, orig_mesh->FileName.c_str());
 	int len = strlen(cookedMeshFilename);
 	r3dscpy(&cookedMeshFilename[len-3], "mpx");
-	bool res = Cooking->cookTriangleMesh(meshDesc, PhysxUserFileWriteStream(cookedMeshFilename));
+	bool res = [&]{ // [PORT] takes a non-const PxOutputStream&; a temporary cannot bind.
+		PhysxUserFileWriteStream __out(cookedMeshFilename);
+		return Cooking->cookTriangleMesh(meshDesc, __out);
+	}();
 
 	return res;
 #else
@@ -1027,13 +1071,13 @@ bool PhysXWorld::CookConvexMesh(const r3dMesh* orig_mesh, const char* save_as)
 	meshDesc.points.count = mesh->NumVertices;    
 	meshDesc.points.stride = sizeof(r3dPoint3D);   
 	meshDesc.points.data = mesh->GetVertexPositions();  
-	meshDesc.triangles.count = mesh->NumIndices/3;    
-	meshDesc.triangles.stride = 3*sizeof(uint32_t);   
-	meshDesc.triangles.data = mesh->GetIndices();   
+	// [PORT] PxConvexMeshDesc::triangles was removed in PhysX 4: a convex hull is
+	// computed from the point cloud alone, so the index data is no longer supplied.
+	// eINFLATE_CONVEX likewise went away -- hull inflation is now a cooking
+	// parameter (PxCookingParams::planeTolerance / convexMeshCookingType).
+	r3d_assert( meshDesc.points.data ) ;
 
-	r3d_assert( meshDesc.points.data && meshDesc.triangles.data ) ;
-
-	meshDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX|PxConvexFlag::eINFLATE_CONVEX; // let physX compute convex mesh. even if we are providing it a convex mesh, maybe it can optimize it better. also in that case if don't have to worry about 256 faces limit
+	meshDesc.flags = PxConvexFlag::eCOMPUTE_CONVEX; // let PhysX compute the hull
 
 	char cookedMeshFilename[256]; memset(cookedMeshFilename, 0, 256);
 	if(save_as)
@@ -1042,7 +1086,10 @@ bool PhysXWorld::CookConvexMesh(const r3dMesh* orig_mesh, const char* save_as)
 		r3dscpy(cookedMeshFilename, orig_mesh->FileName.c_str());
 	int len = strlen(cookedMeshFilename);
 	r3dscpy(&cookedMeshFilename[len-3], "cpx");
-	bool res = Cooking->cookConvexMesh(meshDesc, PhysxUserFileWriteStream(cookedMeshFilename));
+	bool res = [&]{ // [PORT] takes a non-const PxOutputStream&; a temporary cannot bind.
+		PhysxUserFileWriteStream __out(cookedMeshFilename);
+		return Cooking->cookConvexMesh(meshDesc, __out);
+	}();
 
 	return res;
 #else
@@ -1080,82 +1127,42 @@ void PhysXWorld::RemoveActor(PxActor &actor)
 #ifndef FINAL_BUILD
 bool PhysXWorld::ExportWholeScene(const char *filename) const
 {
-	using namespace physx::repx;
+	// [PORT] Rewritten for PhysX 4.
+	//
+	// The 3.x implementation built a RepXCollection by hand (createCollection +
+	// RepXIdToRepXObjectMap + addSDKItemsToRepX + addSceneItemsToRepX). All of that
+	// was removed in PhysX 4; PxCollectionExt::createCollection(PxScene&) gathers the
+	// scene in one call and PxSerialization::serializeCollectionToXml writes it.
+	//
+	// Everything after the original "return true;" was unreachable dead code -- an
+	// abandoned binary-serialization experiment -- and has been dropped rather than
+	// ported.
+	//
+	// Debug/authoring helper only; not built in FINAL_BUILD.
+
 	if (!PhysXSDK || !PhysXScene)
 		return false;
 
-	PxCollection *cl = PhysXSDK->createCollection();
-	if (!cl)
+	PxSerializationRegistry* registry = PxSerialization::createSerializationRegistry(*PhysXSDK);
+	if (!registry)
 		return false;
 
+	PxCollection* collection = PxCollectionExt::createCollection(*PhysXScene);
+	if (!collection)
+	{
+		registry->release();
+		return false;
+	}
+
+	// Pull in anything the scene objects depend on (shapes, materials, meshes).
+	PxSerialization::complete(*collection, *registry);
+
 	PhysxUserFileWriteStream fs(filename);
+	const bool ok = PxSerialization::serializeCollectionToXml(fs, *collection, *registry, Cooking);
 
-	RepXCollection* theCollection = createCollection(PhysXSDK->getTolerancesScale(), PhysXFoundation->getAllocatorCallback());
-	RepXIdToRepXObjectMap* theIdMap =  RepXIdToRepXObjectMap::create(PxGetFoundation().getAllocatorCallback());
-	addSDKItemsToRepX ( *PhysXSDK, *theIdMap, *theCollection); //add physcis object
-	addSceneItemsToRepX ( *PhysXScene, *theIdMap, *theCollection); //add physcis object
-//	physx::repx::addObjectsToScene(theCollection, physics, cooking, scene, mStringTable );
-	theCollection->save(fs);
-	theCollection->destroy();
-	theIdMap->destroy();
-	return true;
+	collection->release();
+	registry->release();
 
-
-//	PxCollectForExportSDK(*PhysXSDK, *cl);
-//	PxCollectForExportScene(*PhysXScene, *cl);
-	ObjectIterator iter = GameWorld().GetFirstOfAllObjects();
-
-	while( iter.current )
-	{
-		GameObject* o = iter.current;
-
-		if (o->PhysicsObject)
-		{
-			PxActor *a = o->PhysicsObject->getPhysicsActor();
-			PxSerialFlags f = a->getSerialFlags();
-			a->collectForExport(*cl);
-			break;
-		}
-
-		iter = GameWorld().GetNextOfAllObjects( iter );
-	}
-	PxU32 numObjs = cl->getNbObjects();
-	numObjs;
-
-	cl->serialize(fs);
-
-	PhysXSDK->releaseCollection(*cl);
-	fclose(fs.fpw);
-
-	FILE* fp=NULL;
-
-	if( (fp = fopen(filename, "rb")) )
-	{
-		fseek(fp, 0, SEEK_END);
-		PxU32 fileSize = ftell(fp);
-		fseek(fp, 0, SEEK_SET);
-
-		PX_ASSERT(fileSize!=0);
-		void* mem = malloc(fileSize+PX_SERIAL_FILE_ALIGN);
-
-		void* mem16 = (void*)((size_t(mem) + PX_SERIAL_FILE_ALIGN)&~(PX_SERIAL_FILE_ALIGN-1));
-		fread(mem16, 1, fileSize, fp);
-		fclose(fp);
-
-		PxUserReferences* convexRefs = PhysXSDK->createUserReferences();
-		PxCollection* collection = PhysXSDK->createCollection();
-		collection->deserialize(mem16, convexRefs, NULL);
-
-		PxU32 numObjs = collection->getNbObjects();
-		for (PxU32 i = 0; i < numObjs; ++i)
-		{
-			PxSerializable *o = collection->getObject(i);
-			const char * name = o->getConcreteTypeName();
-			PX_ASSERT(name);
-		}
-	}
-
-
-	return true;
+	return ok;
 }
 #endif

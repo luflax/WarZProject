@@ -16,10 +16,75 @@ fork is deliberately cut.
 | | |
 |---|---|
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
-| Source copied | run `tools/bootstrap.sh` |
-| Milestone A — compiles | ⬜ not started |
+| Source copied | ✅ `tools/bootstrap.sh` |
+| **Eternity** (engine core) | ✅ **81/81 TUs compile** |
+| **GameEngine** | ✅ **44/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
+| **EclipseStudio** (client + editors) | ✅ **209/209 TUs compile** |
+| **server/src** (3 server binaries) | ✅ **71/71 TUs compile** |
+| Shared sources, server configuration | ✅ **48/48 TUs compile** |
+| **Milestone A — compiles** | ✅ **done** |
 | Milestone B — links | ⬜ not started |
 | Milestone C — runs to a known point | ⬜ not started |
+
+**Milestone A is complete: the whole product compiles under strict ISO C++20** — 405
+translation units plus 48 re-checked in their server configuration, no `-fpermissive`,
+no commercial SDK. Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686,
+`-std=c++20 -fsyntax-only -fms-extensions`).
+
+Several sources are compiled **twice** across the product — once as client code and once
+with `WO_SERVER` defined, which takes different `#ifdef` branches. `WO_GameServer.vcxproj`
+pulls in 50 files from `src/` and `MasterServer.vcxproj` three more.
+`tools/find_shared_server_sources.py` extracts that list, and `probe.sh` checks it in the
+server configuration:
+
+```bash
+./tools/find_shared_server_sources.py
+FORCE_BINARY=WO_GameServer ./tools/probe.sh @.probe-shared.WO_GameServer
+```
+
+### What replaced what
+
+**All three discontinued SDKs are gone.** PhysX 4.1 is vendored (BSD-3), Autodesk
+Navigation is replaced by Recast & Detour (zlib), Scaleform GFx by RmlUi (MIT).
+
+PhysX 3 → 4 was the largest single piece of work. Renames that could be aliased live in
+`src/External/PhysX/compat/Px3xCompat.h`; the rest were ported by hand:
+
+| Removed in PhysX 4 | How it is handled now |
+|---|---|
+| `PxScene::raycastSingle` / `sweepSingle` / `sweepMultiple` / `overlapAny` / `overlapMultiple` | `PxScene3x`, a derived class in `Px3xCompat.h` that adds them back over PhysX 4's buffer API. `PhysXWorld::PhysXScene` is typed as `PxScene3x*`, so ~35 call sites are untouched. |
+| `PxVehicleWheelsDynData::getSuspJounce` / `getSteer` | `PxVehicleWheelQueryResult`, plumbed through `PxVehicleUpdates` and exposed by `VehicleManager::GetWheelQueryResults` |
+| `PxVehicleWheels::isInAir` | `PxVehicleIsInAir(wheelQueryResult)` |
+| `PxRigidActor::createShape` | `PxRigidActorExt::createExclusiveShape` |
+| `PxShape::getWorldBounds` | `PxShapeExt::getWorldBounds(shape, actor)` |
+| RepX (`RepXCollection`, `instantiateCollection`) | `PxSerialization::createCollectionFromXml` + an explicit type-dispatch walk over the `PxCollection` |
+| `PxBatchQueryDesc` buffer fields | `PxBatchQueryMemory`, sized through the descriptor's constructor |
+
+**Deliberate behaviour changes**, all marked `[PORT]` in the source:
+
+- **PhysX PVD is left disconnected.** PhysX 4 needs the `PxPvd` created *before*
+  `PxCreatePhysics`, so restoring it means restructuring `Init()`. The exact sequence is
+  in a comment at the call site.
+- **Convex hulls come from points alone** — `PxConvexMeshDesc::triangles` no longer exists.
+- **No navmesh generation.** Recast's build pipeline belongs in the asset cook, as
+  Kynapse's generator did. `BuildForCurrentLevel`/`LoadPathData` are the seams. The level
+  editor's generator panel now exposes Recast's parameters rather than Kynapse's.
+- **No UI screens.** Every screen is a `.swf`; nothing imports Flash into RML, so each
+  must be re-authored. The RmlUi `RenderInterface` is also still stubbed.
+- **No voice chat, HTTP, gzip, or Steam.** TeamSpeak (client *and* server), Chilkat and
+  Steamworks are all proprietary; each is shimmed to fail cleanly so its subsystem
+  disables itself rather than proceeding half-initialised.
+- **No anti-cheat or gameplay telemetry.** The GameBlocks / FairFight SDK is absent, so
+  `GBClient::Connected()` returns false and every guarded call site is skipped. That
+  disables the server-side aimbot detector, the weapon-cheat projectile accounting, and
+  the whole event stream (kills, chat, item pickups, god-mode attempts). Those call
+  sites are a reasonable seam for a replacement detector.
+- **Zombie nav diagnostics are re-expressed.** Kynapse exposed a `Kaim::Bot` with a
+  visual-debug id, live-path status and a trajectory object; Detour has none of these.
+  The logs now report the agent's `dtCrowd` index, status and avoidance result.
+  `FindBarricade` tests against the barricade itself rather than walking a Kynapse
+  obstacle's spatialised cylinders — which is what the original `TODO` on that line
+  asked for, and is slightly more permissive at corners.
 
 ---
 
@@ -94,17 +159,20 @@ include silently resolves to a header that declares the same API and does nothin
 
 | Shim | Replaces | Runtime consequence |
 |---|---|---|
-| `dxsdk/` | D3DX (**removed from the Windows SDK**) | **None — this one is real**, backed by DirectXMath |
+| `dxsdk/` | D3DX (**removed from the Windows SDK**) | **None — this one is real**: a hand-written, dependency-free scalar implementation |
 | `Scaleform3/` | Scaleform GFx (discontinued 2018) | No UI |
 | `fmod/` | FMOD Ex (commercial) | Silence |
-| `ChilKat/` | Chilkat HTTP (commercial) | No backend connectivity |
+| `ChilKat/` | Chilkat HTTP + gzip (commercial) | No backend connectivity |
 | `ts3_sdk_3/` | TeamSpeak 3 SDK (commercial) | No VOIP |
-| `PhysX/` | PhysX 3.x | Inert physics until PhysX 4.1 is vendored |
-| `CrashRpt/`, `GameBlocks/` | crash reporting, anti-cheat | None meaningful |
+| `Steam/` | Steamworks (proprietary, optional) | Runs standalone |
+| `GameBlocks/` | GameBlocks / FairFight anti-cheat (commercial) | No cheat detection, no telemetry |
+| `CrashRpt/` | crash reporting | None meaningful |
+
+`PhysX/` is **not** a shim — PhysX 4.1 is vendored in full under BSD-3, with a
+`compat/` layer for the 3.x spellings.
 
 Compiled out entirely via flags that already existed upstream — no shim needed:
-`ENABLE_AUTODESK_NAVIGATION=0` (zombie pathing), `ENABLE_WEB_BROWSER=0`, `APEX_ENABLED=0`,
-`__WITH_PB__` and `USE_VMPROTECT` undefined.
+`ENABLE_WEB_BROWSER=0`, `APEX_ENABLED=0`, `__WITH_PB__` and `USE_VMPROTECT` undefined.
 
 **After Phase 1 the game builds and starts, renders nothing, and is silent. That is the
 correct outcome** — each subsystem is restored by a later, independently scoped phase

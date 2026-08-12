@@ -1,4 +1,4 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 #include "GameLevel.h"
 
@@ -7,15 +7,15 @@
 #endif // WO_SERVER
 
 #include "GameCommon.h"
-#include "GameObjects\gameobj.h"
+#include "gameobjects/GameObj.h"
 #ifndef WO_SERVER
-#include "GameObjects\objmanag.h"
+#include "gameobjects/ObjManag.h"
 #endif // WO_SERVER
 
-#include "Lake.h"
+#include "Lake.H"
 #ifndef WO_SERVER
 #include "EnvmapProbes.h"
-#include "TrueNature2\Terrain3.h"
+#include "TrueNature2/Terrain3.h"
 
 
 LPDIRECT3DVERTEXDECLARATION9 R3D_WATER_VERTEX::pDecl = 0;

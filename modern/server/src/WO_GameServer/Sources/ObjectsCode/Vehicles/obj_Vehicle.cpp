@@ -1,11 +1,11 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "multiplayer/P2PMessages.h"
 
 #include "obj_Vehicle.h"
 #include "obj_VehicleSpawnPoint.h"
-#include "GameObjects/VehicleDescriptor.h"
+#include "gameobjects/VehicleDescriptor.h"
 #include "../obj_ServerPlayer.h"
 #include "../obj_ServerBarricade.h"
 #include "../../GameEngine/ai/AutodeskNav/AutodeskNavMesh.h"
@@ -465,7 +465,7 @@ void obj_Vehicle::IsHittingGeomtry(r3dPoint3D dir)
 	{
 		PhysicsCallbackObject* target = NULL;
 
-		if (sweepHits[i].shape && (target = static_cast<PhysicsCallbackObject*>(sweepHits[i].shape->getActor().userData)))
+		if (sweepHits[i].shape && (target = static_cast<PhysicsCallbackObject*>(sweepHits[i].shape->getActor()->userData)))
 		{
 			GameObject* gameObj = target->isGameObject();
 			if (!gameObj)
@@ -612,7 +612,7 @@ bool obj_Vehicle::IsExitSafe(int seatPosition, r3dPoint3D& outPosition)
 		{
 			PhysicsCallbackObject* target = NULL;
 
-			if (hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+			if (hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 			{
 				GameObject* gameObj = target->isGameObject();
 				if (!gameObj || !gameObj->isObjType(OBJTYPE_Terrain))
@@ -627,7 +627,7 @@ bool obj_Vehicle::IsExitSafe(int seatPosition, r3dPoint3D& outPosition)
 		}
 		else
 		{
-			outPosition = r3dPoint3D(hit.impact.x, hit.impact.y + 0.25f, hit.impact.z);
+			outPosition = r3dPoint3D(hit.position.x, hit.position.y + 0.25f, hit.position.z);
 		}
 	}
 

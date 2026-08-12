@@ -2,7 +2,7 @@
 #ifndef __PWAR_OBJECT_LampBulb_H
 #define __PWAR_OBJECT_LampBulb_H
 
-#include "GameObjects\GameObj.h"
+#include "gameobjects/GameObj.h"
 #include "TimeGradient.h"
 #include "Tsg_stl/HashTable.h"
 

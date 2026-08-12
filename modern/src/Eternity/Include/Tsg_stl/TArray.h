@@ -18,11 +18,23 @@ extern bool r3dOutToLog(const char* Str, ...);
 namespace r3dTL
 {
 
+
+// PORT NOTE: MSVC inline _asm replaced with a portable return-address intrinsic.
+// The original captured EIP via "call $+5 / pop eax", which is 32-bit x86 MSVC only.
+#ifndef R3D_RETURN_ADDRESS
+  #if defined(_MSC_VER)
+    #include <intrin.h>
+    #define R3D_RETURN_ADDRESS() (_ReturnAddress())
+  #else
+    #define R3D_RETURN_ADDRESS() (__builtin_return_address(0))
+  #endif
+#endif
+
 #define R3D_TARRAY_CHECKBOUNDS(idx_)								\
 	if( (idx_) >= mCount )											\
 	{																\
 		void* EIPVal;												\
-		{ __asm call $ + 5 __asm pop eax __asm mov EIPVal, eax }	\
+		EIPVal = R3D_RETURN_ADDRESS();	\
 		ReportOutOfBounds( idx_, __FUNCTION__, EIPVal );			\
 	}
 
@@ -30,7 +42,7 @@ namespace r3dTL
 	if( !mCount )													\
 	{																\
 		void* EIPVal;												\
-		{ __asm call $ + 5 __asm pop eax __asm mov EIPVal, eax }	\
+		EIPVal = R3D_RETURN_ADDRESS();	\
 		ReportOutOfBounds( 0, __FUNCTION__, EIPVal );				\
 	}
 

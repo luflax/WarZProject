@@ -1,9 +1,9 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "UI\r3dMenu.h"	// for MenuLayer
-#include "UI\UICurveEditor.h"
-#include "UI\UIimEdit.h"
+#include "UI/r3dMenu.h"	// for MenuLayer
+#include "UI/UICurveEditor.h"
+#include "UI/UIimEdit.h"
 
 #pragma warning (disable: 4244)
 

@@ -1,26 +1,27 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "APIScaleformGfx.h"
-#include "AI_Player.h"
+#include "AI_Player.H"
 #include "AI_PlayerAnim.h"
 
 #include "r3dPhysSkeleton.h"
 
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 
 #include "Particle.h"
 
-#include "ObjectsCode/world/DecalChief.h"
-#include "ObjectsCode/world/MaterialTypes.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
 
-#include "ObjectsCode/weapons/Weapon.h"
+#include "ObjectsCode/WEAPONS/Weapon.h"
 
-#include "ObjectsCode/weapons/Gear.h"
+#include "ObjectsCode/WEAPONS/Gear.h"
 #include "ObjectsCode/WEAPONS/Ammo.h"
-#include "ObjectsCode/weapons/Grenade.h"
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "ObjectsCode/weapons/ExplosionVisualController.h"
+#include "ObjectsCode/WEAPONS/Grenade.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/ExplosionVisualController.h"
 
 #include "ObjectsCode/Gameplay/obj_PlayerSpawnPoint.h"
 #include "ObjectsCode/Gameplay/obj_DamageArea.h"
@@ -49,18 +50,18 @@
 #include "../SF/CmdProcessor/CmdProcessor.h"
 #include "../SF/CmdProcessor/CmdConsole.h"
 
-#include "..\..\ui\HUDDisplay.h"
-#include "..\..\ui\HUD_EditorGame.h"
-#include "..\..\ui\FrontEndShared.h"
-#include "..\..\ui\HUDPause.h"
-#include "..\..\ui\HUDVault.h"
-#include "..\..\ui\HUDSafelock.h"
-#include "..\..\ui\HUDTrade.h"
-#include "..\..\ui\HUDStore.h"
-#include "..\..\ui\HUDActionUI.h"
-#include "..\..\ui\HUDAttachments.h"
-#include "..\..\ui\HUDRepair.h"
-#include "..\..\ui\HUDCrafting.h"
+#include "../../UI/HUDDisplay.h"
+#include "../../UI/HUD_EditorGame.h"
+#include "../../UI/FrontEndShared.h"
+#include "../../UI/HUDPause.h"
+#include "../../UI/HUDVault.h"
+#include "../../UI/HUDSafelock.h"
+#include "../../UI/HUDTrade.h"
+#include "../../UI/HUDStore.h"
+#include "../../UI/HUDActionUI.h"
+#include "../../UI/HUDAttachments.h"
+#include "../../UI/HUDRepair.h"
+#include "../../UI/HUDCrafting.h"
 
 extern HUDDisplay*	hudMain;
 extern HUDPause*	hudPause;
@@ -90,7 +91,7 @@ float		_ai_NetPosUpdateDelta = 1.0f / 10;	// "30"
 
 bool		g_CameraInsidePlayer = false;
 
-#include "../../rendering/Deffered/PFX_ScopeEffect.h"
+#include "../../RENDERING/Deffered/PFX_ScopeEffect.h"
 extern int g_RenderScopeEffect;
 extern PFX_ScopeEffect gPFX_ScopeEffect;
 
@@ -1904,7 +1905,7 @@ static bool updateShootingTarget(obj_Player* pl, const r3dPoint3D& shootFrom, co
 
 		if( recheckCollisionAgainsMuzzler && hit.shape )
 		{
-			r3dPoint3D impactPos = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);
+			r3dPoint3D impactPos = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);
 			r3dPoint3D dir2 = (impactPos - pl->GetPosition()).Normalize();
 			if (dirWithSpread.Dot(dir2) < 0.0f)
 			{
@@ -1929,10 +1930,10 @@ static bool updateShootingTarget(obj_Player* pl, const r3dPoint3D& shootFrom, co
 			}
 		}
 		
-		if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+		if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 		{
 			if(actorName)
-				*actorName = hit.shape->getActor().getName();
+				*actorName = hit.shape->getActor()->getName();
 
 			PxU32 faceIndex = hit.faceIndex;
 			{
@@ -1962,9 +1963,9 @@ static bool updateShootingTarget(obj_Player* pl, const r3dPoint3D& shootFrom, co
 			if (!*sMat)
 				*sMat = target->GetMaterial(faceIndex);
 
-			sPos.x = hit.impact.x;
-			sPos.y = hit.impact.y;
-			sPos.z = hit.impact.z;
+			sPos.x = hit.position.x;
+			sPos.y = hit.position.y;
+			sPos.z = hit.position.z;
 
 			sNorm.x = hit.normal.x;
 			sNorm.y = hit.normal.y;
@@ -2024,10 +2025,10 @@ static bool updateMeleeTarget(obj_Player* pl, const r3dPoint3D& shootFrom, const
 			g_pPhysicsWorld->raycastSingle(PxVec3(shootFrom.x, shootFrom.y, shootFrom.z), PxVec3(dirWithSpread.x, dirWithSpread.y, dirWithSpread.z), MAX_CASTING_DISTANCE, 
 				PxSceneQueryFlag::eIMPACT|PxSceneQueryFlag::eNORMAL, hit, filter);
 
-			if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+			if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 			{
 				if(actorName)
-					*actorName = hit.shape->getActor().getName();
+					*actorName = hit.shape->getActor()->getName();
 
 				PxU32 faceIndex = hit.faceIndex;
 				{
@@ -2056,9 +2057,9 @@ static bool updateMeleeTarget(obj_Player* pl, const r3dPoint3D& shootFrom, const
 				if (!*sMat)
 					*sMat = target->GetMaterial(faceIndex);
 
-				sPos.x = hit.impact.x;
-				sPos.y = hit.impact.y;
-				sPos.z = hit.impact.z;
+				sPos.x = hit.position.x;
+				sPos.y = hit.position.y;
+				sPos.z = hit.position.z;
 
 				sNorm.x = hit.normal.x;
 				sNorm.y = hit.normal.y;
@@ -2534,7 +2535,7 @@ void obj_Player::CheckFireWeapon()
 						PxRaycastHit hit;
 						PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_PLAYER_COLLIDABLE_MASK,0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eSTATIC));
 						if(g_pPhysicsWorld->raycastSingle(PxVec3(pos.x, pos.y, pos.z), PxVec3(0,-1,0), 3.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter))
-							pos = r3dPoint3D(hit.impact.x, hit.impact.y+0.1f, hit.impact.z);
+							pos = r3dPoint3D(hit.position.x, hit.position.y+0.1f, hit.position.z);
 					}
 					localPlayer_UseItem(wpn->m_BackpackIdx, wi.itemID, pos, var1);
 
@@ -3773,9 +3774,9 @@ bool obj_Player::IsInWater( float& waterDepth, float& waterLevel )
 		return false;
 	}
 
-	posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);
+	posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);
 	waterDepth = getWaterDepthAtPos(posForWater);
-	waterLevel = hit.impact.y + waterDepth;
+	waterLevel = hit.position.y + waterDepth;
 
 	// In the water
 	if( waterDepth >= 0 )
@@ -4162,7 +4163,7 @@ void obj_Player::StartJump()
 		bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(newPos.x, newPos.y + 0.5f, newPos.z), PxVec3(0, -1, 0), 10.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 		r3dPoint3D posForWater = newPos;
 		if( hitResult )
-			posForWater = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);			
+			posForWater = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);			
 
 		float waterDepth = getWaterDepthAtPos(posForWater);
 		float allowedDepth = 1.5f;
@@ -4627,9 +4628,9 @@ BOOL obj_Player::Update()
 				PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK|(1<<PHYSCOLL_NETWORKPLAYER), 0, 0, 0), PxSceneQueryFilterFlag::eSTATIC);
 				if(g_pPhysicsWorld->raycastSingle(PxVec3(n.pos.x, n.pos.y+2, n.pos.z), PxVec3(0, -1, 0), 4, PxSceneQueryFlag::eIMPACT, hit, filter))
 				{
-					n.pos.x = hit.impact.x;
-					n.pos.y = hit.impact.y;
-					n.pos.z = hit.impact.z;
+					n.pos.x = hit.position.x;
+					n.pos.y = hit.position.y;
+					n.pos.z = hit.position.z;
 				}
 
 				p2pSendToHost(this, &n, sizeof(n));
@@ -4647,7 +4648,7 @@ BOOL obj_Player::Update()
 			PxTransform pose(PxVec3(GetPosition().x, GetPosition().y+0.5f, GetPosition().z));
 			if(g_pPhysicsWorld->PhysXScene->sweepSingle(boxg, pose, PxVec3(0,-1,0), 2000.0f, PxSceneQueryFlag::eIMPACT, hit, filter))
 			{
-				r3dOutToLog("@@@@ %.2f, %.2f, %.2f\n", hit.impact.x, hit.impact.y, hit.impact.z);
+				r3dOutToLog("@@@@ %.2f, %.2f, %.2f\n", hit.position.x, hit.position.y, hit.position.z);
 			}
 		}
 	}*/
@@ -5455,7 +5456,7 @@ void obj_Player::UpdateActionUI()
 					{
 						// check if we hit our object
 						PhysicsCallbackObject* target = NULL;
-						if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+						if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 						{
 							if(target->isGameObject() == obj)
 								isVisible = true;
@@ -5505,7 +5506,7 @@ void obj_Player::UpdateActionUI()
 							{
 								// check if we hit our object
 								PhysicsCallbackObject* target = NULL;
-								if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+								if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 								{
 									if(target->isGameObject() == plr)
 										isVisible = true;
@@ -5874,7 +5875,7 @@ void obj_Player::AddBloodOnGround(const r3dPoint3D& posOfShot)
 			PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK,0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eSTATIC|PxSceneQueryFilterFlag::eDYNAMIC));
 			if(g_pPhysicsWorld->raycastSingle(PxVec3(posOfShot.x, posOfShot.y, posOfShot.z), PxVec3(0, -1, 0), 10.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT|PxSceneQueryFlag::eNORMAL), hit, filter))
 			{
-				blood_pos = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);
+				blood_pos = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);
 				blood_norm = r3dPoint3D(hit.normal.x, hit.normal.y, hit.normal.z);
 				has_collision = true;
 			}
@@ -8096,8 +8097,9 @@ public:
 	{
 		if(shape)
 		{
-			PxRigidActor& actor = shape->getActor();
-			PhysicsCallbackObject* target = static_cast<PhysicsCallbackObject*>(actor.userData);
+			// [PORT] PhysX 4's PxShape::getActor() returns a pointer, not a reference.
+			PxRigidActor* actor = shape->getActor();
+			PhysicsCallbackObject* target = actor ? static_cast<PhysicsCallbackObject*>(actor->userData) : nullptr;
 			if(target)
 			{
 				GameObject *gameObj = target->isGameObject();
@@ -8267,7 +8269,7 @@ obj_Player::AppendRenderables( RenderArray ( & render_arrays  )[ rsCount ], cons
 						if(g_pPhysicsWorld->raycastSingle(PxVec3(m_BarricadeMeshPlacementPosition.x, m_BarricadeMeshPlacementPosition.y+4.5f, m_BarricadeMeshPlacementPosition.z), PxVec3(0,-1,0), 100.5f, PxSceneQueryFlags(PxSceneQueryFlag::eDISTANCE|PxSceneQueryFlag::eIMPACT), hit, filter))
 						{
 							PhysicsCallbackObject* target = NULL;
-							if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+							if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 							{
 								GameObject *gameObj = target->isGameObject();
 								if(gameObj && gameObj->isObjType(OBJTYPE_GameplayItem) && gameObj->Class->Name == "obj_Barricade")
@@ -8322,7 +8324,7 @@ obj_Player::AppendRenderables( RenderArray ( & render_arrays  )[ rsCount ], cons
 							for(int i=0; i<numRes; ++i)
 							{
 								PhysicsCallbackObject* clbObj = NULL;
-								if( results[i] && (clbObj = static_cast<PhysicsCallbackObject*>(results[i]->getActor().userData)))
+								if( results[i] && (clbObj = static_cast<PhysicsCallbackObject*>(results[i]->getActor()->userData)))
 								{
 									GameObject* gameObj = clbObj->isGameObject();
 									if(gameObj && gameObj->isObjType(OBJTYPE_GameplayItem))
@@ -8489,7 +8491,7 @@ void obj_Player::UpdateFootsteps()
 	bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(GetPosition().x, GetPosition().y + 0.5f, GetPosition().z), PxVec3(0, -1, 0), 1.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 	if( hitResult )
 	{
-		if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+		if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 		{
 			PxU32 faceIndex = hit.faceIndex;
 			{
@@ -8974,7 +8976,7 @@ obj_Vehicle* obj_Player::IsNearVehicle()
 	if(g_pPhysicsWorld->raycastSingle(PxVec3(GetPosition().x, GetPosition().y + 1.5f, GetPosition().z), PxVec3(rayDir.x, rayDir.y, rayDir.z), rayLen, PxSceneQueryFlag::eIMPACT, hit, filter))
 	{
 		PhysicsCallbackObject* callbackObj = NULL;
-		if(hit.shape && (callbackObj = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+		if(hit.shape && (callbackObj = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 		{
 			GameObject* gameObj = callbackObj->isGameObject();
 			if(gameObj && gameObj->isObjType(OBJTYPE_Vehicle))
@@ -9099,9 +9101,9 @@ bool obj_Player::TestExitPosition( r3dVector& exitPosition, bool ignoreGround)
 		PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK, 0, 0, 0), PxSceneQueryFilterFlag::eSTATIC);
 		if(g_pPhysicsWorld->raycastSingle(PxVec3(exitPosition.x, exitPosition.y+1, exitPosition.z), PxVec3(0, -1, 0), 2, PxSceneQueryFlag::eIMPACT, hit, filter))
 		{
-			exitPosition.x = hit.impact.x;
-			exitPosition.y = hit.impact.y;
-			exitPosition.z = hit.impact.z;
+			exitPosition.x = hit.position.x;
+			exitPosition.y = hit.position.y;
+			exitPosition.z = hit.position.z;
 		} 
 		else 
 		{

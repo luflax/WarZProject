@@ -25,12 +25,12 @@ struct CubemapTransform
 	template<FACE faceIndex>
 	static void getLookAtAndUpVectors(D3DXVECTOR3& lookAt, D3DXVECTOR3& up);
 
-	template<> static void getLookAtAndUpVectors<CUBE_POS_X>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 1.0f, 0.0f, 0.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
-	template<> static void getLookAtAndUpVectors<CUBE_NEG_X>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3(-1.0f, 0.0f, 0.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
-	template<> static void getLookAtAndUpVectors<CUBE_POS_Y>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f, 1.0f, 0.0f); up = D3DXVECTOR3(0.0f, 0.0f,-1.0f); }
-	template<> static void getLookAtAndUpVectors<CUBE_NEG_Y>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f,-1.0f, 0.0f); up = D3DXVECTOR3(0.0f, 0.0f, 1.0f); }
-	template<> static void getLookAtAndUpVectors<CUBE_POS_Z>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f, 0.0f, 1.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
-	template<> static void getLookAtAndUpVectors<CUBE_NEG_Z>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f, 0.0f,-1.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
+
+
+
+
+
+
 
 	template<FACE faceIndex>
 	static void getViewMatrix(const D3DXVECTOR3& pos, D3DXMATRIX& view)
@@ -61,3 +61,14 @@ struct CubemapTransform
 		getViewMatrix<CUBE_NEG_Z>(pos, mtx.view[CUBE_NEG_Z]);
 	}
 };
+
+// PORT NOTE: these were explicit specializations declared INSIDE the class body,
+// which ISO C++ forbids -- an explicit specialization must appear at namespace
+// scope. MSVC accepted them in place. Behaviour is unchanged.
+template<> inline void CubemapTransform::getLookAtAndUpVectors<CubemapTransform::CUBE_POS_X>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 1.0f, 0.0f, 0.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
+template<> inline void CubemapTransform::getLookAtAndUpVectors<CubemapTransform::CUBE_NEG_X>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3(-1.0f, 0.0f, 0.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
+template<> inline void CubemapTransform::getLookAtAndUpVectors<CubemapTransform::CUBE_POS_Y>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f, 1.0f, 0.0f); up = D3DXVECTOR3(0.0f, 0.0f,-1.0f); }
+template<> inline void CubemapTransform::getLookAtAndUpVectors<CubemapTransform::CUBE_NEG_Y>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f,-1.0f, 0.0f); up = D3DXVECTOR3(0.0f, 0.0f, 1.0f); }
+template<> inline void CubemapTransform::getLookAtAndUpVectors<CubemapTransform::CUBE_POS_Z>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f, 0.0f, 1.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
+template<> inline void CubemapTransform::getLookAtAndUpVectors<CubemapTransform::CUBE_NEG_Z>(D3DXVECTOR3& lookAt, D3DXVECTOR3& up) { lookAt = D3DXVECTOR3( 0.0f, 0.0f,-1.0f); up = D3DXVECTOR3(0.0f, 1.0f, 0.0f); }
+

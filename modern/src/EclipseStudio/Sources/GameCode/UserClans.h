@@ -206,7 +206,7 @@ class CUserClans
 	  int		NumClanMembers;
 	};
 	ClanCurrentData_s clanCurData_;
-	void		ParseClanCurrentData(pugi::xml_node& xmlNode);
+	void		ParseClanCurrentData(pugi::xml_node xmlNode);
 
 	struct ClanApplication_s
 	{
@@ -217,7 +217,7 @@ class CUserClans
 	};
 	typedef r3dgameList(ClanApplication_s) ClanApplicationList;
 	ClanApplicationList clanApplications_;
-	void		ParseClanApplications(pugi::xml_node& xmlNode);
+	void		ParseClanApplications(pugi::xml_node xmlNode);
 
 	struct ClanInvite_s
 	{
@@ -230,6 +230,6 @@ class CUserClans
 	  int		ClanEmblemColor;
 	};
 	r3dgameVector(ClanInvite_s) clanInvites_;
-	void		ParseClanInvites(pugi::xml_node& xmlNode);
+	void		ParseClanInvites(pugi::xml_node xmlNode);
 };
 

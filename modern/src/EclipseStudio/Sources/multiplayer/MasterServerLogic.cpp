@@ -5,7 +5,7 @@
 
 #include "MasterServerLogic.h"
 
-#include "ui/m_LoadingScreen.h"
+#include "UI/m_LoadingScreen.h"
 
 	MasterServerLogic gMasterServerLogic;
 

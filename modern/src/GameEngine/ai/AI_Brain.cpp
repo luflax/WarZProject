@@ -451,7 +451,7 @@ bool AI_Brain::UpdateEvaluation( float approxTimeLimit /* = 0.1f */ )
 					// Only need to do the NavAgents search once; it's not going to change during this check.
 					if( numAgentsGroupPriority == UINT_MAX )
 					{
-						std::tr1::unordered_set<uint32_t> PoiTypesSet;
+						std::unordered_set<uint32_t> PoiTypesSet;
 						PoiTypesSet.insert(AutodeskNavAgent::PoiZombie);
 						PoiTypesSet.insert(AutodeskNavAgent::PoiSuperZombie);
 						gAutodeskNavMesh.GetNavAgentsInAABB(m_TacticParams.m_StartPos, r3dPoint3D(5.0f, 2.5f, 5.0f), PoiTypesSet, numAgentsGroupPriority, true );

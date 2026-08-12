@@ -4,9 +4,9 @@
 #include "r3d.h"
 
 #include "GameCommon.h"
-#include "obj_Group.h"
+#include "obj_Group.H"
 
-#include "..\..\Editors\ObjectManipulator3d.h"
+#include "../../Editors/ObjectManipulator3d.h"
 
 //////////////////////////////////////////////////////////////////////////
 

@@ -551,7 +551,7 @@ namespace
 	}
 }
 
-#include "D3Dcommon.h"
+#include "d3dcommon.h"
 
 void SetD3DResourcePrivateData(LPDIRECT3DRESOURCE9 res, const char* FName)
 {
@@ -1900,7 +1900,7 @@ void r3dThumbnailTexture::LoadFullSizeTexture()
 
 //------------------------------------------------------------------------
 
-static void MakeThumbNailInMainThread( void * param )
+/* [PORT] not static: declared friend elsewhere */ void MakeThumbNailInMainThread( void * param )
 {
 	((r3dThumbnailTexture*)param)->DoMakeThumbnail();
 }

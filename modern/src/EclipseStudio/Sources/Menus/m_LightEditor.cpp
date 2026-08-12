@@ -1,12 +1,12 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "menu/m_LightEditor.h"
-#include "menu/UIElements.h"
+#include "m_LightEditor.h"   // [PORT] lives in Sources/UI
+#include "UIElements.h"   // [PORT] lives in Sources/UI
 
 #include "GameCommon.h"
 
-#include "ObjectsCode\World\Lamp.h"
+#include "ObjectsCode/WORLD/Lamp.H"
 #include "GameStart.h"
 
 
