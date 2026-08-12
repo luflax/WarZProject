@@ -308,8 +308,8 @@ UndoAction_e ValueChangeUndo<T>::ActionID()
 	// instantiation; GCC checks non-dependent names at definition time. A
 	// dependent static_assert has the same effect and fires only when used.
 	static_assert(sizeof(T) == 0,
-		"Unsupported type: write a type-specialized version of CreateUndoItem<T>()");
-	return nullptr;
+		"Unsupported type: write a type-specialized version of ActionID<T>()");
+	return UndoAction_e();
 }
 
 template <>

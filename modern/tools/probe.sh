@@ -39,7 +39,7 @@ esac
 # Per-target: a single shared cache replayed the wrong tree's failures.
 CACHE=".probe-failed.$(echo "$TARGET" | tr "/" "_")"
 
-INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/ChilKat/Include -Isrc/External/ts3_sdk_3/include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
+INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseStudio/Sources -Isrc/External -Isrc/External/dxsdk/Include -Isrc/External/Scaleform3/Include -Isrc/External/ChilKat/Include -Isrc/External/Steam -Isrc/External/ts3_sdk_3/include -Isrc/External/RakNet/Source -Isrc/ServerNetPackets -Isrc/External/PhysX/physx-include -Isrc/External/PhysX/pxshared-include -Isrc/External/PhysX/compat -Isrc/External/Recast/Detour/Include -Isrc/External/Recast/DetourCrowd/Include -Isrc/External/Recast/Recast/Include -Isrc/External/RmlUi/Include"
 
 # WO_SERVER strips rendering. PhysX 4.1 is now vendored (BSD-3), so DISABLE_PHYSX is
 # no longer set -- the real SDK headers are used. PX_PHYSX_STATIC_LIB avoids dllimport
@@ -48,12 +48,26 @@ INCLUDES="-Isrc/Eternity/Include -Isrc/Eternity -Isrc/GameEngine -Isrc/EclipseSt
 # and its headers hard-#error if WO_SERVER is set ("client weapon.h included in
 # SERVER"); server/src is the server. Getting this wrong accounted for 22 of the
 # first 94 EclipseStudio failures.
-case "${TARGET:-$FILE}" in
-  *EclipseStudio*) BINARY_DEFINES="-DVEHICLES_ENABLED" ;;
-  *server*)        BINARY_DEFINES="-DWO_SERVER" ;;
-  *)               BINARY_DEFINES="-DWO_SERVER" ;;   # Eternity/GameEngine: smallest surface
-esac
-DEFINES="-DWIN32 -D_WINDOWS $BINARY_DEFINES -DPX_PHYSX_STATIC_LIB -DNDEBUG"
+#
+# GameEngine is shared, so its defines are chosen PER FILE rather than per tree: two of
+# its sources (gameobjects/obj_Vehicle.cpp and VehicleManager.cpp) are listed only in
+# Studio.vcxproj, never in WO_GameServer.vcxproj -- the server has its own obj_Vehicle
+# under server/src/.../Vehicles/. They pull in client headers and must be probed as
+# client code.
+BASE_DEFINES="-DWIN32 -D_WINDOWS -DPX_PHYSX_STATIC_LIB -DNDEBUG"
+CLIENT_ONLY_RE='GameEngine/gameobjects/(obj_Vehicle|VehicleManager)\.cpp$'
+
+defines_for() {
+  case "$1" in
+    *EclipseStudio*) echo "$BASE_DEFINES -DVEHICLES_ENABLED"; return ;;
+    *server*)        echo "$BASE_DEFINES -DWO_SERVER";        return ;;
+  esac
+  if [[ "$1" =~ $CLIENT_ONLY_RE ]]; then
+    echo "$BASE_DEFINES -DVEHICLES_ENABLED"
+  else
+    echo "$BASE_DEFINES -DWO_SERVER"   # Eternity/GameEngine: smallest surface
+  fi
+}
 # No -fpermissive: it masked ~70 real conformance errors behind one root cause
 # (Tsg_stl/TString.h calling unqualified r3dTL::Max). Strict is the honest gate.
 FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"
@@ -63,7 +77,14 @@ FLAGS="-std=c++20 -fsyntax-only -w -fms-extensions"
 # against Source/: r3dObj_OLDRender.cpp is the only one in the engine.
 # Kynapse wrapper implementations, superseded by ai/RecastNav/. Their headers remain
 # as forwarding shims so call sites compile; the .cpp files have no counterpart.
-EXCLUDE_RE='r3dObj_OLDRender\.cpp|AutodeskNav/Autodesk.*\.cpp'
+EXCLUDE_RE='AutodeskNav/Autodesk.*\.cpp'
+
+# Files the ORIGINAL Visual Studio projects never compiled -- dead legacy. Fixing
+# one is pure waste, so they are excluded. Regenerate with tools/find_orphans.py.
+if [[ -s .probe-orphans ]]; then
+  ORPHAN_RE=$(paste -sd'|' .probe-orphans | sed 's/\./\\./g')
+  EXCLUDE_RE="$EXCLUDE_RE|$ORPHAN_RE"
+fi
 
 if [[ $ONLY_FAILED == 1 && -s "$CACHE" ]]; then
   mapfile -t FILES < "$CACHE"
@@ -77,11 +98,13 @@ fi
 OUT=$(mktemp -d)
 trap 'rm -rf "$OUT"' EXIT
 
-export CXX FLAGS INCLUDES DEFINES OUT
+export CXX FLAGS INCLUDES BASE_DEFINES CLIENT_ONLY_RE OUT
+export -f defines_for
 probe_one() {
   local f="$1"
   local tag; tag=$(echo "$f" | tr '/' '_')
-  if err=$($CXX $FLAGS $INCLUDES $DEFINES "$f" 2>&1); then
+  local defines; defines=$(defines_for "$f")
+  if err=$($CXX $FLAGS $INCLUDES $defines "$f" 2>&1); then
     echo "PASS $f" > "$OUT/$tag"
   else
     { echo "FAIL $f"; grep -m1 -E "error:|fatal error:" <<<"$err"; } > "$OUT/$tag"

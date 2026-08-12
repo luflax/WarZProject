@@ -13,7 +13,8 @@ class CLoginSessionPoller
 	DWORD		SessionID_;
 	
 	HANDLE		hPollThread;
-	friend static unsigned int WINAPI PollingThread_Entry(void* param);
+	// [PORT] a friend declaration cannot carry a storage class in ISO C++.
+	friend unsigned int WINAPI PollingThread_Entry(void* param);
 	DWORD		PollingThread();
 	bool		 UpdateLoginSession();
 	

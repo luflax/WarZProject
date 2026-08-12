@@ -1,7 +1,7 @@
 # Porting Lessons
 
-What actually worked, and what wasted time, driving Eternity to 81/81 and GameEngine to
-36/46 under strict C++20 GCC.
+What actually worked, and what wasted time, driving the whole client — Eternity 81/81,
+GameEngine 44/44, EclipseStudio 209/209 — to compile under strict C++20 GCC.
 
 Read this before starting a new tree. Most of it generalises to any MSVC-era codebase.
 
@@ -17,6 +17,8 @@ Measured, repeatedly:
 |---|---|---|
 | `virtual ... = NULL;` in `r3dNetwork.h` | `= 0` | **70 of 82** |
 | `Min`/`Max` unqualified in `Tsg_stl/TString.h` | include + qualify `r3dTL::` | **61 of 81** |
+| `_THROW0` / `_FARQ` in `r3dSTLAllocators.h` | define them at the top of the file | **198** |
+| Wrong `-D` for the tree (`WO_SERVER` on client code) | per-binary defines in `probe.sh` | **22** |
 | Leaked `for(int i…)` scope in `xpsobject.h` | give the second loop its own `i` | **6** |
 | `fmod/soundsys.h` casing | one entry in a skip-list | **9** |
 
@@ -85,6 +87,20 @@ a `.cpp` **dereferences** (`actor->isRigidStatic()`, `hit.position`, `desc.thick
 you need the real SDK. Decide early which side of that line a dependency sits on —
 growing a fake API past it is wasted work.
 
+### The compiler's own suggestion is usually right — but check the direction
+
+`'mNumRatios'; did you mean 'mNbRatios'?` and `'setRigidDynamicFlag'; did you mean
+'setRigidDynamicLockFlags'?` look alike, and only one is correct: the second wanted
+`setRigidBodyFlag`, which GCC never suggested. **Grep the vendored headers before
+accepting a rename.**
+
+### A friend declaration is also a declaration
+
+`friend struct Editor_Level;` inside `namespace Nav`, with no prior declaration of
+`Editor_Level`, befriends `Nav::Editor_Level` — a class that never exists. The real
+`::Editor_Level` gets nothing. Forward-declare at the right scope and write
+`friend struct ::Editor_Level;`. MSVC accepted the original.
+
 ### Watch for your own tooling bugs
 
 - `normalize_includes.py` skipped anything matching `"fmod/"` as a shim path. That also
@@ -129,7 +145,12 @@ Ordered by files affected.
 | `_cdecl` | `__cdecl` |
 | `stdext::hash_map`, `std::tr1::` | `std::unordered_map`, `std::` |
 | `#endif TOKEN` | must be a comment |
-| Anonymous struct in a local union | must live inside a *named* type (or `-fms-extensions`) |
+| Anonymous struct in a local union | `-fms-extensions` only allows this inside a *named* type; at block scope, replace with explicit shifts and masks |
+| Parenthesised return type: `typedef (unsigned int)(WINAPI *f)(void*)` | drop the parentheses |
+| `T::iterator` in a template | `typename T::iterator` — including in the `typedef` that resolves it |
+| Use-before-declaration of a global inside a template body | declare it above the template; non-dependent names resolve at the definition point |
+| Function declared `extern` (or as a friend) then defined `static` | make the two agree |
+| Rebinding a parameter used as an iteration cursor (`node = node.next_sibling()`) | take cheap handles like `pugi::xml_node` **by value**, not by `const&` |
 | Explicit specialization inside a class body | must be at namespace scope |
 | MSVC STL internals (`std::_String_base::_Xlen`) | no libstdc++ equivalent — guard with `_MSC_VER` |
 
@@ -170,6 +191,32 @@ When vendoring a *newer* major version, put the old paths and spellings in a
 `compat/` directory rather than editing call sites — the same trick that makes
 `src/External/` work. `Px3xCompat.h` covers PhysX 3→4 renames in one header included
 from the PCH; only genuinely **removed** APIs needed hand porting.
+
+### Three tiers of compat, cheapest first
+
+1. **A typedef.** `PxSceneQueryFilterData` → `PxQueryFilterData`, `PxRigidDynamicFlag`
+   → `PxRigidBodyFlag`. Free, and invisible at the call site.
+2. **A macro on an enumerator.** `#define eDISTANCE ePOSITION` reached 19 call sites at
+   once. Only safe because the compat header is included *after* the SDK has finished
+   parsing — a macro on a name that common will otherwise detonate somewhere unrelated.
+   Say so in a comment, and check the SDK for other uses of the name first.
+3. **A derived class.** PhysX 4 deleted six `PxScene` query methods with ~35 call sites
+   spelled `scene->raycastSingle(...)`. `class PxScene3x : public PxScene` adds them back
+   as non-virtual forwarders over the new buffer API, and the one member holding the
+   pointer changes type. No data members, no virtuals, so the object's layout and vtable
+   are untouched — it stays abstract and is only handled by pointer. **One declaration
+   change beat 35 rewrites.**
+
+Beyond that, port by hand. Trying to fake `PxVehicleWheelQueryResult` would have meant
+inventing values the simulation actually produces.
+
+### Renames are cheap; removals are the real work
+
+The PhysX 3→4 migration was ~80% mechanical (`impact` → `position`, `getActor()` returning
+a pointer instead of a reference, `PxTransform::createIdentity()` → `PxTransform(PxIdentity)`)
+and ~20% genuinely removed capability that had to be re-plumbed — wheel query results,
+RepX deserialization, batch-query memory. **Sort the list into those two buckets before
+starting**: the first bucket is a `sed` per entry, the second needs a design decision each.
 
 ---
 

@@ -441,7 +441,9 @@ bool hud_ProcessCameraPick(float mx, float my)
 	}
 
 	if ( Terrain && Terrain->IsLoaded() ) {
-		extern BOOL terra_FindIntersection(r3dPoint3D &vFrom, r3dPoint3D &vTo, r3dPoint3D &colpos, int iterations);
+		// [PORT] this local redeclaration had dropped the const on the first two params that
+		// ITerrain.h declares, so the temporaries passed below could not bind.
+		extern BOOL terra_FindIntersection(const r3dPoint3D &vFrom, const r3dPoint3D &vTo, r3dPoint3D &colpos, int iterations);
 		r3dPoint3D v3;
 
 		if(terra_FindIntersection(gCam, gCam + dir*20000, v3, 20000)) 

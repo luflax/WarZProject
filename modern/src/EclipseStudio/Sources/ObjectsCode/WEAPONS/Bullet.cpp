@@ -177,9 +177,9 @@ bool obj_Bullet::OnHit( PxSweepHit &hit )
 	PhysicsCallbackObject* target = NULL;
 	const char * hitActorName = NULL;
 
-	r3dVector hitPoint = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);
+	r3dVector hitPoint = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);
 	r3dVector hitNormal = r3dPoint3D(hit.normal.x, hit.normal.y, hit.normal.z);
-	if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+	if( hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 	{
 		PxU32 faceIndex = hit.faceIndex;
 		{
@@ -195,7 +195,7 @@ bool obj_Bullet::OnHit( PxSweepHit &hit )
 			}
 		}
 
-		hitActorName = hit.shape->getActor().getName(); 
+		hitActorName = hit.shape->getActor()->getName(); 
 		shootTarget= target->isGameObject();
 
 		if( shootTarget)

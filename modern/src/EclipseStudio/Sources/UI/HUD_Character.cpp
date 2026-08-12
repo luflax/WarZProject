@@ -465,7 +465,9 @@ void CharacterHUD :: Process()
 	D3DXVECTOR3 up(0,1,0);
 	D3DXVECTOR4 rup;
 	D3DXVECTOR4 rpos;
-	D3DXVec3Transform(&rpos, &pos, &(t0*mr));
+	// [PORT] &(t0*mr) took the address of a temporary -- an MSVC extension.
+	const D3DXMATRIX camXform = t0 * mr;
+	D3DXVec3Transform(&rpos, &pos, &camXform);
 	D3DXVec3Transform(&rup, &up, &(mr));
 
 // 	D3DXMatrixLookAtRH(&t1, &D3DXVECTOR3(rpos.x, rpos.y, rpos.z), &pos, &up);

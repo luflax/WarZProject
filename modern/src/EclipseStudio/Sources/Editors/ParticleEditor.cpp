@@ -76,7 +76,8 @@ const char * PARTICLE_DATA_PATH_PATTERN = "Data\\Particles\\%s";
 int		curEmitterSlot;
 r3dParticleData*   EditTorch    = NULL;
 
-bool		DrawPickMenu();
+// [PORT] the definition below is static, so this forward declaration must be too.
+static bool	DrawPickMenu();
 
 #pragma warning(push)
 #pragma warning(disable:4244)

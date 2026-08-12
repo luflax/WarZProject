@@ -396,9 +396,9 @@ class CUserProfile
 	virtual ~CUserProfile();
 
 	int 		GetProfile(int CharID = 0);
-	void		 ParseLoadouts(pugi::xml_node& xmlItem);
-	void		 ParseInventory(pugi::xml_node& xmlItem);
-	void		 ParseBackpacks(pugi::xml_node& xmlItem);
+	void		 ParseLoadouts(pugi::xml_node xmlItem);
+	void		 ParseInventory(pugi::xml_node xmlItem);
+	void		 ParseBackpacks(pugi::xml_node xmlItem);
 
 	wiInventoryItem* getInventorySlot(__int64 InventoryID);
 	bool		 haveFreeInventorySlot(bool useLogicalLimit = true);
@@ -406,7 +406,7 @@ class CUserProfile
 
 	int		ApiGetShopData();
 
-	static void	ParseCharData(wiCharDataFull& loadout, pugi::xml_node& xmlItem);
+	static void	ParseCharData(wiCharDataFull& loadout, pugi::xml_node xmlItem);
 #ifdef WO_SERVER
 	static void	SaveCharData(const wiCharDataFull& loadout, pugi::xml_node& xmlItem);
 #endif

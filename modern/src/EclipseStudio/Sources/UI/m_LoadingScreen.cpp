@@ -1,6 +1,11 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
+// [PORT] for _CrtCheckMemory, used in two assertions below. MSVC pulled this in
+// transitively; both MSVC and MinGW ship the header, and both reduce it to a
+// constant 1 outside a debug-CRT build.
+#include <crtdbg.h>
+
 #include "m_LoadingScreen.h"
 #include "GameCode/UserProfile.h"
 

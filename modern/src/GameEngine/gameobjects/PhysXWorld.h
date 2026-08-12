@@ -29,7 +29,9 @@ public:
 	PxFoundation *PhysXFoundation;
 	PxProfileZoneManager *PhysXProfileZoneMgr;
 	physx::PxPhysics*	PhysXSDK;
-	PxScene*		PhysXScene;
+	// [PORT] PxScene3x adds back the PhysX 3.x scene-query methods (raycastSingle,
+	// sweepSingle, overlapAny, ...) that PhysX 4 removed. See External/PhysX/compat/Px3xCompat.h.
+	PxScene3x*		PhysXScene;
 	PxControllerManager* CharacterManager; // create all characters through it for proper physics behavior
 	PxCooking* Cooking; // for cooking meshes for PhysX
 	PxMaterial* defaultMaterial;

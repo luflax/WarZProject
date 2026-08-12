@@ -325,7 +325,8 @@ void PrefabManager::ValidatePrefabs()
 					);
 
 					bool removeInstances = MessageBoxA(r3dRenderer->HLibWin, buf, "WARNING", MB_YESNO | MB_ICONWARNING) == IDYES;
-					IncorrectPrefabsMap::_Pairib rv = incorrectPrefabsMap.insert(IncorrectPrefabsMap::value_type(p->prefabName, removeInstances));
+					// [PORT] _Pairib is an MSVC STL internal name for std::pair<iterator, bool>.
+					auto rv = incorrectPrefabsMap.insert(IncorrectPrefabsMap::value_type(p->prefabName, removeInstances));
 					itr = rv.first;
 				}
 			}

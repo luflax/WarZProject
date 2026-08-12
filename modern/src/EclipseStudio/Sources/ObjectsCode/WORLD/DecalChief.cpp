@@ -1732,8 +1732,12 @@ DecalChief::Close()
 	delete mVB; mVB = NULL;
 	delete mIB; mIB = NULL;
 
-	mVertices.Swap( Vertices() );
-	mIndices.Swap( Indices() );
+	// [PORT] Swap() takes a non-const reference, so the empty containers it swaps
+	// against cannot be temporaries.
+	Vertices emptyVertices;
+	Indices  emptyIndices;
+	mVertices.Swap( emptyVertices );
+	mIndices.Swap( emptyIndices );
 }
 
 //------------------------------------------------------------------------

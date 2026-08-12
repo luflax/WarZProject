@@ -124,6 +124,10 @@ struct D3DXVECTOR3 : public D3DVECTOR
 // D3DX spelled this both ways in different headers; the codebase uses both.
 using D3DXVector3 = D3DXVECTOR3;
 
+// scalar * vector -- the member operator only covers vector * scalar.
+inline D3DXVECTOR2 operator*(float s, const D3DXVECTOR2& v) { return v * s; }
+inline D3DXVECTOR3 operator*(float s, const D3DXVECTOR3& v) { return D3DXVECTOR3(s * v.x, s * v.y, s * v.z); }
+
 struct D3DXVECTOR4
 {
     float x, y, z, w;
@@ -138,10 +142,15 @@ struct D3DXVECTOR4
     D3DXVECTOR4 operator+(const D3DXVECTOR4& v) const { return D3DXVECTOR4(x + v.x, y + v.y, z + v.z, w + v.w); }
     D3DXVECTOR4 operator-(const D3DXVECTOR4& v) const { return D3DXVECTOR4(x - v.x, y - v.y, z - v.z, w - v.w); }
     D3DXVECTOR4 operator*(float s) const              { return D3DXVECTOR4(x * s, y * s, z * s, w * s); }
+    D3DXVECTOR4 operator/(float s) const              { return D3DXVECTOR4(x / s, y / s, z / s, w / s); }
+    D3DXVECTOR4 operator-() const                     { return D3DXVECTOR4(-x, -y, -z, -w); }
     D3DXVECTOR4& operator*=(float s) { x *= s; y *= s; z *= s; w *= s; return *this; }
+    D3DXVECTOR4& operator/=(float s) { x /= s; y /= s; z /= s; w /= s; return *this; }
     D3DXVECTOR4& operator+=(const D3DXVECTOR4& v) { x += v.x; y += v.y; z += v.z; w += v.w; return *this; }
     D3DXVECTOR4& operator-=(const D3DXVECTOR4& v) { x -= v.x; y -= v.y; z -= v.z; w -= v.w; return *this; }
 };
+
+inline D3DXVECTOR4 operator*(float s, const D3DXVECTOR4& v) { return v * s; }
 
 struct D3DXQUATERNION
 {

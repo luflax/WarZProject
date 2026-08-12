@@ -916,7 +916,7 @@ void Weapon::Update(const D3DXMATRIX& weaponBone)
 				PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK|(1<<PHYSCOLL_NETWORKPLAYER),0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eSTATIC|PxSceneQueryFilterFlag::eDYNAMIC));
 				bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(laserCastPos.x, laserCastPos.y, laserCastPos.z), PxVec3(laserCastDir.x, laserCastDir.y, laserCastDir.z), 500.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 				if( hitResult )
-					m_LaserHitPoint = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);
+					m_LaserHitPoint = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);
 				else
 					m_LaserHitPoint.Assign(0,0,0);
 			}
@@ -972,7 +972,7 @@ void Weapon::Update(const D3DXMATRIX& weaponBone)
 				PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK|(1<<PHYSCOLL_NETWORKPLAYER),0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eSTATIC|PxSceneQueryFilterFlag::eDYNAMIC));
 				bool hitResult = g_pPhysicsWorld->raycastSingle(PxVec3(laserCastPos.x, laserCastPos.y, laserCastPos.z), PxVec3(laserCastDir.x, laserCastDir.y, laserCastDir.z), 500.0f, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter);
 				if( hitResult )
-					m_LaserHitPoint = r3dPoint3D(hit.impact.x, hit.impact.y, hit.impact.z);
+					m_LaserHitPoint = r3dPoint3D(hit.position.x, hit.position.y, hit.position.z);
 				else
 					m_LaserHitPoint.Assign(0,0,0);
 			}

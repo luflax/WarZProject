@@ -595,7 +595,7 @@ void PhysXWorld::Init()
 	sceneDesc.flags |= PxSceneFlag::eENABLE_CCD;
 #endif
 
-	PhysXScene = PhysXSDK->createScene(sceneDesc);	
+	PhysXScene = PxAsScene3x( PhysXSDK->createScene(sceneDesc) );	
 	if (!PhysXScene) 
 		r3dError("PhysX: can't create physics scene!");
 

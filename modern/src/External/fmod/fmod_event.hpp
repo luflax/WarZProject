@@ -64,6 +64,9 @@ enum FMOD_EVENT_PROPERTY
     FMOD_EVENTPROPERTY_3D_MINDISTANCE,
     FMOD_EVENTPROPERTY_3D_MAXDISTANCE,
     FMOD_EVENTPROPERTY_MODE,
+    FMOD_EVENTPROPERTY_NAME,
+    FMOD_EVENTPROPERTY_3D_POSITION,
+    FMOD_EVENTPROPERTY_SPAWNINTENSITY,
 };
 
 // Bit flags, combined with | and assigned back, so a plain integer type rather
@@ -113,6 +116,10 @@ using FMOD_EVENT_INITFLAGS = unsigned int;
 
 // Sound creation modes (bit flags on FMOD_MODE)
 #define FMOD_3D                       0x00000010
+
+// 3D position mode, compared against the value of FMOD_EVENTPROPERTY_3D_POSITION.
+#define FMOD_3D_HEADRELATIVE          0x00000400
+#define FMOD_3D_WORLDRELATIVE         0x00000800
 #define FMOD_CREATECOMPRESSEDSAMPLE   0x00000200
 #define FMOD_SOFTWARE                 0x00000040
 

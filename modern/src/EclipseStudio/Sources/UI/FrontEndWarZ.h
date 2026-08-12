@@ -213,7 +213,9 @@ private:
 	// Async Function Calls
 	//
 	typedef void (FrontendWarZ::*fn_finish)();
-	typedef (unsigned int)(WINAPI *fn_thread)(void*);
+	// [PORT] the return type was parenthesised -- "(unsigned int)(WINAPI *fn_thread)(void*)"
+	// -- which only MSVC accepts.
+	typedef unsigned int (WINAPI *fn_thread)(void*);
 
 	float		lastServerReqTime_;
 	void		DelayServerRequest();

@@ -90,7 +90,7 @@ BOOL obj_PlayerSpawnPoint::Update()
 			PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK,0,0,0), PxSceneQueryFilterFlags(PxSceneQueryFilterFlag::eSTATIC));
 			if(g_pPhysicsWorld->raycastSingle(from, PxVec3(0,-1,0), 10000, PxSceneQueryFlags(PxSceneQueryFlag::eIMPACT), hit, filter))
 			{
-				r3dPoint3D hitPos(hit.impact.x, hit.impact.y, hit.impact.z);
+				r3dPoint3D hitPos(hit.position.x, hit.position.y, hit.position.z);
 				if(R3D_ABS(m_SpawnPoints[i].pos.y - hitPos.y) > 2.0f)
 				{
 					r3dArtBug("Player CP Spawn at %.2f, %.2f, %.2f has spawn position(index=%d) in the air at %.2f, %.2f, %.2f\n", 

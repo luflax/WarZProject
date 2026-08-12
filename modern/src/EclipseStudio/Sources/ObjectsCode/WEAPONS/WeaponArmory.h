@@ -26,7 +26,7 @@ public:
 
 	virtual void UnloadMeshes();
 	
-	void updateLootBoxContent(pugi::xml_node& xmlLootBox, int srvLootType = 0);
+	void updateLootBoxContent(pugi::xml_node xmlLootBox, int srvLootType = 0);
 
 	// returns pointer to a weapon, or null if not found
 	// you are responsible for deleting pointer after you are done

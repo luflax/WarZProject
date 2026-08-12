@@ -85,9 +85,9 @@ GameObject* Ammo::Fire(const r3dPoint3D& hitPos, const r3dPoint3D& muzzlerPos, c
 		// muzzlePos is the correct position for the hands.
 		if(g_pPhysicsWorld->raycastSingle(PxVec3(muzzlerPos.x, muzzlerPos.y+1, muzzlerPos.z), PxVec3(0, -1, 0), 50.0f, PxSceneQueryFlag::eIMPACT, hit, filter))
 		{
-			spawnPos.x = hit.impact.x;
-			spawnPos.y = hit.impact.y;
-			spawnPos.z = hit.impact.z;
+			spawnPos.x = hit.position.x;
+			spawnPos.y = hit.position.y;
+			spawnPos.z = hit.position.z;
 		}
 			
 		spawnRot.x = (plr->m_fPlayerRotation) + R3D_RAD2DEG(plr->bodyAdjust_x) + 180;

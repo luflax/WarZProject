@@ -3,6 +3,7 @@
 //	Copyright (C) Online Warmongers Group Inc. 2013.
 //=========================================================================
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "obj_MissionStateObject.h"

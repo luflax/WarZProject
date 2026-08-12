@@ -58,7 +58,9 @@ extern void GameFrameStart();
 extern bool IsNeedExit();
 extern void InputUpdate();
 
-extern EGameResult PlayNetworkGame();
+// [PORT] was declared extern here but defined static below, and no other translation
+// unit references it -- so the declaration follows the definition.
+static EGameResult PlayNetworkGame();
 
 void tempDoMsgLoop()
 {

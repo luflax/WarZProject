@@ -9,6 +9,8 @@
 
 #include "r3d.h"
 #include "extensions/PxStringTableExt.h"
+// [PORT] PxRigidActorExt::createExclusiveShape replaces PxRigidActor::createShape.
+#include "extensions/PxRigidActorExt.h"
 #include "PhysXWorld.h"
 #include "PhysXRepXHelpers.h"
 #include "ObjManag.h"
@@ -166,7 +168,9 @@ namespace
 		PxFilterData filterData1,
 		const void* constantBlock,
 		PxU32 constantBlockSize,
-		PxSceneQueryFilterFlags& filterFlags
+		// [PORT] PxBatchQueryPreFilterShader takes PxHitFlags& in PhysX 4; in 3.x this
+		// was the query-filter flags.
+		PxHitFlags& filterFlags
 	)
 	{
 		//filterData0 is the vehicle suspension raycast.
@@ -196,7 +200,9 @@ namespace
 		PhysxUserMemoryWriteStream buf;
 		if(cooking.cookConvexMesh(convexDesc, buf))
 		{
-			convexMesh = physics.createConvexMesh(PhysxUserMemoryReadStream(buf.getData(), buf.getSize()));
+			// [PORT] createConvexMesh takes PxInputStream& -- a temporary cannot bind.
+			PhysxUserMemoryReadStream cookedStream(buf.getData(), buf.getSize());
+			convexMesh = physics.createConvexMesh(cookedStream);
 		}
 
 		return convexMesh;
@@ -310,7 +316,7 @@ namespace
 		//Add all the wheel shapes to the actor.
 		for (PxU32 i = 0; i < numWheelGeometries; i++)
 		{
-			PxShape* wheelShape = vehActor->createShape(wheelGeometries[i], *wheelMaterial);
+			PxShape* wheelShape = PxRigidActorExt::createExclusiveShape(*vehActor, wheelGeometries[i], *wheelMaterial);
 			wheelShape->setQueryFilterData(vehQryFilterData);
 			wheelShape->setSimulationFilterData(wheelCollFilterData);
 			wheelShape->setLocalPose(wheelLocalPoses[i]);
@@ -319,7 +325,7 @@ namespace
 		//Add the chassis shapes to the actor.
 		for (PxU32 i = 0; i < numChassisGeometries; i++)
 		{
-			PxShape* chassisShape = vehActor->createShape(chassisGeometries[i], *chassisMaterial);
+			PxShape* chassisShape = PxRigidActorExt::createExclusiveShape(*vehActor, chassisGeometries[i], *chassisMaterial);
 			chassisShape->setQueryFilterData(vehQryFilterData);
 			chassisShape->setSimulationFilterData(chassisCollFilterData);
 			chassisShape->setLocalPose(chassisLocalPoses[i]);
@@ -328,21 +334,21 @@ namespace
 		// Add the seat shapes to the actor.
 		for (PxU32 i = 0; i < numSeats; ++i)
 		{
-			PxShape* seatShape = vehActor->createShape(PxSphereGeometry(0.25f), *g_pPhysicsWorld->defaultMaterial);
+			PxShape* seatShape = PxRigidActorExt::createExclusiveShape(*vehActor, PxSphereGeometry(0.25f), *g_pPhysicsWorld->defaultMaterial);
 			seatShape->setQueryFilterData(vehQryFilterData); //PxFilterData(PHYSCOLL_TINY_GEOMETRY, 0, 0, VEHICLE_NONDRIVABLE_SURFACE));
 			seatShape->setLocalPose(seatLocalPoses[i]);
 		}
 
 		for (PxU32 i = 0; i < numTurrets; ++i)
 		{
-			PxShape* turretShape = vehActor->createShape(PxSphereGeometry(0.25f), *g_pPhysicsWorld->defaultMaterial);
+			PxShape* turretShape = PxRigidActorExt::createExclusiveShape(*vehActor, PxSphereGeometry(0.25f), *g_pPhysicsWorld->defaultMaterial);
 			turretShape->setQueryFilterData(vehQryFilterData);
 			turretShape->setLocalPose(turretLocalPoses[i]);
 		}
 
 		vehActor->setMass(chassisData.mMass);
 		vehActor->setMassSpaceInertiaTensor(chassisData.mMOI);
-		vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset,PxQuat::createIdentity()));
+		vehActor->setCMassLocalPose(PxTransform(chassisData.mCMOffset,PxQuat(PxIdentity)));
 	}
 
 //////////////////////////////////////////////////////////////////////////
@@ -434,9 +440,9 @@ namespace
 
 		//Ackermann steer accuracy
 		PxVehicleAckermannGeometryData &ackermann = vd.ackermannData;
-		ackermann.mAxleSeparation = std::abs(wheelCenterOffsets[PxVehicleDrive4W::eFRONT_LEFT_WHEEL].z - wheelCenterOffsets[PxVehicleDrive4W::eREAR_LEFT_WHEEL].z);
-		ackermann.mFrontWidth = std::abs(wheelCenterOffsets[PxVehicleDrive4W::eFRONT_RIGHT_WHEEL].x - wheelCenterOffsets[PxVehicleDrive4W::eFRONT_LEFT_WHEEL].x);
-		ackermann.mRearWidth = std::abs(wheelCenterOffsets[PxVehicleDrive4W::eREAR_RIGHT_WHEEL].x - wheelCenterOffsets[PxVehicleDrive4W::eREAR_LEFT_WHEEL].x);
+		ackermann.mAxleSeparation = std::abs(wheelCenterOffsets[PxVehicleDrive4WWheelOrder::eFRONT_LEFT].z - wheelCenterOffsets[PxVehicleDrive4WWheelOrder::eREAR_LEFT].z);
+		ackermann.mFrontWidth = std::abs(wheelCenterOffsets[PxVehicleDrive4WWheelOrder::eFRONT_RIGHT].x - wheelCenterOffsets[PxVehicleDrive4WWheelOrder::eFRONT_LEFT].x);
+		ackermann.mRearWidth = std::abs(wheelCenterOffsets[PxVehicleDrive4WWheelOrder::eREAR_RIGHT].x - wheelCenterOffsets[PxVehicleDrive4WWheelOrder::eREAR_LEFT].x);
 
 		vd.ConfigureVehicleSimulationData(&driveData, &wheelsData);
 
@@ -449,7 +455,7 @@ namespace
 	{
 		//We need a rigid body actor for the vehicle.
 		//Don't forget to add the actor the scene after setting up the associated vehicle.
-		PxRigidDynamic* vehActor = g_pPhysicsWorld->PhysXSDK->createRigidDynamic(PxTransform::createIdentity());
+		PxRigidDynamic* vehActor = g_pPhysicsWorld->PhysXSDK->createRigidDynamic(PxTransform(PxIdentity));
 
 		//We need to add wheel collision shapes, a material for the wheels, and a simulation filter for the wheels.
 		r3dTL::TFixedArray<PxConvexMeshGeometry, MAX_WHEELS_COUNT> wheelGeoms;
@@ -457,7 +463,7 @@ namespace
 		for (uint32_t i = 0; i < vd.numWheels; ++i)
 		{
 			wheelGeoms[i] = PxConvexMeshGeometry(wheels[i]);
-			wheelLocalPoses[i] = PxTransform::createIdentity();
+			wheelLocalPoses[i] = PxTransform(PxIdentity);
 		}
 		PxMaterial& wheelMaterial = *g_pPhysicsWorld->defaultMaterial;
 		PxFilterData wheelCollFilterData;
@@ -468,7 +474,7 @@ namespace
 		PxConvexMeshGeometry chassisConvexGeom(&hull);
 
 		//We need to specify the local poses of the chassis composite shapes.
-		PxTransform chassisLocalPoses[1] = {PxTransform::createIdentity()};
+		PxTransform chassisLocalPoses[1] = {PxTransform(PxIdentity)};
 
 		PxMaterial& chassisMaterial = *g_pPhysicsWorld->defaultMaterial;
 		PxFilterData chassisCollFilterData;
@@ -481,7 +487,7 @@ namespace
 		{
 			r3dVector seat = vd.skl->Bones[vd.seatBonesRemapIndices[i]].vRelPlacement;
 			seat.RotateAroundY( 90 );
-			seatLocalPoses[i] = PxTransform::createIdentity();
+			seatLocalPoses[i] = PxTransform(PxIdentity);
 			seatLocalPoses[i].p = PxVec3(seat.x, seat.y, seat.z);
 		}
 
@@ -490,7 +496,7 @@ namespace
 		{
 			r3dVector turret = vd.skl->Bones[vd.turretBonesRemapIndices[i]].vRelPlacement;
 			turret.RotateAroundY( 90 );
-			turretLocalPoses[i] = PxTransform::createIdentity();
+			turretLocalPoses[i] = PxTransform(PxIdentity);
 			turretLocalPoses[i].p = PxVec3(turret.x, turret.y, turret.z);
 		}
 
@@ -528,7 +534,7 @@ VehicleManager::VehicleManager()
 , vehiclesLoaded(false)
 , activeVehicles(0)
 , hasDrivableCar(false)
-, tankControlData(PxVehicleDriveTank::eDRIVE_MODEL_STANDARD)
+, tankControlData(PxVehicleDriveTankControlModel::eSTANDARD)
 {
 	r3d_assert(g_pPhysicsWorld);
 	r3d_assert(g_pPhysicsWorld->PhysXSDK);
@@ -638,7 +644,30 @@ void VehicleManager::Update(float timeStep)
 		
 		PxVehicleSuspensionRaycasts(batchSuspensionRaycasts, activeVehicles, &physxVehs[0], batchQueryResults.Count(), &batchQueryResults.GetFirst());
 
-		PxVehicleUpdates(timeStep, g_pPhysicsWorld->PhysXScene->getGravity(), *surfaceTypePairs, activeVehicles, &physxVehs[0]);
+		// [PORT] PhysX 4 fills suspension jounce and steer angle into these results
+		// rather than exposing them on PxVehicleWheelsDynData. One entry per active
+		// vehicle, each pointing at that vehicle's slice of the flat wheel array.
+		wheelQueryResults.Resize(activeVehicles);
+		{
+			PxU32 wheelBase = 0;
+			for (int i = 0; i < activeVehicles; ++i)
+			{
+				const PxU32 nbWheels = physxVehs[i]->mWheelsSimData.getNbWheels();
+				if (wheelBase + nbWheels > (PxU32)wheelQueryStorage.Count())
+				{
+					// Should not happen -- ConfigureSuspensionRaycasts sizes this per
+					// vehicle -- but a short buffer would corrupt memory, so clamp.
+					wheelQueryResults[i].nbWheelQueryResults = 0;
+					wheelQueryResults[i].wheelQueryResults   = NULL;
+					continue;
+				}
+				wheelQueryResults[i].nbWheelQueryResults = nbWheels;
+				wheelQueryResults[i].wheelQueryResults   = &wheelQueryStorage[wheelBase];
+				wheelBase += nbWheels;
+			}
+		}
+
+		PxVehicleUpdates(timeStep, g_pPhysicsWorld->PhysXScene->getGravity(), *surfaceTypePairs, activeVehicles, &physxVehs[0], &wheelQueryResults[0]);
 	}
 
 	if (gClientLogic().localPlayer_ && gClientLogic().localPlayer_->IsInVehicle())
@@ -708,7 +737,11 @@ void VehicleManager::DoUserCarControl(float timeStep)
 			carControlData.setDigitalBrake(accel);
 		}
 
-		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, carControlData, timeStep, car);
+		// [PORT] PhysX 4 added an isVehicleInAir argument -- 3.x read it off the vehicle
+		// internally. Sourced from the last update's wheel query results.
+		const PxVehicleWheelQueryResult* wqr = GetWheelQueryResults(&car);
+		const bool vehicleInAir = wqr ? PxVehicleIsInAir(*wqr) : false;
+		PxVehicleDrive4WSmoothDigitalRawInputsAndSetAnalogInputs(gKeySmoothingData, gSteerVsForwardSpeedTable, carControlData, timeStep, vehicleInAir, car);
 		clearInputData = true;
 	}
 }
@@ -736,7 +769,11 @@ bool VehicleManager::ProcessAutoReverse(float timestep)
 	bool justRaisedFlag = false;
 	if(brake && !mAtRestUnderBraking)
 	{
-		bool isInAir = car.isInAir();
+		// [PORT] PxVehicleWheels::isInAir() is gone; PhysX 4 derives it from the wheel
+		// query results of the last update. No results yet (first frame) means the
+		// vehicle has not been simulated, so it is not airborne.
+		const PxVehicleWheelQueryResult* wqr = GetWheelQueryResults(&car);
+		bool isInAir = wqr ? PxVehicleIsInAir(*wqr) : false;
 		VehicleForwardSpeed = PxAbs(car.computeForwardSpeed());
 		VehicleSidewaySpeed = PxAbs(car.computeSidewaysSpeed());
 
@@ -991,19 +1028,20 @@ VehicleDescriptor * VehicleManager::CreateVehicle(const r3dMesh *m, PhysicsCallb
 	{
 		if (vd->hasTracks == 0)
 		{
-			vd->vehicle->setWheelShapeMapping(i, i);
+			// [PORT] PhysX 4 moved these off the vehicle and onto its wheel sim data.
+			vd->vehicle->mWheelsSimData.setWheelShapeMapping(i, i);
 			PxShape *wheel = 0;
 			vehActor->getShapes(&wheel, 1, i);
 			if (wheel)
-				vd->vehicle->setSceneQueryFilterData(i, wheel->getQueryFilterData());
+				vd->vehicle->mWheelsSimData.setSceneQueryFilterData(i, wheel->getQueryFilterData());
 		}
 		else
 		{
-			vd->tank->setWheelShapeMapping(i, i);
+			vd->tank->mWheelsSimData.setWheelShapeMapping(i, i);
 			PxShape *wheel = 0;
 			vehActor->getShapes(&wheel, 1, i);
 			if (wheel)
-				vd->tank->setSceneQueryFilterData(i, wheel->getQueryFilterData());
+				vd->tank->mWheelsSimData.setSceneQueryFilterData(i, wheel->getQueryFilterData());
 		}
 	}
 
@@ -1039,11 +1077,35 @@ VehicleDescriptor * VehicleManager::CreateVehicle(const r3dMesh *m, PhysicsCallb
 
 //////////////////////////////////////////////////////////////////////////
 
+// [PORT] PhysX 4 reports per-wheel simulation output through PxVehicleWheelQueryResult
+// instead of on PxVehicleWheelsDynData. The results are indexed the same way as
+// physxVehs, which Update() rebuilds every frame from the active vehicles.
+const PxVehicleWheelQueryResult* VehicleManager::GetWheelQueryResults(const PxVehicleWheels* veh) const
+{
+	if (!veh)
+		return NULL;
+
+	const int n = physxVehs.Count() < wheelQueryResults.Count()
+	            ? physxVehs.Count() : wheelQueryResults.Count();
+	for (int i = 0; i < n; ++i)
+	{
+		if (physxVehs[i] == veh)
+			return &wheelQueryResults[i];
+	}
+	return NULL;
+}
+
+//////////////////////////////////////////////////////////////////////////
+
 void VehicleManager::ConfigureSuspensionRaycasts(const VehicleDescriptor &car)
 {
 	//	Increase suspension raycasts buffers
 	batchHits.Resize(batchHits.Count() + car.numWheels);
 	batchQueryResults.Resize(batchQueryResults.Count() + car.numWheels);
+
+	//	[PORT] the per-wheel simulation output PhysX 4 requires is sized the same way:
+	//	one PxWheelQueryResult per wheel across all vehicles.
+	wheelQueryStorage.Resize(wheelQueryStorage.Count() + car.numWheels);
 
 	//	Clear current batch query, it will be recreated in next update with new data
 	ClearSuspensionRaycatsQuery();
@@ -1053,10 +1115,14 @@ void VehicleManager::ConfigureSuspensionRaycasts(const VehicleDescriptor &car)
 
 PxBatchQuery * VehicleManager::SetUpBatchedSceneQuery()
 {
-	PxBatchQueryDesc bqd;
-	bqd.userRaycastHitBuffer = &batchHits.GetFirst();
-	bqd.userRaycastResultBuffer = &batchQueryResults.GetFirst();
-	bqd.raycastHitBufferSize = batchHits.Count();
+	// [PORT] PhysX 4 moved the batch-query buffers into PxBatchQueryMemory, whose
+	// capacities are fixed by the descriptor's constructor. There is one raycast (and
+	// one touch) per wheel across all vehicles, so both counts are batchHits.Count();
+	// sweeps and overlaps are unused.
+	PxBatchQueryDesc bqd(batchQueryResults.Count(), 0, 0);
+	bqd.queryMemory.userRaycastResultBuffer = &batchQueryResults.GetFirst();
+	bqd.queryMemory.userRaycastTouchBuffer  = &batchHits.GetFirst();
+	bqd.queryMemory.raycastTouchBufferSize  = batchHits.Count();
 	bqd.preFilterShader = &VehicleWheelRaycastPreFilter;
 	return g_pPhysicsWorld->PhysXScene->createBatchQuery(bqd);
 }
@@ -1186,7 +1252,7 @@ VehicleCameraController::VehicleCameraController()
 , mLastCarPos(0, 0, 0)
 , mLastCarVelocity(0, 0, 0)
 , mCameraInit(false)
-, mLastFocusVehTransform(PxTransform::createIdentity())
+, mLastFocusVehTransform(PxTransform(PxIdentity))
 , mCameraRotateAngleY(0)
 , mCameraRotateAngleZ(0.38f)
 , mCounter(0)

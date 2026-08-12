@@ -650,7 +650,7 @@ static void renormalizeLootBox(LootBoxConfig* lootBox)
         return;
 }
 
-void WeaponArmory::updateLootBoxContent(pugi::xml_node& xmlLootBox, int srvLootType)
+void WeaponArmory::updateLootBoxContent(pugi::xml_node xmlLootBox, int srvLootType)
 {
 	xmlLootBox = xmlLootBox.first_child();
 	while(!xmlLootBox.empty())

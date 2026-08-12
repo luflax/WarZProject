@@ -505,7 +505,7 @@ r3dPoint3D getAdjustedPointTo(obj_Player* pl, const r3dPoint3D& PointTo, const r
             PxSceneQueryFilterData filter(PxFilterData(COLLIDABLE_STATIC_MASK|(1<<PHYSCOLL_NETWORKPLAYER), 0, 0, 0), PxSceneQueryFilterFlag::eSTATIC|PxSceneQueryFilterFlag::eDYNAMIC);
             if(g_pPhysicsWorld->raycastSingle(PxVec3(gCam.x, gCam.y, gCam.z), PxVec3(dir.x, dir.y, dir.z), 2000.0f, PxSceneQueryFlag::eIMPACT|PxSceneQueryFlag::eDISTANCE, hit, filter))
             {
-                currentLookAt.Assign(hit.impact.x, hit.impact.y, hit.impact.z);
+                currentLookAt.Assign(hit.position.x, hit.position.y, hit.position.z);
                 currentLookAtDist = hit.distance;
             }
             else

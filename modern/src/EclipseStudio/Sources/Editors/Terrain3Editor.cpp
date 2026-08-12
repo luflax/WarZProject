@@ -122,11 +122,13 @@ void Terrain3Editor::OptimizeMaskCache( T& cache )
 
 	if( diffCount > 0 )
 	{
-		typedef std::map< int, T::iterator > SortBasedOnFreshness;
+		// [PORT] T is a template parameter, so T::iterator is a dependent name and needs
+		// `typename`. MSVC's delayed template parsing let it through bare.
+		typedef std::map< int, typename T::iterator > SortBasedOnFreshness;
 
 		SortBasedOnFreshness sortBasedOnFreshness;
 
-		for( T::iterator	i = cache.begin(), 
+		for( typename T::iterator	i = cache.begin(), 
 							e = cache.end();
 											
 							i != e;
@@ -134,10 +136,10 @@ void Terrain3Editor::OptimizeMaskCache( T& cache )
 							++ i
 							)
 		{
-			sortBasedOnFreshness.insert( SortBasedOnFreshness::value_type( i->second.Freshness, i ) );
+			sortBasedOnFreshness.insert( typename SortBasedOnFreshness::value_type( i->second.Freshness, i ) );
 		}
 
-		for( SortBasedOnFreshness::iterator i = sortBasedOnFreshness.begin(), 
+		for( typename SortBasedOnFreshness::iterator i = sortBasedOnFreshness.begin(), 
 											e = sortBasedOnFreshness.end();
 
 											i != e && diffCount > 0 ;
@@ -2369,17 +2371,12 @@ void Terrain3Editor::RebuildLayerInfo()
 					{
 						Terrain3->UnpackMask( &m_TempUShorts, m_TempPackedMaskTexture, m_TempUnpackedMaskTexture, tx, tz, L, m );
 
-						union
-						{
-							struct
-							{
-								UINT16 b : 5;
-								UINT16 g : 6;
-								UINT16 r : 5;
-							};
-
-							UINT16 sample;
-						};
+						// [PORT] was an anonymous struct inside an anonymous union at block
+						// scope -- an MSVC extension GCC rejects even with -fms-extensions,
+						// which only permits it inside a NAMED type. The bitfields were
+						// b:5, g:6, r:5, so under MSVC's little-endian layout b sits in the
+						// low bits; the shifts below reproduce exactly that.
+						UINT16 sample;
 
 						int r_present = 0;
 						int g_present = 0;
@@ -2388,6 +2385,10 @@ void Terrain3Editor::RebuildLayerInfo()
 						for( int i = 0, e = (int)m_TempUShorts.Count(); i < e; i ++ )
 						{
 							sample = m_TempUShorts[ i ];
+
+							const UINT16 b = (UINT16)(  sample         & 0x1F );
+							const UINT16 g = (UINT16)( (sample >>  5 ) & 0x3F );
+							const UINT16 r = (UINT16)( (sample >> 11 ) & 0x1F );
 
 							if( r ) r_present = 1;
 							if( g ) g_present = 1;
@@ -2619,36 +2620,27 @@ void Terrain3Editor::UpdateLayerMaskMipFromTemps( int tx, int tz, int maskId, Ti
 				int gsum = 0;
 				int bsum = 0;
 
-				union
-				{
-					struct
-					{
-						UINT16 r : 5;
-						UINT16 g : 6;
-						UINT16 b : 5;
-					};
-
-					UINT16 sample;
-				};
-
+				// [PORT] same anonymous-struct-in-anonymous-union extension as above. Note
+				// these bitfields are declared in the OPPOSITE order to the other site --
+				// r:5, g:6, b:5 -- so here it is r that occupies the low bits.
 				for( int i = 0; i < 4; i ++ )
 				{
-					sample = m_TempUShorts[ srcIdxes[ i ] ];
+					const UINT16 sample = m_TempUShorts[ srcIdxes[ i ] ];
 
-					rsum += r;
-					gsum += g;
-					bsum += b;
+					rsum += (int)(  sample         & 0x1F );
+					gsum += (int)( (sample >>  5 ) & 0x3F );
+					bsum += (int)( (sample >> 11 ) & 0x1F );
 				}
 
 				rsum /= 4;
 				gsum /= 4;
 				bsum /= 4;
 
-				r = rsum;
-				g = gsum;
-				b = bsum;
+				const UINT16 packed = (UINT16)( ( rsum         & 0x1F )
+											  | ( ( gsum <<  5 ) & 0x7E0 )
+											  | ( ( bsum << 11 ) & 0xF800 ) );
 
-				m_TempUShorts2[ z * qs.MaskAtlasTileDim + x ] = sample;
+				m_TempUShorts2[ z * qs.MaskAtlasTileDim + x ] = packed;
 			}
 		}
 

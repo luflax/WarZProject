@@ -17,67 +17,49 @@ fork is deliberately cut.
 |---|---|
 | Scaffolding | ✅ build system, shim layer, bootstrap script |
 | Source copied | ✅ `tools/bootstrap.sh` |
-| **Eternity** (engine core) | ✅ **81/81 TUs compile** — strict C++20, no `-fpermissive` |
-| **GameEngine** | 🟢 **42/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
-| **EclipseStudio** (client + editors) | 🟡 **149/224 TUs compile** |
+| **Eternity** (engine core) | ✅ **81/81 TUs compile** |
+| **GameEngine** | ✅ **44/44 TUs compile** — PhysX 4.1, Recast/Detour and RmlUi all in |
+| **EclipseStudio** (client + editors) | ✅ **209/209 TUs compile** |
 | server/src | ⬜ not started (~156 files) |
 | Milestone B — links | ⬜ not started |
 | Milestone C — runs to a known point | ⬜ not started |
 
-Measured with `./tools/probe.sh <dir>` (MinGW-w64 i686, `-std=c++20`, **no `-fpermissive`**).
+**The entire client compiles under strict ISO C++20** — 334 translation units, no
+`-fpermissive`, no commercial SDK. Measured with `./tools/probe.sh <dir>`
+(MinGW-w64 i686, `-std=c++20 -fsyntax-only -fms-extensions`).
 
-### GameEngine: what the 10 remaining failures need
+### What replaced what
 
-**PhysX is done.** 4.1 is vendored (BSD-3) with a 3.x→4.1 compat layer, and the four
-files that used APIs PhysX 4 *removed* have been ported by hand rather than aliased.
+**All three discontinued SDKs are gone.** PhysX 4.1 is vendored (BSD-3), Autodesk
+Navigation is replaced by Recast & Detour (zlib), Scaleform GFx by RmlUi (MIT).
 
-| Blocked on | Files | Path forward |
-|---|---|---|
-| **Autodesk Navigation** | 7 — `AI_Brain`, `AI_Tactics`, five `AutodeskNav*` wrappers | Unobtainable (discontinued). Replace with Recast & Detour |
-| **EclipseStudio client surface** | 2 — `obj_Vehicle`, `VehicleManager` | Pull in client weapon/UI headers; unblocked when EclipseStudio is ported |
-| **Scaleform GFx** | 1 — `APIScaleformGfx.cpp` | Drives the full Loader/Movie/Renderer/FontProvider API; a port target for RmlUi, not a shim target |
+PhysX 3 → 4 was the largest single piece of work. Renames that could be aliased live in
+`src/External/PhysX/compat/Px3xCompat.h`; the rest were ported by hand:
 
-#### What the PhysX port involved
-
-| File | 3.x API that PhysX 4 removed | Ported to |
-|---|---|---|
-| `PhysXRepXHelpers` | `RepXCollection`, `buildExtensionList`, `RepXUpgrader` | `PxSerialization::createCollectionFromXml` — one call replaces all of it |
-| `PhysXWorld` | RepX scene export, `PxSerializable`, `PxUserReferences`, the PVD connection manager, `raycastMultiple`, `PxProfileZoneManager` | `PxCollectionExt::createCollection` + `serializeCollectionToXml`; `PxRaycastBuffer`; PVD left disconnected (see below) |
-| `PhysObj` | `PxControllerDesc::interactionMode`/`groupsBitmask`/`callback`, `PxControllerFilters::mActiveGroups`, `raycastAny` | `reportCallback`, `mFilterData`, `raycast` + `PxQueryFlag::eANY_HIT` |
-| `Terrain3` | `PxPhysics::createHeightField(desc)`, `PxHeightFieldDesc::thickness` | `PxCooking::createHeightField(desc, insertionCallback)` |
-
-**Two deliberate behaviour changes**, both marked `[PORT]` in the source:
-
-- **PVD is left disconnected.** PhysX 4 requires the `PxPvd` to be created *before*
-  `PxCreatePhysics` and passed into it, so reinstating it means restructuring `Init()`.
-  PVD is a debug-only convenience; the exact call sequence to restore it is written out
-  in a comment at the call site.
-- **`PxConvexMeshDesc::triangles` is gone** — PhysX 4 computes convex hulls from the
-  point cloud alone, so the index data is no longer supplied and `eINFLATE_CONVEX`
-  became a cooking parameter.
-
-Dead code was dropped rather than ported: everything after the original `return true;`
-in `ExportWholeScene` was unreachable (an abandoned binary-serialization experiment).
-
----|---|---|
-| **Autodesk Navigation** | 7 — `AI_Brain`, `AI_Tactics`, five `AutodeskNav*` wrappers | Unobtainable (discontinued). Replace with Recast & Detour |
-| **PhysX 3.x APIs removed in 4.1** | 4 — `PhysXWorld`, `PhysXRepXHelpers`, `PhysObj`, `Terrain3` | Genuine porting, not aliasing — see below |
-| **EclipseStudio client surface** | 2 — `obj_Vehicle`, `VehicleManager` | Blocked until EclipseStudio is ported |
-| **Scaleform GFx** | 1 — `APIScaleformGfx.cpp` | Drives the full Loader/Movie/Renderer API; a port target, not a shim target |
-
-The four PhysX files use APIs that PhysX 4 **removed outright**, so no alias can bridge
-them:
-
-| File | Needs |
+| Removed in PhysX 4 | How it is handled now |
 |---|---|
-| `PhysXRepXHelpers` | RepX 3.x (`RepXCollection`, `instantiateCollection`) → `PxSerialization` + `PxRepXSerializer` |
-| `PhysXWorld` | 3.x serialization (`PxSerializable`, `PxSerialFlags`) and the old PVD connection manager |
-| `PhysObj` | `PxControllerDesc::interactionMode`, `groupsBitmask`, `PxControllerFilters::mActiveGroups` — all gone |
-| `Terrain3` | heightfield cooking now goes through `PxInputStream`; `PxHeightFieldDesc::thickness` removed |
+| `PxScene::raycastSingle` / `sweepSingle` / `sweepMultiple` / `overlapAny` / `overlapMultiple` | `PxScene3x`, a derived class in `Px3xCompat.h` that adds them back over PhysX 4's buffer API. `PhysXWorld::PhysXScene` is typed as `PxScene3x*`, so ~35 call sites are untouched. |
+| `PxVehicleWheelsDynData::getSuspJounce` / `getSteer` | `PxVehicleWheelQueryResult`, plumbed through `PxVehicleUpdates` and exposed by `VehicleManager::GetWheelQueryResults` |
+| `PxVehicleWheels::isInAir` | `PxVehicleIsInAir(wheelQueryResult)` |
+| `PxRigidActor::createShape` | `PxRigidActorExt::createExclusiveShape` |
+| `PxShape::getWorldBounds` | `PxShapeExt::getWorldBounds(shape, actor)` |
+| RepX (`RepXCollection`, `instantiateCollection`) | `PxSerialization::createCollectionFromXml` + an explicit type-dispatch walk over the `PxCollection` |
+| `PxBatchQueryDesc` buffer fields | `PxBatchQueryMemory`, sized through the descriptor's constructor |
 
-A `Scaleform::GFx` **type-surface** shim was added — enough for headers that merely
-declare Scaleform members (`AI_Player.H` holds a `GFx::Value` by value). It deliberately
-does not attempt the full API.
+**Deliberate behaviour changes**, all marked `[PORT]` in the source:
+
+- **PhysX PVD is left disconnected.** PhysX 4 needs the `PxPvd` created *before*
+  `PxCreatePhysics`, so restoring it means restructuring `Init()`. The exact sequence is
+  in a comment at the call site.
+- **Convex hulls come from points alone** — `PxConvexMeshDesc::triangles` no longer exists.
+- **No navmesh generation.** Recast's build pipeline belongs in the asset cook, as
+  Kynapse's generator did. `BuildForCurrentLevel`/`LoadPathData` are the seams. The level
+  editor's generator panel now exposes Recast's parameters rather than Kynapse's.
+- **No UI screens.** Every screen is a `.swf`; nothing imports Flash into RML, so each
+  must be re-authored. The RmlUi `RenderInterface` is also still stubbed.
+- **No voice chat, HTTP, gzip, or Steam.** TeamSpeak, Chilkat and Steamworks are all
+  proprietary; each is shimmed to fail cleanly so its subsystem disables itself rather
+  than proceeding half-initialised.
 
 ---
 
@@ -152,17 +134,19 @@ include silently resolves to a header that declares the same API and does nothin
 
 | Shim | Replaces | Runtime consequence |
 |---|---|---|
-| `dxsdk/` | D3DX (**removed from the Windows SDK**) | **None — this one is real**, backed by DirectXMath |
+| `dxsdk/` | D3DX (**removed from the Windows SDK**) | **None — this one is real**: a hand-written, dependency-free scalar implementation |
 | `Scaleform3/` | Scaleform GFx (discontinued 2018) | No UI |
 | `fmod/` | FMOD Ex (commercial) | Silence |
-| `ChilKat/` | Chilkat HTTP (commercial) | No backend connectivity |
+| `ChilKat/` | Chilkat HTTP + gzip (commercial) | No backend connectivity |
 | `ts3_sdk_3/` | TeamSpeak 3 SDK (commercial) | No VOIP |
-| `PhysX/` | PhysX 3.x | Inert physics until PhysX 4.1 is vendored |
+| `Steam/` | Steamworks (proprietary, optional) | Runs standalone |
 | `CrashRpt/`, `GameBlocks/` | crash reporting, anti-cheat | None meaningful |
 
+`PhysX/` is **not** a shim — PhysX 4.1 is vendored in full under BSD-3, with a
+`compat/` layer for the 3.x spellings.
+
 Compiled out entirely via flags that already existed upstream — no shim needed:
-`ENABLE_AUTODESK_NAVIGATION=0` (zombie pathing), `ENABLE_WEB_BROWSER=0`, `APEX_ENABLED=0`,
-`__WITH_PB__` and `USE_VMPROTECT` undefined.
+`ENABLE_WEB_BROWSER=0`, `APEX_ENABLED=0`, `__WITH_PB__` and `USE_VMPROTECT` undefined.
 
 **After Phase 1 the game builds and starts, renders nothing, and is silent. That is the
 correct outcome** — each subsystem is restored by a later, independently scoped phase

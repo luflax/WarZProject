@@ -71,6 +71,14 @@ const plain_float4 EnvmapConvert64F::ZERO_VAL = { 0.f, 0.f, 0.f, 0.f };
 template< typename Config >
 void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3D& pos, int LDR )
 {
+	// [PORT] Config is a template parameter, so Config::RENDER_FORMAT_TYPE and friends
+	// are DEPENDENT names, and ISO C++ needs `typename` on every one of their ~80 uses.
+	// MSVC's delayed template parsing let them all through unadorned. Resolving the
+	// three type members once here keeps the body below unchanged.
+	typedef typename Config::RENDER_FORMAT_TYPE         RENDER_FORMAT_TYPE;
+	typedef typename Config::RENDER_CHANNEL_FORMAT_TYPE RENDER_CHANNEL_FORMAT_TYPE;
+	typedef typename Config::INTENSITY_TYPE             INTENSITY_TYPE;
+
 #ifdef FINAL_BUILD
 	return;
 #else
@@ -274,12 +282,12 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 
 		struct Avarage
 		{
-			R3D_FORCEINLINE Config::RENDER_FORMAT_TYPE operator() ( Config::RENDER_FORMAT_TYPE v0, Config::RENDER_FORMAT_TYPE v1 )
+			R3D_FORCEINLINE RENDER_FORMAT_TYPE operator() ( RENDER_FORMAT_TYPE v0, RENDER_FORMAT_TYPE v1 )
 			{
 				union RGBA
 				{
-					Config::RENDER_CHANNEL_FORMAT_TYPE rgba[ 4 ];
-					Config::RENDER_FORMAT_TYPE val;
+					RENDER_CHANNEL_FORMAT_TYPE rgba[ 4 ];
+					RENDER_FORMAT_TYPE val;
 				} a, b;
 
 				a.val = v0;
@@ -293,12 +301,12 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 				return a.val;
 			}
 
-			R3D_FORCEINLINE Config::RENDER_FORMAT_TYPE operator() ( Config::RENDER_FORMAT_TYPE v0, Config::RENDER_FORMAT_TYPE v1, Config::RENDER_FORMAT_TYPE v2 )
+			R3D_FORCEINLINE RENDER_FORMAT_TYPE operator() ( RENDER_FORMAT_TYPE v0, RENDER_FORMAT_TYPE v1, RENDER_FORMAT_TYPE v2 )
 			{
 				union RGBA
 				{
-					Config::RENDER_CHANNEL_FORMAT_TYPE rgba[ 4 ];
-					Config::RENDER_FORMAT_TYPE val;
+					RENDER_CHANNEL_FORMAT_TYPE rgba[ 4 ];
+					RENDER_FORMAT_TYPE val;
 				} a, b, c;
 
 				a.val = v0;
@@ -319,13 +327,13 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 		{
 			void operator () ( void* vp0, void* vp1, int step0, int step1, int count )
 			{
-				Config::RENDER_FORMAT_TYPE *p0 = (Config::RENDER_FORMAT_TYPE*)vp0;
-				Config::RENDER_FORMAT_TYPE *p1 = (Config::RENDER_FORMAT_TYPE*)vp1;
+				RENDER_FORMAT_TYPE *p0 = (RENDER_FORMAT_TYPE*)vp0;
+				RENDER_FORMAT_TYPE *p1 = (RENDER_FORMAT_TYPE*)vp1;
 
 				Avarage avg;
 				for( int i = 0, e = count; i < e; i ++ )
 				{
-					Config::RENDER_FORMAT_TYPE a = avg( *p0, *p1 );
+					RENDER_FORMAT_TYPE a = avg( *p0, *p1 );
 					*p0 = a;
 					*p1 = a;
 
@@ -336,13 +344,13 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 
 			void operator () ( void* vp0, void* vp1, void* vp2 )
 			{
-				Config::RENDER_FORMAT_TYPE *p0 = (Config::RENDER_FORMAT_TYPE*)vp0;
-				Config::RENDER_FORMAT_TYPE *p1 = (Config::RENDER_FORMAT_TYPE*)vp1;
-				Config::RENDER_FORMAT_TYPE *p2 = (Config::RENDER_FORMAT_TYPE*)vp2;
+				RENDER_FORMAT_TYPE *p0 = (RENDER_FORMAT_TYPE*)vp0;
+				RENDER_FORMAT_TYPE *p1 = (RENDER_FORMAT_TYPE*)vp1;
+				RENDER_FORMAT_TYPE *p2 = (RENDER_FORMAT_TYPE*)vp2;
 
 				Avarage avg;
 		
-				Config::RENDER_FORMAT_TYPE a = avg( *p0, *p1, *p2 );
+				RENDER_FORMAT_TYPE a = avg( *p0, *p1, *p2 );
 
 				*p0 = a;
 				*p1 = a;
@@ -379,52 +387,52 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 		
 		if( dim > 1 )
 		{
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + 2 * dim - 1,	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim, dim, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim,			(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + 2 * dim - 1, dim, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim,			(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + 2 * dim - 1, dim, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + 2 * dim - 1,	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim, dim, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + 2 * dim - 1,	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim, dim, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim,			(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + 2 * dim - 1, dim, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim,			(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + 2 * dim - 1, dim, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + 2 * dim - 1,	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim, dim, dim, dim - 2 );
 
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim - 2,		(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + 2 * dim - 1, -1, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + 1,				(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim, 1, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + 1,				(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + (dim - 1) * dim + 1, 1, 1, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim - 2,		(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + 1, -1, 1, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim - 2,		(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + 2 * dim - 1, -1, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + 1,				(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim, 1, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + 1,				(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + (dim - 1) * dim + 1, 1, 1, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim - 2,		(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + 1, -1, 1, dim - 2 );
 
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim * ( dim - 1 ) + 1,			(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + 2 * dim - 1, 1, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim * ( dim - 1 ) + dim - 2,	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim, -1, dim, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim * ( dim - 1 ) + 1,			(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + 1, 1, 1, dim - 2 );
-			fixup( (Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim * ( dim - 1 ) + dim - 2,	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + (dim - 1) * dim + 1, -1, 1, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim * ( dim - 1 ) + 1,			(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + 2 * dim - 1, 1, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim * ( dim - 1 ) + dim - 2,	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim, -1, dim, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim * ( dim - 1 ) + 1,			(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + 1, 1, 1, dim - 2 );
+			fixup( (RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim * ( dim - 1 ) + dim - 2,	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + (dim - 1) * dim + 1, -1, 1, dim - 2 );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim * ( dim - 1 ), 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim - 1,
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim - 1 + dim * ( dim - 1 ) );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim * ( dim - 1 ), 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim - 1,
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim - 1 + dim * ( dim - 1 ) );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim - 1 + dim * ( dim - 1 ), 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits,
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim * ( dim - 1 ) );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim - 1 + dim * ( dim - 1 ), 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits,
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim * ( dim - 1 ) );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim * ( dim - 1 ), 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim * ( dim - 1 ),
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim - 1 + dim * ( dim - 1 ) );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim * ( dim - 1 ), 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim * ( dim - 1 ),
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim - 1 + dim * ( dim - 1 ) );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim - 1 + dim * ( dim - 1 ), 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim * ( dim - 1 ) + dim - 1,				
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim * ( dim - 1 ) );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim - 1 + dim * ( dim - 1 ), 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Y ].pBits + dim * ( dim - 1 ) + dim - 1,				
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim * ( dim - 1 ) );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits, 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim * ( dim - 1 ) + dim - 1,
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim - 1 );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits, 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim * ( dim - 1 ) + dim - 1,
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits + dim - 1 );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim - 1, 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim * ( dim - 1 ),
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits + dim - 1, 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim * ( dim - 1 ),
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Z ].pBits );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits, 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits,
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim - 1 );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_X ].pBits, 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits,
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits + dim - 1 );
 
-			fixup(	(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim - 1, 
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim - 1,
-					(Config::RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits );
+			fixup(	(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_X ].pBits + dim - 1, 
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_POSITIVE_Y ].pBits + dim - 1,
+					(RENDER_FORMAT_TYPE*)lrects[ D3DCUBEMAP_FACE_NEGATIVE_Z ].pBits );
 		}
 		else
 		{
@@ -437,13 +445,13 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 				{
 					union RGBA
 					{
-						Config::RENDER_CHANNEL_FORMAT_TYPE rgba[ 4 ];
-						Config::RENDER_FORMAT_TYPE val;
+						RENDER_CHANNEL_FORMAT_TYPE rgba[ 4 ];
+						RENDER_FORMAT_TYPE val;
 					} a;
 
-					a.val = *(Config::RENDER_FORMAT_TYPE*)lrect->pBits;
+					a.val = *(RENDER_FORMAT_TYPE*)lrect->pBits;
 
-					Config::INTENSITY_TYPE intensity = a.rgba[ 0 ] + a.rgba[ 1 ] + a.rgba[ 2 ];
+					INTENSITY_TYPE intensity = a.rgba[ 0 ] + a.rgba[ 1 ] + a.rgba[ 2 ];
 
 					if( intensity > maxIntens )
 					{
@@ -453,8 +461,8 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 
 				}
 
-				Config::RENDER_FORMAT_TYPE maxVal;
-				Config::INTENSITY_TYPE maxIntens;
+				RENDER_FORMAT_TYPE maxVal;
+				INTENSITY_TYPE maxIntens;
 
 			} maxColor = { Config::ZERO_VAL, 0 };
 
@@ -465,7 +473,7 @@ void GenerateEnvmapT( r3dTexture* tex, const r3dString& texName, const r3dPoint3
 
 			for( int f = 0; f < 6; f ++ )
 			{
-				*(Config::RENDER_FORMAT_TYPE*)lrects[ f ].pBits = maxColor.maxVal;
+				*(RENDER_FORMAT_TYPE*)lrects[ f ].pBits = maxColor.maxVal;
 			}
 		}
 

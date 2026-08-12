@@ -914,7 +914,7 @@ bool obj_Zombie::CheckViewToPlayer(const GameObject* obj)
 		AILog(20, "view obstructed\n");
 
 		PhysicsCallbackObject* target = NULL;
-		if(hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor().userData)))
+		if(hit.shape && (target = static_cast<PhysicsCallbackObject*>(hit.shape->getActor()->userData)))
 		{
 			GameObject* obj = target->isGameObject();
 			if(obj)

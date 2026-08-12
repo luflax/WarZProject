@@ -7,6 +7,7 @@
 #include "r3dPhysSkeleton.h"
 
 #include "extensions/PxRigidBodyExt.h"
+#include "extensions/PxShapeExt.h"
 
 #include "RepX/RepX.h"
 #include "RepX/RepXUtility.h"
@@ -14,7 +15,9 @@
 #include "../../../../GameEngine/gameobjects/PhysXRepXHelpers.h"
 #include "r3dBackgroundTaskDispatcher.h"
 
-static class physx::repx::RepXCollection* m_sCollection = NULL;
+// [PORT] PhysX 4 removed RepX. loadCollection() (GameEngine/PhysXRepXHelpers.cpp)
+// now returns a PxCollection built by PxSerialization::createCollectionFromXml.
+static physx::PxCollection* m_sCollection = NULL;
 static class PxStringTable* m_sStringTable = NULL;
 static int m_sCollectionRef = 0;
 
@@ -34,21 +37,25 @@ struct RepXItemAdder
 	: mScene( inScene ), m_Skeleton(skel)
 	{
 	}
-	void operator()( const physx::repx::TRepXId inId, PxConvexMesh* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxTriangleMesh* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxHeightField* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxClothFabric* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxMaterial* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxParticleSystem* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxParticleFluid* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxAggregate* ) {}
-	void operator()( const physx::repx::TRepXId inId, PxRigidStatic* inActor ) 
+	// [PORT] PhysX 3.x's instantiateCollection() called back with one typed overload
+	// per object kind, each tagged with a TRepXId. PhysX 4 hands back a flat
+	// PxCollection of PxBase, so the type dispatch happens here instead. Meshes,
+	// materials, cloth and particle systems were all no-ops before and are simply not
+	// matched now.
+	void Apply( PxBase& obj )
+	{
+		if( PxRigidDynamic* d = obj.is<PxRigidDynamic>() )  { (*this)( d ); return; }
+		if( PxRigidStatic*  st = obj.is<PxRigidStatic>() )  { (*this)( st ); return; }
+		if( PxJoint*        j  = obj.is<PxJoint>() )        { (*this)( j );  return; }
+	}
+
+	void operator()( PxRigidStatic* inActor ) 
 	{
 		r3d_assert(false); // rag doll should be dynamic only, if you have static than you are trying to import static object
 		//mScene->addActor( *inActor ); 
 	}
 
-	void operator()( const physx::repx::TRepXId inId, PxRigidDynamic* inActor ) 
+	void operator()( PxRigidDynamic* inActor ) 
 	{ 
 		if (!inActor)
 			return;
@@ -84,15 +91,13 @@ struct RepXItemAdder
 		// not sure if that is too much mass, or if it should be set from Max, but otherwise PhysX outputs a lot of warnings
 		//PxRigidBodyExt::setMassAndUpdateInertia(*inActor, 10.0f);
 
-		inActor->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, true);
+		inActor->setRigidBodyFlag(PxRigidDynamicFlag::eKINEMATIC, true);
 		inActor->setSleepThreshold(0.1f);
 
 		//mScene->addActor(*inActor);
 	}
 
-	void operator()( const physx::repx::TRepXId inId, PxArticulation* inArticulation ) { }
-	void operator()( const physx::repx::TRepXId inId, PxCloth* inData ) {}
-	void operator()( const physx::repx::TRepXId inId, PxJoint* inJoint ) 
+	void operator()( PxJoint* inJoint ) 
 	{
 		PxTransform p0 = inJoint->getLocalPose(PxJointActorIndex::eACTOR0);
 		PxTransform p1 = inJoint->getLocalPose(PxJointActorIndex::eACTOR1);
@@ -159,7 +164,8 @@ r3dPhysSkeleton::~r3dPhysSkeleton()
 	--m_sCollectionRef;
 	if(m_sCollectionRef == 0)
 	{
-		m_sCollection->destroy();
+		// [PORT] RepXCollection::destroy() -> PxCollection::release().
+		m_sCollection->release();
 		m_sCollection = NULL;
 
 		m_sStringTable->release();
@@ -199,11 +205,16 @@ bool r3dPhysSkeleton::loadSkeleton(const char* fname)
 
 	int numActors = 0;
 	int numJoints = 0;
-	for(const physx::repx::RepXCollectionItem* iter=m_sCollection->begin(); iter!=m_sCollection->end(); ++iter)
+	// [PORT] 3.x iterated RepXCollectionItems and compared mLiveObject.mTypeName as a
+	// string. PxCollection is indexed, and PxBase carries its own concrete type, so the
+	// same counting is a typed test.
+	const PxU32 nbObjects = m_sCollection ? m_sCollection->getNbObjects() : 0;
+	for(PxU32 i = 0; i < nbObjects; ++i)
 	{
-		if(strcmp(iter->mLiveObject.mTypeName, "PxRigidDynamic")==0)
+		PxBase& obj = m_sCollection->getObject(i);
+		if(obj.is<PxRigidDynamic>())
 			++numActors;
-		if(strcmp(iter->mLiveObject.mTypeName, "PxD6Joint")==0)
+		if(obj.is<PxD6Joint>())
 			++numJoints;
 	}
 
@@ -216,9 +227,11 @@ bool r3dPhysSkeleton::loadSkeleton(const char* fname)
 	
 	RepXItemAdder itemAdder(g_pPhysicsWorld->PhysXScene, this);
 
-	//R3D_LOG_TIMESPAN_START(instantiateCollection);
-	instantiateCollection( *m_sCollection, *g_pPhysicsWorld->PhysXSDK, *g_pPhysicsWorld->Cooking, m_sStringTable, itemAdder );
-	//R3D_LOG_TIMESPAN_END(instantiateCollection);
+	// [PORT] instantiateCollection() is gone. PxSerialization::createCollectionFromXml
+	// (inside loadCollection) already produced live PhysX objects, so all that remains
+	// is to walk them and apply the same per-object fix-ups the RepX callbacks did.
+	for(PxU32 i = 0; i < nbObjects; ++i)
+		itemAdder.Apply( m_sCollection->getObject(i) );
 
 	m_Aggregate = g_pPhysicsWorld->PhysXSDK->createAggregate(m_NumBones, false);
 	for(int i=0; i<m_NumBones; ++i)
@@ -388,7 +401,7 @@ void r3dPhysSkeleton::SwitchToRagdoll(bool toRagdoll)
 		return;
 
 	m_isRagdollMode = toRagdoll;
-	const PxTransform identity(PxTransform::createIdentity());
+	const PxTransform identity(PxIdentity);
 	for (int i = 0; i < m_NumBones; ++i)
 	{
 		PxRigidDynamic *a = m_Bones[i].actor;
@@ -397,7 +410,7 @@ void r3dPhysSkeleton::SwitchToRagdoll(bool toRagdoll)
 		if (m_isRagdollMode)
 			a->setKinematicTarget(identity);
 
-		a->setRigidDynamicFlag(PxRigidDynamicFlag::eKINEMATIC, !m_isRagdollMode);
+		a->setRigidBodyFlag(PxRigidDynamicFlag::eKINEMATIC, !m_isRagdollMode);
 
 		if(m_isRagdollMode)
 		{
@@ -517,7 +530,9 @@ r3dBoundBox r3dPhysSkeleton::getWorldBBox() const
 			for (PxU32 j = 0; j < numShapes; ++j)
 			{
 				PxShape *s = shapes[j];
-				PxBounds3 shapeBox = s->getWorldBounds();
+				// [PORT] PhysX 4 dropped PxShape::getWorldBounds(); shapes can be shared
+				// between actors, so the bounds now need the actor to resolve against.
+				PxBounds3 shapeBox = PxShapeExt::getWorldBounds(*s, *a);
 				bbox.include(shapeBox);
 			}
 		}

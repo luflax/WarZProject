@@ -382,7 +382,7 @@ bool WaterBase::Ripples(D3DXVECTOR4& camd)
 			}
 
 
-			r3dRenderer->DrawUP(D3DPT_TRIANGLEFAN, 2, sq, sizeof D3DXVECTOR3);
+			r3dRenderer->DrawUP(D3DPT_TRIANGLEFAN, 2, sq, sizeof(D3DXVECTOR3));
 			ripplesRT[curRipplesRT]->Deactivate();
 		}
 

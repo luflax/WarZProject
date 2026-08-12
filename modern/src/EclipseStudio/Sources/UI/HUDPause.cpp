@@ -1,4 +1,5 @@
 #include "r3dPCH.h"
+#include <algorithm>   // [PORT] MSVC pulled this in transitively
 #include "r3d.h"
 
 #include "../../../Eternity/SF/Console/Config.h"
@@ -1490,7 +1491,7 @@ void HUDPause::reloadBackpackInfo()
 					const BackpackConfig* bpc = g_pWeaponArmory->getBackpackConfig(slot.Items[a].itemID);
 					if(bpc)
 					{
-						if(std::find<r3dgameVector(uint32_t)::iterator, uint32_t>(uniqueBackpacks.begin(), uniqueBackpacks.end(), slot.Items[a].itemID) != uniqueBackpacks.end())
+						if(std::find(uniqueBackpacks.begin(), uniqueBackpacks.end(), slot.Items[a].itemID) != uniqueBackpacks.end())
 							continue;
 
 						// add backpack info

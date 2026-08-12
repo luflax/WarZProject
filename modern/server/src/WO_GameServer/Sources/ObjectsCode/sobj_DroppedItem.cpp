@@ -100,7 +100,7 @@ void obj_DroppedItem::LoadServerObjectData()
 	// deserialize from xml
 	IServerObject::CSrvObjXmlReader xml(srvObjParams_.Var1);
 	m_Item.itemID      = srvObjParams_.ItemID;
-	m_Item.InventoryID = xml.xmlObj.attribute("iid").as_int64();
+	m_Item.InventoryID = xml.xmlObj.attribute("iid").as_llong();
 	m_Item.quantity    = xml.xmlObj.attribute("q").as_int();
 	m_Item.Var1        = xml.xmlObj.attribute("v1").as_int();
 	m_Item.Var2        = xml.xmlObj.attribute("v2").as_int();
