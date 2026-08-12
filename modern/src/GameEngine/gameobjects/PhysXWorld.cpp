@@ -13,6 +13,11 @@
 #include "cooking/PxConvexMeshDesc.h"
 #include "characterkinematic/PxControllerManager.h"
 #include "physxprofilesdk/PxProfileZoneManager.h"
+// [PORT] PhysX 4's PVD API. PxCreatePvd lives in pvd/PxPvd.h and the socket transport
+// factory in pvd/PxPvdTransport.h -- 3.x reached both through PxVisualDebuggerExt,
+// which no longer exists.
+#include "pvd/PxPvd.h"
+#include "pvd/PxPvdTransport.h"
 
 #include "PhysXWorld.h"
 #include "GameObj.h"
@@ -219,6 +224,7 @@ PhysXWorld::PhysXWorld()
 , PhysXProfileZoneMgr(0)
 #ifndef FINAL_BUILD
 , debuggerConnection(0)
+, debuggerTransport(0)
 #endif
 {
 	PhysXSDK = 0;
@@ -483,18 +489,64 @@ void PhysXWorld::Init()
 		r3dError("PxCreateFoundation failed!");
 
 	// [PORT] The profile SDK was removed in PhysX 4. The final PxCreatePhysics
-	// parameter is now a PxPvd*, which is optional and left null here -- PVD is a
-	// debug-only feature and is not wired up in this configuration.
+	// parameter is now a PxPvd*.
 	PhysXProfileZoneMgr = NULL;
 
-	PhysXSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PhysXFoundation, tolerancesScale, recordMemoryAllocations, NULL);
+	// [PORT] PVD, restored. PhysX 3.x connected the debugger after the fact, through
+	// PxVisualDebuggerExt::createConnection(PhysXSDK->getPvdConnectionManager(), ...).
+	// PhysX 4 requires the PxPvd to exist BEFORE PxCreatePhysics, because the SDK
+	// binds its instrumentation at construction -- so creation moves up here, ahead of
+	// the SDK it instruments, and the pointer is threaded into both PxCreatePhysics
+	// and PxInitExtensions.
+	//
+	// The connect() is non-blocking and is expected to fail when no PVD is listening;
+	// that is the normal case and is not an error. Everything downstream works
+	// identically whether it succeeded or not.
+	PxPvd* pvd = NULL;
+
+#ifndef FINAL_BUILD
+	debuggerTransport = PxDefaultPvdSocketTransportCreate(
+							d_physx_pvd_host->GetString(),
+							d_physx_pvd_port->GetInt(),
+							d_physx_pvd_timeout->GetInt());
+
+	if(debuggerTransport)
+	{
+		debuggerConnection = PxCreatePvd(*PhysXFoundation);
+
+		if(debuggerConnection)
+		{
+			if(debuggerConnection->connect(*debuggerTransport, PxPvdInstrumentationFlag::eALL))
+			{
+				r3dOutToLog("PhysX PVD: connected to %s:%d\n",
+							d_physx_pvd_host->GetString(), d_physx_pvd_port->GetInt());
+			}
+			else
+			{
+				r3dOutToLog("PhysX PVD: nothing listening on %s:%d, running uninstrumented\n",
+							d_physx_pvd_host->GetString(), d_physx_pvd_port->GetInt());
+			}
+
+			// Handed to the SDK either way. A PxPvd that is not connected costs
+			// nothing, and reconnecting later needs the object to already exist.
+			pvd = debuggerConnection;
+		}
+		else
+		{
+			debuggerTransport->release();
+			debuggerTransport = NULL;
+		}
+	}
+#endif
+
+	PhysXSDK = PxCreatePhysics(PX_PHYSICS_VERSION, *PhysXFoundation, tolerancesScale, recordMemoryAllocations, pvd);
 	if(!PhysXSDK)
 	{
 		r3dError("Failed to init PhysX SDK");
 	}
 
 	// [PORT] PxInitExtensions takes a PxPvd* in PhysX 4.
-	if(!PxInitExtensions(*PhysXSDK, NULL))
+	if(!PxInitExtensions(*PhysXSDK, pvd))
 	{
 		r3dError("Failed to init PhysX Extensions");
 	}
@@ -506,21 +558,6 @@ void PhysXWorld::Init()
 	{
 		r3dError("Failed to init PhysX Cooking");
 	}
-
-#ifndef FINAL_BUILD
-	// [PORT] PhysX 4 replaced the 3.x PVD connection API (PxVisualDebuggerExt +
-	// PxPhysics::getPvdConnectionManager) with PxPvd + PxPvdTransport, which must be
-	// created BEFORE PxCreatePhysics and passed into it. Reinstating PVD therefore
-	// means restructuring Init(), and PVD is a debug-only convenience -- so it is
-	// left disconnected rather than half-ported.
-	//
-	// To restore it:
-	//   PxPvd* pvd = PxCreatePvd(*PhysXFoundation);
-	//   PxPvdTransport* t = PxDefaultPvdSocketTransportCreate("localhost", 5425, 10);
-	//   pvd->connect(*t, PxPvdInstrumentationFlag::eALL);
-	//   ... then pass `pvd` to PxCreatePhysics and PxInitExtensions.
-	debuggerConnection = NULL;
-#endif
 
 	// set collision group BEFORE creating scene and cannot change after that
 //#if !ENABLE_RAGDOLL
@@ -626,13 +663,12 @@ void PhysXWorld::Destroy()
 {
 	r3d_assert( PhysXSDK );
 
-#ifndef FINAL_BUILD
-	if (debuggerConnection)
-	{
-		debuggerConnection->release();
-		debuggerConnection = 0;
-	}
-#endif
+	// [PORT] PVD teardown moved to the END of this function. Under PhysX 3.x the
+	// connection was an independent object and releasing it first was harmless; under
+	// PhysX 4 the PxPvd is bound into PxPhysics, and releasing it before
+	// PhysXSDK->release() leaves the SDK writing into freed instrumentation.
+	// NVIDIA's own order is physics, then pvd, then transport, then foundation.
+
 	if(defaultMaterial)
 	{
 		defaultMaterial->release();
@@ -696,6 +732,22 @@ void PhysXWorld::Destroy()
 		PhysXSDK->release();
 		PhysXSDK = NULL;
 	}
+
+#ifndef FINAL_BUILD
+	// After the SDK, before the foundation that allocated it.
+	if (debuggerConnection)
+	{
+		debuggerConnection->disconnect();
+		debuggerConnection->release();
+		debuggerConnection = 0;
+	}
+
+	if (debuggerTransport)
+	{
+		debuggerTransport->release();
+		debuggerTransport = 0;
+	}
+#endif
 
 	if( PhysXFoundation )
 	{

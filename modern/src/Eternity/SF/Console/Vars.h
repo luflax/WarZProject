@@ -39,6 +39,13 @@ REG_VAR( d_temp_green_screen,		false,			0 );
 REG_VAR( d_physx_debug,				0,				0 );
 REG_VAR( d_physx_debug_range,		512.f,			0 );
 
+// PhysX Visual Debugger. PhysXWorld::Init connects at startup and carries on
+// uninstrumented when nothing is listening, so these only matter when a PVD is
+// running somewhere other than the defaults. 5425 is NVIDIA's registered port.
+REG_VAR( d_physx_pvd_host,			"127.0.0.1",	0 );
+REG_VAR( d_physx_pvd_port,			5425,			0 );
+REG_VAR( d_physx_pvd_timeout,		10,				0 );		// connect timeout, ms
+
 REG_VAR( d_use_test_map,			2,			0 );
 
 REG_VAR( d_login,					"",			0 );

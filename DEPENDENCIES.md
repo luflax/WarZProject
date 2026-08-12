@@ -40,7 +40,7 @@ Three dependencies are referenced but not actually used. Removing them costs not
 |---|---|---|---|---|
 | **Scaleform GFx** | All HUD and menus | Autodesk commercial, **discontinued 2018** — cannot be licensed at any price | **RmlUi** | MIT |
 | **Autodesk Navigation** (Kynapse / Gameware) | Zombie navmesh + pathing | Autodesk commercial, **discontinued** | **Recast & Detour** | zlib |
-| **Chilkat** (`CkHttp`) | HTTPS to backend API | Commercial, paid | **libcurl** | curl (MIT-like) |
+| **Chilkat** (`CkHttp`, `CkGzip`) | HTTPS to backend API | Commercial, paid | **WinHTTP** + the in-tree zlib — *done*, `src/External/compat/ChilkatHttp.cpp` | OS component / zlib |
 | **FMOD Ex** | All audio | Commercial; free tier still requires a license agreement. FMOD Ex is EOL | **miniaudio** + **Steam Audio** | MIT-0 / Apache-2.0 |
 | **TeamSpeak 3 SDK** | In-game VOIP | Commercial, paid | **Opus** over existing transport | BSD-3 |
 | **PunkBuster** | Anti-cheat | Commercial, defunct vendor | *Drop* — see below | — |
@@ -73,9 +73,15 @@ system* (`SoundSys.GetEventIDByPath("Sounds/MainMenu GUI/UI_MENU_MUSIC")`); a th
 event/bank layer must be written. `GameEngine/fmod/SoundSys.h` already isolates FMOD, so
 the blast radius is contained.
 
-**Chilkat → libcurl.** Direct substitution across `Sources/http/` and `WOBackendAPI.cpp`.
-cpp-httplib (MIT, header-only) is the zero-friction alternative, but libcurl is the safer
-choice for TLS correctness.
+**Chilkat → WinHTTP, not libcurl.** Done, in `modern/src/External/compat/ChilkatHttp.cpp`.
+The original recommendation here was libcurl; WinHTTP won on the merits of *this* target.
+It is present on every supported Windows, it speaks TLS through schannel with no
+certificate bundle to ship, and it adds nothing to this audit — where libcurl would be a
+vendored dependency earning nothing until the port grows a second platform. gzip goes to
+the zlib already vendored inside Eternity (`src/Eternity/Source/ZLib`), and base64 —
+which the servers need at startup to decode the game name out of `argv` — is 40 lines
+in the same file. A private backend with a self-signed certificate is reached by setting
+`WARZ_HTTP_INSECURE=1`; validation is on by default.
 
 **TeamSpeak → Opus.** No drop-in open-source VOIP SDK exists. Opus gives you the codec;
 the mixer, jitter buffer and session management must be written over the existing UDP
@@ -94,9 +100,9 @@ server-side statistical approach already present in the FairFight aimbot detecto
 
 | Dependency | Used for | Problem | Replacement | License |
 |---|---|---|---|---|
-| **DirectX SDK (June 2010)** | D3D9 + **D3DX** | D3DX was **removed from the Windows SDK**; `D3DXMATRIX` is used pervasively (e.g. `GameObj.h:305`) | **DirectXMath** (Windows SDK) or **GLM** | MIT |
+| **DirectX SDK (June 2010)** | D3D9 + **D3DX** | D3DX was **removed from the Windows SDK**; `D3DXMATRIX` is used pervasively (e.g. `GameObj.h:305`) | Hand-written math; **DDS loading** and **`D3DCompile`** — *done*, `src/External/compat/D3DXImage.cpp` and `D3DXShaderCompile.cpp`. Image *saving* is still stubbed (editor-only) | own code / OS component |
 | **libjpeg 6b** | Texture loading | 1998 vintage | **stb_image** at cook time; ship BC7 via **bc7enc_rdo** | Public domain / MIT |
-| **CrashRpt** | Crash reporting | Stale | **Crashpad** or **Sentry Native** | Apache-2.0 / MIT |
+| **CrashRpt** | Crash reporting | Stale | **dbghelp** minidumps — *done*, `src/External/compat/CrashReport.cpp`. Local only; there is no uploader | OS component |
 | **Berkelium** | In-game web browser (`ENABLE_WEB_BROWSER`) | Abandoned, 2012-era Chromium | **Dropped** — the port builds with `-DENABLE_WEB_BROWSER=0`; `r3dPCH.h` now only defaults the flag to 1 when it is not already defined, and every call site is already behind `#if ENABLE_WEB_BROWSER`. Longer term, `ShellExecute` to the OS browser as `Main.cpp:1602` already does | — |
 | **PhysX 3.x** | Physics, character controllers | Not a licensing problem (PhysX 4+ is BSD-3), but 3.x is old and the API differs | **Jolt Physics** (target) / **PhysX 4.1** (interim) | MIT / BSD-3 |
 

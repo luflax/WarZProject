@@ -813,13 +813,16 @@ inline D3DXVECTOR3* D3DXPlaneIntersectLine(D3DXVECTOR3* o, const D3DXPLANE* p,
 // ===========================================================================
 // Image / texture / shader utilities
 //
-// STUBS. These wrapped D3DX's texture loading, format conversion and shader
-// compilation, all of which need real replacements (stb_image + a modern shader
-// compiler). They are declared so the codebase links; every one returns failure so
-// callers take their error path rather than proceeding with garbage.
+// LOADING and SHADER COMPILATION are implemented, in ../../compat/D3DXImage.cpp and
+// ../../compat/D3DXShaderCompile.cpp respectively. Loading reads DDS -- the format the
+// game ships -- and does not resample: a requested size is honoured when it is the
+// image's own or one of its mip levels, and refused otherwise. Shader compilation
+// goes through d3dcompiler_NN.dll, loaded at first use.
 //
-// See ../../../../DEPENDENCIES.md: stb_image is the chosen replacement for image
-// loading, DirectXShaderCompiler/slang for shaders.
+// SAVING is still stubbed. The D3DXSave* family is used by the level and terrain
+// editors and by debug screenshots, never on the gameplay path, and writing DDS/TGA/
+// JPG encoders is a separate piece of work from getting pixels INTO the engine.
+// Each one below says so at its own declaration.
 // ===========================================================================
 
 enum D3DXIMAGE_FILEFORMAT
@@ -850,47 +853,71 @@ struct D3DXMACRO
 };
 
 // --- image info -----------------------------------------------------------
+//
+// FUNCTIONAL -- compat/D3DXImage.cpp. DDS only; anything else is rejected with the
+// leading bytes logged, rather than reported as a zero-sized image.
 
-inline HRESULT D3DXGetImageInfoFromFileA(LPCSTR, D3DXIMAGE_INFO*)                 { return E_NOTIMPL; }
-inline HRESULT D3DXGetImageInfoFromFileInMemory(LPCVOID, UINT, D3DXIMAGE_INFO*)   { return E_NOTIMPL; }
+HRESULT D3DXGetImageInfoFromFileA(LPCSTR pSrcFile, D3DXIMAGE_INFO* pSrcInfo);
+HRESULT D3DXGetImageInfoFromFileInMemory(LPCVOID pSrcData, UINT srcDataSize,
+                                         D3DXIMAGE_INFO* pSrcInfo);
 #define D3DXGetImageInfoFromFile D3DXGetImageInfoFromFileA
 
 // --- texture creation -----------------------------------------------------
+//
+// FUNCTIONAL -- compat/D3DXImage.cpp. Filter and MipFilter are ignored because no
+// resampling happens (see the file header); ColorKey and pPalette are ignored because
+// every call site in this codebase passes 0 and NULL.
 
-inline HRESULT D3DXCreateTextureFromFileA(LPDIRECT3DDEVICE9, LPCSTR, LPDIRECT3DTEXTURE9* t)
-{ if (t) *t = nullptr; return E_NOTIMPL; }
+HRESULT D3DXCreateTextureFromFileA(LPDIRECT3DDEVICE9 pDevice, LPCSTR pSrcFile,
+                                   LPDIRECT3DTEXTURE9* ppTexture);
 #define D3DXCreateTextureFromFile D3DXCreateTextureFromFileA
 
-inline HRESULT D3DXCreateTextureFromFileExA(LPDIRECT3DDEVICE9, LPCSTR, UINT, UINT, UINT, DWORD,
-                                            D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR,
-                                            D3DXIMAGE_INFO*, PALETTEENTRY*, LPDIRECT3DTEXTURE9* t)
-{ if (t) *t = nullptr; return E_NOTIMPL; }
+HRESULT D3DXCreateTextureFromFileExA(LPDIRECT3DDEVICE9 pDevice, LPCSTR pSrcFile,
+                                     UINT width, UINT height, UINT mipLevels, DWORD usage,
+                                     D3DFORMAT format, D3DPOOL pool, DWORD filter,
+                                     DWORD mipFilter, D3DCOLOR colorKey,
+                                     D3DXIMAGE_INFO* pSrcInfo, PALETTEENTRY* pPalette,
+                                     LPDIRECT3DTEXTURE9* ppTexture);
 #define D3DXCreateTextureFromFileEx D3DXCreateTextureFromFileExA
 
-inline HRESULT D3DXCreateTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9, LPCVOID, UINT, UINT, UINT, UINT,
-                                                   DWORD, D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR,
-                                                   D3DXIMAGE_INFO*, PALETTEENTRY*, LPDIRECT3DTEXTURE9* t)
-{ if (t) *t = nullptr; return E_NOTIMPL; }
+HRESULT D3DXCreateTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9 pDevice, LPCVOID pSrcData,
+                                            UINT srcDataSize, UINT width, UINT height,
+                                            UINT mipLevels, DWORD usage, D3DFORMAT format,
+                                            D3DPOOL pool, DWORD filter, DWORD mipFilter,
+                                            D3DCOLOR colorKey, D3DXIMAGE_INFO* pSrcInfo,
+                                            PALETTEENTRY* pPalette,
+                                            LPDIRECT3DTEXTURE9* ppTexture);
 
-inline HRESULT D3DXCreateCubeTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9, LPCVOID, UINT, UINT, UINT,
-                                                       DWORD, D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR,
-                                                       D3DXIMAGE_INFO*, PALETTEENTRY*, LPDIRECT3DCUBETEXTURE9* t)
-{ if (t) *t = nullptr; return E_NOTIMPL; }
+HRESULT D3DXCreateCubeTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9 pDevice, LPCVOID pSrcData,
+                                                UINT srcDataSize, UINT size, UINT mipLevels,
+                                                DWORD usage, D3DFORMAT format, D3DPOOL pool,
+                                                DWORD filter, DWORD mipFilter, D3DCOLOR colorKey,
+                                                D3DXIMAGE_INFO* pSrcInfo, PALETTEENTRY* pPalette,
+                                                LPDIRECT3DCUBETEXTURE9* ppCubeTexture);
 
-inline HRESULT D3DXCreateVolumeTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9, LPCVOID, UINT, UINT, UINT, UINT,
-                                                         UINT, DWORD, D3DFORMAT, D3DPOOL, DWORD, DWORD, D3DCOLOR,
-                                                         D3DXIMAGE_INFO*, PALETTEENTRY*, LPDIRECT3DVOLUMETEXTURE9* t)
-{ if (t) *t = nullptr; return E_NOTIMPL; }
+HRESULT D3DXCreateVolumeTextureFromFileInMemoryEx(LPDIRECT3DDEVICE9 pDevice, LPCVOID pSrcData,
+                                                  UINT srcDataSize, UINT width, UINT height,
+                                                  UINT depth, UINT mipLevels, DWORD usage,
+                                                  D3DFORMAT format, D3DPOOL pool, DWORD filter,
+                                                  DWORD mipFilter, D3DCOLOR colorKey,
+                                                  D3DXIMAGE_INFO* pSrcInfo, PALETTEENTRY* pPalette,
+                                                  LPDIRECT3DVOLUMETEXTURE9* ppVolumeTexture);
 
+HRESULT D3DXCreateCubeTexture(LPDIRECT3DDEVICE9 pDevice, UINT size, UINT mipLevels,
+                              DWORD usage, D3DFORMAT format, D3DPOOL pool,
+                              LPDIRECT3DCUBETEXTURE9* ppCubeTexture);
+
+// STUB. Mesh generation, not texture loading -- and ID3DXMesh itself is a stub type.
 inline HRESULT D3DXCreateBox(LPDIRECT3DDEVICE9, FLOAT, FLOAT, FLOAT,
                              LPD3DXMESH* mesh, LPD3DXBUFFER* adjacency)
 { if (mesh) *mesh = nullptr; if (adjacency) *adjacency = nullptr; return E_NOTIMPL; }
 
-inline HRESULT D3DXCreateCubeTexture(LPDIRECT3DDEVICE9, UINT, UINT, DWORD, D3DFORMAT, D3DPOOL,
-                                     LPDIRECT3DCUBETEXTURE9* t)
-{ if (t) *t = nullptr; return E_NOTIMPL; }
-
 // --- save -----------------------------------------------------------------
+//
+// STUBS, all of them. Callers are the level editor (LevelEditor.cpp), the terrain
+// editor and tools (Terrain3.cpp, Terrain3Editor.cpp, ITerrain.cpp) and debug
+// screenshots (D3DMiscFunctions.cpp, RenderDeffered.cpp). Nothing on the gameplay
+// path saves an image, so these stay failing until the editors are in scope.
 
 inline HRESULT D3DXSaveTextureToFileA(LPCSTR, D3DXIMAGE_FILEFORMAT, LPDIRECT3DBASETEXTURE9, const PALETTEENTRY*)
 { return E_NOTIMPL; }
@@ -911,11 +938,16 @@ inline HRESULT D3DXSaveSurfaceToFileA(LPCSTR, D3DXIMAGE_FILEFORMAT, LPDIRECT3DSU
 
 // --- surface --------------------------------------------------------------
 
-inline HRESULT D3DXLoadSurfaceFromSurface(LPDIRECT3DSURFACE9, const PALETTEENTRY*, const RECT*,
-                                          LPDIRECT3DSURFACE9, const PALETTEENTRY*, const RECT*,
-                                          DWORD, D3DCOLOR)
-{ return E_NOTIMPL; }
+// FUNCTIONAL -- compat/D3DXImage.cpp. Full-surface copies only (NULL rects, equal
+// dimensions), converting between uncompressed formats where needed. That is what
+// Terrain3's dozen call sites do; a sub-rect or a scaling copy returns E_NOTIMPL.
+HRESULT D3DXLoadSurfaceFromSurface(LPDIRECT3DSURFACE9 pDestSurface,
+                                   const PALETTEENTRY* pDestPalette, const RECT* pDestRect,
+                                   LPDIRECT3DSURFACE9 pSrcSurface,
+                                   const PALETTEENTRY* pSrcPalette, const RECT* pSrcRect,
+                                   DWORD filter, D3DCOLOR colorKey);
 
+// STUB. No caller in this codebase.
 inline HRESULT D3DXLoadSurfaceFromFileInMemory(LPDIRECT3DSURFACE9, const PALETTEENTRY*, const RECT*,
                                                LPCVOID, UINT, const RECT*, DWORD, D3DCOLOR,
                                                D3DXIMAGE_INFO*)
@@ -974,28 +1006,24 @@ inline UINT D3DXGetDeclLength(const D3DVERTEXELEMENT9* decl)
 
 // --- shader compilation ---------------------------------------------------
 
-inline HRESULT D3DXCompileShader(LPCSTR, UINT, const D3DXMACRO*, LPD3DXINCLUDE, LPCSTR, LPCSTR,
-                                 DWORD, LPD3DXBUFFER* code, LPD3DXBUFFER* errors,
-                                 LPD3DXCONSTANTTABLE* table)
-{
-    if (code)   *code   = nullptr;
-    if (errors) *errors = nullptr;
-    if (table)  *table  = nullptr;
-    return E_NOTIMPL;
-}
+// FUNCTIONAL -- implemented in ../../compat/D3DXShaderCompile.cpp on top of
+// d3dcompiler_NN.dll, which still supports the vs_3_0 / ps_3_0 profiles this engine
+// targets. ppConstantTable is always set to null: nothing in this codebase requests
+// reflection (every call site passes NULL), so it is not implemented.
 
-inline HRESULT D3DXCompileShaderFromFileA(LPCSTR, const D3DXMACRO*, LPD3DXINCLUDE, LPCSTR, LPCSTR,
-                                          DWORD, LPD3DXBUFFER* code, LPD3DXBUFFER* errors,
-                                          LPD3DXCONSTANTTABLE* table)
-{
-    if (code)   *code   = nullptr;
-    if (errors) *errors = nullptr;
-    if (table)  *table  = nullptr;
-    return E_NOTIMPL;
-}
+HRESULT D3DXCompileShader(LPCSTR pSrcData, UINT srcDataLen, const D3DXMACRO* pDefines,
+                          LPD3DXINCLUDE pInclude, LPCSTR pFunctionName, LPCSTR pProfile,
+                          DWORD flags, LPD3DXBUFFER* ppShader, LPD3DXBUFFER* ppErrorMsgs,
+                          LPD3DXCONSTANTTABLE* ppConstantTable);
+
+HRESULT D3DXCompileShaderFromFileA(LPCSTR pSrcFile, const D3DXMACRO* pDefines,
+                                   LPD3DXINCLUDE pInclude, LPCSTR pFunctionName,
+                                   LPCSTR pProfile, DWORD flags, LPD3DXBUFFER* ppShader,
+                                   LPD3DXBUFFER* ppErrorMsgs,
+                                   LPD3DXCONSTANTTABLE* ppConstantTable);
 #define D3DXCompileShaderFromFile D3DXCompileShaderFromFileA
 
-inline HRESULT D3DXDisassembleShader(const DWORD*, BOOL, LPCSTR, LPD3DXBUFFER* out)
-{ if (out) *out = nullptr; return E_NOTIMPL; }
+HRESULT D3DXDisassembleShader(const DWORD* pShader, BOOL enableColorCode,
+                              LPCSTR pComments, LPD3DXBUFFER* ppDisassembly);
 
 #endif // __WARZ_COMPAT_D3DX9_H

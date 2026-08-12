@@ -30,13 +30,29 @@ the same API and does nothing.
 
 Shims that **must actually work**, because the code depends on their behaviour.
 
-| Directory | Replaces | Backed by |
-|---|---|---|
-| `dxsdk/` | D3DX (removed from the Windows SDK) | **DirectXMath** |
+| Directory | Replaces | Backed by | Implementation |
+|---|---|---|---|
+| `dxsdk/` | D3DX math | hand-written scalar code | inline, in `dxsdk/Include/d3dx9.h` |
+| `dxsdk/` | D3DX image loading | a DDS parser, no dependency | `compat/D3DXImage.cpp` |
+| `dxsdk/` | D3DX shader compilation | `d3dcompiler_NN.dll` | `compat/D3DXShaderCompile.cpp` |
+| `ChilKat/` | Chilkat HTTP + gzip | WinHTTP, the in-tree zlib, local base64 | `compat/ChilkatHttp.cpp` |
+| `CrashRpt/` | CrashRpt | `MiniDumpWriteDump` | `compat/CrashReport.cpp` |
 
 `D3DXMATRIX` and friends are used pervasively — `GameObject::UpdateTransform`
 (`GameObj.h:305-318`) builds every object's world matrix through them. A no-op here
 produces a build that links and renders nothing correctly. This layer is real code.
+
+**`compat/` is where a shim goes once it grows a `.cpp`.** The headers stay where they
+are, at the path the source already includes from; only the bodies move. Those
+translation units are compiled into the Eternity target (see
+`../Eternity/CMakeLists.txt` for why that placement and not a library of their own),
+and they are PCH exclusions because they talk to `winhttp.h`, `dbghelp.h` and
+`d3dcompiler.h` rather than to `r3d.h`.
+
+Each carries its remaining limits in its own header comment. The short version: images
+load but do not save and are DDS only; shader reflection (`ID3DXConstantTable`) is not
+implemented because nothing asks for it; crash reports are written to disk but never
+uploaded.
 
 ### 3. No-op shims
 
@@ -47,7 +63,6 @@ linker are satisfied.
 |---|---|---|
 | `Scaleform3/` | Scaleform GFx | UI does not render |
 | `fmod/` | FMOD Ex | Silence |
-| `ChilKat/` | Chilkat HTTP | All requests fail |
 | `ts3_sdk_3/` | TeamSpeak 3 SDK | No VOIP |
 | `PhysX/` | PhysX 3.x | Inert physics (until PhysX 4.1 is vendored) |
 | `CrashRpt/` | CrashRpt | No crash reports |
@@ -93,12 +108,12 @@ committed here are starting points covering known call sites, not complete surfa
 
 Later phases substitute real implementations. The order that minimises risk:
 
-| Order | Shim | Replacement | Why this order |
+| Order | Shim | Replacement | Status |
 |---|---|---|---|
-| 1 | `ChilKat/` | libcurl | Small, self-contained, unblocks backend work |
-| 2 | `PhysX/` | PhysX 4.1 → Jolt | Gameplay depends on it; large but well-bounded |
-| 3 | `fmod/` | miniaudio + Steam Audio | `SoundSys` already isolates it |
-| 4 | *(none)* | Recast & Detour | Currently compiled out via `ENABLE_AUTODESK_NAVIGATION=0` |
-| 5 | `Scaleform3/` | RmlUi | Largest — every screen must be re-authored |
+| 1 | `ChilKat/` | WinHTTP + zlib (not libcurl — see DEPENDENCIES.md) | **done** |
+| 2 | `PhysX/` | PhysX 4.1 → Jolt | PhysX 4.1 **done**; Jolt is a performance-phase item |
+| 3 | `fmod/` | miniaudio + Steam Audio | not started — the hard part is the *Event* system, not the mixer |
+| 4 | *(none)* | Recast & Detour | linked, but `BuildForCurrentLevel` / `LoadPathData` are still seams |
+| 5 | `Scaleform3/` | RmlUi | integrated; the render interface and every screen are still to do |
 
 See `../../../DEPENDENCIES.md` for the full audit.

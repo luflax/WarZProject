@@ -12,6 +12,31 @@ include(${WARZ_ROOT}/cmake/sources/Eternity.cmake)
 
 warz_add_dual_library(Eternity SOURCES ${WARZ_ETERNITY_SOURCES})
 
+# The compat layer -- shim APIs that grew real implementations.
+#
+# These live under src/External/compat but are compiled INTO Eternity rather than into
+# a library of their own, and that placement is deliberate. Eternity sits below
+# everything that calls them (r3dTex.cpp and VShader.cpp for D3DX, r3dDebug.cpp for
+# CrashRpt, EclipseStudio and all three servers for Chilkat), so it is the one target
+# that can both reach the engine's log and be reached by every caller. A separate
+# static library would have to either duplicate r3dOutToLog or form a cycle with
+# Eternity, and GNU ld does not revisit an archive.
+#
+# They are not in cmake/sources/Eternity.cmake because that file is generated from
+# Eternity.vcxproj by tools/gen_sources.py and would drop them on the next run.
+set(WARZ_COMPAT_SOURCES
+    ${WARZ_ROOT}/src/External/compat/CrashReport.cpp        # -> dbghelp minidumps
+    ${WARZ_ROOT}/src/External/compat/ChilkatHttp.cpp        # -> WinHTTP + zlib + base64
+    ${WARZ_ROOT}/src/External/compat/D3DXImage.cpp          # -> DDS loading
+    ${WARZ_ROOT}/src/External/compat/D3DXShaderCompile.cpp  # -> d3dcompiler_NN.dll
+)
+
+foreach(variant client server)
+    target_sources(Eternity_${variant} PRIVATE ${WARZ_COMPAT_SOURCES})
+    target_include_directories(Eternity_${variant} PRIVATE
+        ${WARZ_ROOT}/src/External/compat)
+endforeach()
+
 # Eternity's OWN dependencies, declared here rather than on each executable.
 #
 # This is not bookkeeping -- it is what makes the link work. GNU ld resolves static
@@ -30,8 +55,9 @@ foreach(variant client server)
         # strips the drawing, not the renderer headers and their device plumbing.
         d3d9 dinput8 dxguid xinput
         winmm ws2_32 shlwapi crypt32 rpcrt4 version psapi
-        dbghelp                     # StackWalker.cpp, MiniDumpWriteDump
+        dbghelp                     # StackWalker.cpp, MiniDumpWriteDump, compat/CrashReport.cpp
         pdh                         # HWInfo.cpp performance counters
+        winhttp                     # compat/ChilkatHttp.cpp -- the backend transport
         iphlpapi dnsapi
         odbc32 odbccp32 wbemuuid
     )

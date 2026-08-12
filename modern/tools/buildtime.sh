@@ -106,8 +106,12 @@ if [[ $DO_VERIFY -eq 1 ]]; then
   # A source that grows an #include "r3dPCH.h" later should stop being an exception, and
   # one that loses it should become one. Neither is visible without checking.
   echo "  PCH exclusion list:"
+  # src/Eternity/CMakeLists.txt is in the list beside cmake/sources/*.cmake because the
+  # compat layer (src/External/compat) is added there by hand rather than by
+  # tools/gen_sources.py -- it is not in any .vcxproj, so the generator has nothing to
+  # derive it from. Leaving it out made every compat source look like a stale exclusion.
   expected=$(grep -oE '\$\{WARZ_ROOT\}/[^ ]+\.cpp' cmake/Pch.cmake | sed 's|${WARZ_ROOT}/||' | sort)
-  actual=$(cat cmake/sources/*.cmake \
+  actual=$(cat cmake/sources/*.cmake src/Eternity/CMakeLists.txt \
            | grep -oE '\$\{WARZ_ROOT\}/[^ ]+\.cpp' | sed 's|${WARZ_ROOT}/||' | sort -u \
            | while read -r f; do grep -qE '#include[[:space:]]*"r3dPCH\.h"' "$f" || echo "$f"; done | sort)
   if [[ "$expected" == "$actual" ]]; then
