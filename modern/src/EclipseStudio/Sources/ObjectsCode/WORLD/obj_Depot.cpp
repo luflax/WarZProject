@@ -2,7 +2,7 @@
 #include "r3d.h"
 
 #include "GameCommon.h"
-#include "obj_Depot.h"
+#include "obj_Depot.H"
 
 
 IMPLEMENT_CLASS(obj_Depot, "obj_Depot", "Object");

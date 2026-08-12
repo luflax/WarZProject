@@ -1,6 +1,6 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "r3dAnimation.h"
+#include "r3dAnimation.H"
 
 extern	int	r3dAnimation_bInterpolation = 1;
 

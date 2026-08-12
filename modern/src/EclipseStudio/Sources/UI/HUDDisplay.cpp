@@ -4,10 +4,10 @@
 #include "HUDDisplay.h"
 
 #include "ObjectsCode/Gameplay/BasePlayerSpawnPoint.h"
-#include "../multiplayer/clientgamelogic.h"
-#include "../ObjectsCode/ai/AI_Player.H"
-#include "../ObjectsCode/weapons/Weapon.h"
-#include "../ObjectsCode/weapons/WeaponArmory.h"
+#include "../multiplayer/ClientGameLogic.h"
+#include "../ObjectsCode/AI/AI_Player.H"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
+#include "../ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "TeamSpeakClient.h"
 
 #include "../SF/CmdProcessor/CmdProcessor.h"

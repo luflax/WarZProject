@@ -5,7 +5,7 @@
 #include "r3d.h"
 #include "r3dLight.h"
 #include "r3dUtils.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 #include "GameCommon.h"
 //#include "Editors\Tool_AxisControl.h"
 #include "LevelEditor.h"

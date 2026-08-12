@@ -3,13 +3,13 @@
 
 #include "ClientGameLogic.h"
 
-#include "GameObjects/ObjManag.h"
-#include "GameObjects/EventTransport.h"
+#include "gameobjects/ObjManag.h"
+#include "gameobjects/EventTransport.h"
 #include "MasterServerLogic.h"
 
 #include "multiplayer/P2PMessages.h"
 
-#include "ObjectsCode/AI/AI_Player.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "ObjectsCode/Gameplay/BasePlayerSpawnPoint.h"
 #include "ObjectsCode/Gameplay/obj_DroppedItem.h"
 #include "ObjectsCode/Gameplay/obj_Gravestone.h"
@@ -20,26 +20,26 @@
 // CAT todo - relocate obj_Vehicle to a more organized player, such as where obj_Zombie is
 #include "../GameEngine/gameobjects/obj_Vehicle.h"
 
-#include "ObjectsCode/weapons/Weapon.h"
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "ObjectsCode/weapons/Ammo.h"
-#include "ObjectsCode/weapons/Barricade.h"
-#include "ObjectsCode/weapons/FarmBlock.h"
-#include "ObjectsCode/weapons/Grenade.h"
-#include "ObjectsCode/weapons/Safelock.h"
+#include "ObjectsCode/WEAPONS/Weapon.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/Ammo.h"
+#include "ObjectsCode/WEAPONS/Barricade.h"
+#include "ObjectsCode/WEAPONS/FarmBlock.h"
+#include "ObjectsCode/WEAPONS/Grenade.h"
+#include "ObjectsCode/WEAPONS/Safelock.h"
 
-#include "Rendering/Deffered/D3DMiscFunctions.h"
+#include "RENDERING/Deffered/D3DMiscFunctions.h"
 
 #include "GameCode/UserProfile.h"
 #include "GameCode/UserSettings.h"
 #include "Gameplay_Params.h"
 #include "GameLevel.h"
 
-#include "ui/m_LoadingScreen.h"
-#include "ui/HUDDisplay.h"
-#include "ui/HUDPause.h"
-#include "ui/HUDSafelock.h"
-#include "ui/HUDTrade.h"
+#include "UI/m_LoadingScreen.h"
+#include "UI/HUDDisplay.h"
+#include "UI/HUDPause.h"
+#include "UI/HUDSafelock.h"
+#include "UI/HUDTrade.h"
 
 #include "HWInfo.h"
 extern CHWInfo g_HardwareInfo;

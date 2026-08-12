@@ -3,7 +3,7 @@
 
 #include "Gameplay_Params.h"
 #include "GameCommon.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 
 #include "Particle.h"
 #include "obj_PlayerSpawnPoint.h"
@@ -14,7 +14,7 @@
 
 #include "Editors/ObjectManipulator3d.h"
 
-#include "..\..\ui\HUDDisplay.h"
+#include "../../UI/HUDDisplay.h"
 extern HUDDisplay*	hudMain;
 
 IMPLEMENT_CLASS(obj_PlayerSpawnPoint, "obj_PlayerSpawnPoint", "Object");

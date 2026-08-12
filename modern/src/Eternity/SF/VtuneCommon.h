@@ -8,7 +8,7 @@
 
 #ifdef VTUNE_USE
 	#include "VtuneApi.h"					// c:\Program Files\Intel\VTune\Analyzer\Include
-	#pragma comment( lib, "VtuneApi.lib" )	// c:\Program Files\Intel\VTune\Analyzer\Lib
+// [PORT] linking handled by CMake: 	#pragma comment( lib, "VtuneApi.lib" )	// c:\Program Files\Intel\VTune\Analyzer\Lib
 
 	#define VTunePause		VTPause
 	#define VTuneResume		VTResume

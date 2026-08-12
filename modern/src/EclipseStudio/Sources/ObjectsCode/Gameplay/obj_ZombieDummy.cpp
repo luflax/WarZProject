@@ -5,7 +5,7 @@
 
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "ui/UIimEdit.h"
+#include "UI/UIimEdit.h"
 
 #include "obj_ZombieDummy.h"
 #include "../AI/r3dPhysSkeleton.h"

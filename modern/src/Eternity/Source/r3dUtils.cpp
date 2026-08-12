@@ -125,35 +125,38 @@ int r3dImageLoader::Load(r3dFile *f)
 // High Performance Counter
 //
 //
-#define THIS_IN_ECX	1
+// PORT NOTE: MSVC inline _asm replaced with the __rdtsc intrinsic.
+// The original depended on two MSVC-only behaviours: `this` arriving in ecx under
+// thiscall, and a value being returned in eax with no return statement (UB).
+// The arithmetic below is a faithful translation of the original instructions.
+#if defined(_MSC_VER)
+  #include <intrin.h>
+#else
+  #include <x86intrin.h>
+#endif
 
 void r3dPerfCounter::Start()
 {
-#if !THIS_IN_ECX
-  __asm mov ecx, [this]
-#endif
-  __asm rdtsc
-  __asm mov [ecx.perf_StartHi], edx
-  __asm mov [ecx.perf_StartLo], eax
-  __asm shr eax, 4
-  __asm mov [ecx.perf_Start], eax
+  const unsigned long long tsc = __rdtsc();
+  perf_StartHi = (long)(unsigned long)(tsc >> 32);
+  perf_StartLo = (long)(unsigned long)(tsc & 0xFFFFFFFFull);
+  perf_Start   = (long)(((unsigned long)(tsc & 0xFFFFFFFFull)) >> 4);
 }
 
-#pragma warning(disable: 4035)
-// return value in EAX
 long r3dPerfCounter::GetDiffTicks()
 {
-#if !THIS_IN_ECX
-  __asm mov ecx, [this]
-#endif
-  __asm rdtsc
-  __asm sub edx, [ecx.perf_StartHi]
-  __asm shr eax, 4
-  __asm shl edx, 28
-  __asm or  eax, edx
-  __asm sub eax, [ecx.perf_Start]
+  const unsigned long long tsc = __rdtsc();
+
+  const unsigned long hi = (unsigned long)(tsc >> 32);
+  const unsigned long lo = (unsigned long)(tsc & 0xFFFFFFFFull);
+
+  // sub edx, perf_StartHi ; shr eax, 4 ; shl edx, 28 ; or eax, edx ; sub eax, perf_Start
+  const unsigned long dhi = hi - (unsigned long)perf_StartHi;
+  unsigned long       eax = lo >> 4;
+  eax |= (dhi << 28);
+
+  return (long)(eax - (unsigned long)perf_Start);
 }
-#pragma warning(default: 4035)
 
 float r3dPerfCounter::GetDiff()
 {

@@ -16,7 +16,7 @@ DWORD TSServer_GetPassword() {}
 #include <serverlib_publicdefinitions.h>
 #include <serverlib.h>
 
-#pragma comment(lib, "../../../src/external/ts3_sdk_3/lib/ts3server_win32.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../../../src/external/ts3_sdk_3/lib/ts3server_win32.lib")
 
 #include "TeamSpeakServer.h"
 #include "ServerGameLogic.h"
@@ -595,7 +595,7 @@ void CTeamSpeakServer::RemoveClient(int clientID)
 
 DWORD CTeamSpeakServer::GetCustomerID(int clientID)
 {
-	stdext::hash_map<int, client_s>::iterator it = m_clients.find(clientID);
+	std::unordered_map<int, client_s>::iterator it = m_clients.find(clientID);
 	r3d_assert(it != m_clients.end());
 	
 	return it->second.CustomerID;

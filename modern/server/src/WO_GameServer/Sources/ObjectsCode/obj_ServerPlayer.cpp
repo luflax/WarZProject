@@ -1,4 +1,4 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "MasterServerLogic.h"
@@ -6,7 +6,7 @@
 
 #include "ServerWeapons/ServerWeapon.h"
 #include "ServerWeapons/ServerGear.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../EclipseStudio/Sources/ObjectsCode/Gameplay/ZombieStates.h"
 
 #include "multiplayer/P2PMessages.h"

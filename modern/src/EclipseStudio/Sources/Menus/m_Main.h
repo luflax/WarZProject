@@ -1,7 +1,7 @@
 #ifndef __wiimenu7_H
 #define __wiimenu7_H
 
-#include "ui/r3dMenu.h"
+#include "UI/r3dMenu.h"
 
 class Menu_Main : public MenuLayer
 {

@@ -4,8 +4,8 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "GameObjects/GameObj.h"
-#include "GameObjects/EventTransport.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/EventTransport.h"
 
 #include "GameCommon.h"
 

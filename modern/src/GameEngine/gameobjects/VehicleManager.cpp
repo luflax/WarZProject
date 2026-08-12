@@ -21,7 +21,7 @@
 #include "VehicleDescriptor.h"
 
 #include "../EclipseStudio/Sources/multiplayer/ClientGameLogic.h"
-#include "../EclipseStudio/Sources/ObjectsCode/ai/AI_Player.H"
+#include "../EclipseStudio/Sources/ObjectsCode/AI/AI_Player.H"
 
 #include "../EclipseStudio/Sources/UI/HUDPause.h"
 #include "../EclipseStudio/Sources/UI/HUDAttachments.h"
@@ -907,7 +907,7 @@ VehicleDescriptor * VehicleManager::CreateVehicle(const r3dMesh *m, PhysicsCallb
 	typedef r3dTL::TArray<PxVec3> Vertices;
 	typedef r3dTL::TArray<Vertices> Meshes;
 
-	std::auto_ptr<VehicleDescriptor> vd(game_new VehicleDescriptor);
+	std::unique_ptr<VehicleDescriptor> vd(game_new VehicleDescriptor);
 	if (!vd->Init(m))
 	{
 		return 0;

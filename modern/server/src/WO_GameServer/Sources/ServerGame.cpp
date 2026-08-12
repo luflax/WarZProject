@@ -1,12 +1,12 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dLight.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "../EclipseStudio/Sources/GameLevel.h"
-#include "../EclipseStudio/Sources/rendering/Deffered/RenderDeffered.h"
+#include "../EclipseStudio/Sources/RENDERING/Deffered/RenderDeffered.h"
 #include "../../GameEngine/TrueNature2/Terrain3.h"
 #include "../../GameEngine/gameobjects/PhysXWorld.h"
 #include "../../GameEngine/ai/AutodeskNav/AutodeskNavMesh.h"

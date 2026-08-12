@@ -9,9 +9,9 @@
 #include "MissionActionsData.h"
 #include "MissionActions.h"
 #include "MissionCommands.h"
-#include "..\obj_ServerMissionArea.h"
-#include "..\obj_ServerPlayer.h"
-#include "..\Zombies\sobj_Zombie.h"
+#include "../obj_ServerMissionArea.h"
+#include "../obj_ServerPlayer.h"
+#include "../Zombies/sobj_Zombie.h"
 
 //-------------------------------------------------------------------------
 

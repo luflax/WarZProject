@@ -2,7 +2,7 @@
 #define	__R3D_SKIN_H_36d6815
 
 #include "r3dBinFmt.h"
-#include "r3dSkeleton.h"
+#include "r3dSkeleton.H"
 
 class r3dSkinMesh;
 class r3dSkeleton;

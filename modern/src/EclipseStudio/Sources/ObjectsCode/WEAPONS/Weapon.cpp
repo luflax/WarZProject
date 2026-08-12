@@ -7,11 +7,11 @@
 #include "WeaponArmory.h"
 
 #include "Particle.h"
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
-#include "ObjectsCode\ai\AI_Player.H"
-#include "ObjectsCode\ai\AI_PlayerAnim.H"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
+#include "ObjectsCode/AI/AI_Player.H"
+#include "ObjectsCode/AI/AI_PlayerAnim.h"
 #include "BulletShellManager.h"
-#include "..\..\multiplayer\ClientGameLogic.h"
+#include "../../multiplayer/ClientGameLogic.h"
 
 r3dMesh* WeaponAttachmentConfig::getMesh( bool allow_async_loading, bool aim_model) const
 {

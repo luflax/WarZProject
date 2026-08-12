@@ -1,4 +1,4 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #ifndef WO_SERVER
@@ -6,14 +6,14 @@
 #endif // WO_SERVER
 
 #include "GameCommon.h"
-#include "GameObjects\gameobj.h"
+#include "gameobjects/GameObj.h"
 #ifndef WO_SERVER
-#include "GameObjects\objmanag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "EnvmapProbes.h"
 #endif // WO_SERVER
 #include "GameLevel.h"
-#include "WaterPlane.h"
+#include "WaterPlane.H"
 #ifndef WO_SERVER
 #include "../GameEngine/TrueNature2/Terrain3.h"
 

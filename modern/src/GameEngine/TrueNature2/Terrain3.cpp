@@ -2,15 +2,15 @@
 
 #include "r3d.h"
 
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
-#include "GameObjects/GameObj.h"
-#include "ObjectsCode/world/obj_Road.h"
-#include "ObjectsCode/world/MaterialTypes.h"
-#include "ObjectsCode/world/DecalChief.h"
+#include "gameobjects/GameObj.h"
+#include "ObjectsCode/WORLD/obj_Road.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
 
-#include "GameObjects/PhysXWorld.h"
-#include "GameObjects/PhysObj.h"
+#include "gameobjects/PhysXWorld.h"
+#include "gameobjects/PhysObj.h"
 
 #include "TrueNature/Sun.h"
 

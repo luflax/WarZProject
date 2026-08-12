@@ -9,8 +9,8 @@
 #include "GrassEditorPlanes.h"
 #include "GrassMap.h"
 
-#include "..\..\Editors\ObjectManipulator3d.h"
-#include "..\..\..\..\GameEngine\TrueNature2\Terrain3.h"
+#include "../../Editors/ObjectManipulator3d.h"
+#include "../../../../GameEngine/TrueNature2/Terrain3.h"
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -497,4 +497,4 @@ void GrassPlaneGameObjectProxy::SetResizeMode(bool doResizeMode)
 
 //////////////////////////////////////////////////////////////////////////
 
-#endif FINAL_BUILD
+#endif // FINAL_BUILD

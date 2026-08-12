@@ -1,20 +1,20 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "GameCommon.h"
 #include "Ammo.h"
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "Bullet.h"
-#include "..\world\DecalChief.h"
-#include "..\world\MaterialTypes.h"
+#include "../WORLD/DecalChief.h"
+#include "../WORLD/MaterialTypes.h"
 #include "ExplosionVisualController.h"
 
-#include "..\AI\AI_Player.H"
+#include "../AI/AI_Player.H"
 #include "WeaponConfig.h"
 #include "Weapon.h"
 
 #include "multiplayer/P2PMessages.h"
-#include "..\..\multiplayer\ClientGameLogic.h"
+#include "../../multiplayer/ClientGameLogic.h"
 
 IMPLEMENT_CLASS(obj_Bullet, "obj_Bullet", "Object");
 AUTOREGISTER_CLASS(obj_Bullet);

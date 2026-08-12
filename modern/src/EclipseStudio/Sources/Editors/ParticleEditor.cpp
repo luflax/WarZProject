@@ -13,11 +13,11 @@ typedef r3dgameVector(r3dSTLString) stringlist_t;
 #include "UI/UIimEdit2.h"
 
 #include "GameCommon.h"
-#include "..\..\..\GameEngine\gameobjects\obj_Dummy.h"
+#include "../../../GameEngine/gameobjects/obj_Dummy.h"
 
-#include "Editors\ObjectManipulator3d.h"
+#include "Editors/ObjectManipulator3d.h"
 
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "EditedValueTracker.h"
 #include "ParticleEditorUndoSubsystem.h"
 

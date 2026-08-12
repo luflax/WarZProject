@@ -1,11 +1,11 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include <Shlwapi.h>
-#include <ShellAPI.h>
+#include <shlwapi.h>
+#include <shellapi.h>
 
 #include "FileSystem/r3dFileSystem.h"
-#include "FileSystem\r3dFSStructs.h"
+#include "FileSystem/r3dFSStructs.h"
 
 static	r3dFileSystem	g_filesys;
 extern CRITICAL_SECTION g_FileSysCritSection ;

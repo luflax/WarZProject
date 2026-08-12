@@ -20,9 +20,9 @@
 
 #include "../../EclipseStudio/Sources/ObjectsCode/Gameplay/obj_Zombie.h"
 #include "../../EclipseStudio/Sources/ObjectsCode/WEAPONS/Barricade.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/EFFECTS/obj_ParticleSystem.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/weapons/ExplosionVisualController.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/world/MaterialTypes.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/EFFECTS/obj_ParticleSystem.H"
+#include "../../EclipseStudio/Sources/ObjectsCode/WEAPONS/ExplosionVisualController.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/WORLD/MaterialTypes.h"
 #include "../../EclipseStudio/Sources/UI/HUDDisplay.h"
 #include "../../EclipseStudio/Sources/UI/HUDPause.h"
 

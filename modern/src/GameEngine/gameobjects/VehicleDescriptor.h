@@ -213,4 +213,4 @@ private:
 	void InitToDefault();
 };
 
-#endif VEHICLES_ENABLED
+#endif // VEHICLES_ENABLED

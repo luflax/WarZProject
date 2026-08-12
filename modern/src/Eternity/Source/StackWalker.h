@@ -153,7 +153,10 @@ protected:
 //       But I currently use it in x64/IA64 environments...
 //#if defined(_M_IX86) && (_WIN32_WINNT <= 0x0500) && (_MSC_VER < 1400)
 
-#if defined(_M_IX86)
+// PORT NOTE: the 32-bit x86 branch below uses MSVC inline _asm. Restrict it to
+// MSVC so every other compiler falls through to the RtlCaptureContext branch,
+// which is the modern Windows API and already used here for x64.
+#if defined(_M_IX86) && defined(_MSC_VER)
 #ifdef CURRENT_THREAD_VIA_EXCEPTION
 // TODO: The following is not a "good" implementation, 
 // because the callstack is only valid in the "__except" block...

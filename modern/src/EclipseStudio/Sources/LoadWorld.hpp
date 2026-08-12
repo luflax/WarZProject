@@ -1,4 +1,4 @@
-#include "ObjectsCode\World\Lamp.h"
+#include "ObjectsCode/WORLD/Lamp.H"
 
 r3dColor BloomColor = r3dColor(155, 125, 105);
 r3dColor BloomColor1 = r3dColor(255,255,255);

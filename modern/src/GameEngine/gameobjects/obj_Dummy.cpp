@@ -4,7 +4,7 @@
 #include "GameCommon.h"
 #include "obj_Dummy.h"
 
-#include "rendering/Deffered/DeferredHelpers.h"
+#include "RENDERING/Deffered/DeferredHelpers.h"
 
 DummyObject::DummyObject()
 {

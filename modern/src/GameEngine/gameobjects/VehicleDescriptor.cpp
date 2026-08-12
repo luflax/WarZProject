@@ -886,4 +886,4 @@ void VehicleDescriptor::ReadSerializedData(pugi::xml_node& node)
 
 #endif
 
-#endif VEHICLES_ENABLED
+#endif // VEHICLES_ENABLED

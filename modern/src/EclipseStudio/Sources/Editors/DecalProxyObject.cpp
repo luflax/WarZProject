@@ -8,7 +8,7 @@
 #ifndef FINAL_BUILD
 
 #include "DecalProxyObject.h"
-#include "..\ObjectsCode\world\DecalChief.h"
+#include "../ObjectsCode/WORLD/DecalChief.h"
 #include "ObjectManipulator3d.h"
 
 //////////////////////////////////////////////////////////////////////////

@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "r3dDeviceQueue.h"
 

@@ -4,9 +4,9 @@
 #include "Barricade.h"
 #include "WeaponConfig.h"
 #include "WeaponArmory.h"
-#include "..\ai\AI_Player.H"
-#include "..\..\multiplayer\ClientGameLogic.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/world/MaterialTypes.h"
+#include "../AI/AI_Player.H"
+#include "../../multiplayer/ClientGameLogic.h"
+#include "../../EclipseStudio/Sources/ObjectsCode/WORLD/MaterialTypes.h"
 #ifdef VEHICLES_ENABLED
 #include "../../GameEngine/gameobjects/obj_Vehicle.h"
 #endif

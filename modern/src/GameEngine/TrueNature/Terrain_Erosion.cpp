@@ -5,11 +5,11 @@
 #pragma warning( disable : 4800 )
 
 #include "r3d.h"
-#include "r3dBuffer.h"
+#include "r3dbuffer.h"
 
 #include "GameCommon.h"
-#include "rendering/Deffered/DeferredHelpers.h"
-#include "rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/DeferredHelpers.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 
 #include "../SF/Console/Config.h"
 #include "../SF/RenderBuffer.h"

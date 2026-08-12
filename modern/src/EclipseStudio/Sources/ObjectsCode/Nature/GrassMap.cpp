@@ -2,7 +2,7 @@
 #include "r3d.h"
 
 #include "../GameEngine/TrueNature2/Terrain3.h"
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "GameCommon.h"
 

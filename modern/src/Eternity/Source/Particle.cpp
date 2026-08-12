@@ -6,8 +6,8 @@
 #include "Particle_Int.h"
 #include "Particle.h"
 
-#include "../GameEngine/gameobjects\obj_Mesh.h"
-#include "../../EclipseStudio\Sources\GameLevel.h"
+#include "../GameEngine/gameobjects/obj_Mesh.h"
+#include "../../EclipseStudio/Sources/GameLevel.h"
 
 extern r3dLightSystem	WorldLightSystem;
 

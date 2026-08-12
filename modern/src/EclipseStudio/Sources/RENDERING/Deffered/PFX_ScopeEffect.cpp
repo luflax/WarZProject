@@ -10,7 +10,7 @@
 #include "GameCommon.h"
 #include "PFX_ScopeEffect.h"
 
-#include "ObjectsCode/world/EnvmapProbes.h"
+#include "ObjectsCode/WORLD/EnvmapProbes.h"
 
 //------------------------------------------------------------------------
 

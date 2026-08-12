@@ -9,14 +9,14 @@
 #if ENABLE_WEB_BROWSER
 //#define BERKELIM_EXTENDED_LOG 1
 
-#include <berkelium\Berkelium.hpp>
-#include <berkelium\Window.hpp>
-#include <berkelium\Context.hpp>
-#include <berkelium\WindowDelegate.hpp>
+#include <berkelium/Berkelium.hpp>
+#include <berkelium/Window.hpp>
+#include <berkelium/Context.hpp>
+#include <berkelium/WindowDelegate.hpp>
 
 #include "r3dEternityWebBrowser.h"
 
-#pragma comment(lib, "../external/berkelium/lib/berkelium.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../external/berkelium/lib/berkelium.lib")
 
 //////////////////////////////////////////////////////////////////////////
 

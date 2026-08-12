@@ -1,28 +1,28 @@
 #ifndef __GAMECOMMON_H
 #define __GAMECOMMON_H
 
-#include "GameObjects\GameObj.h"
-#include "GameObjects\ObjManag.h"
-#include "gameobjects\PhysXWorld.h"
-#include "gameobjects\ApexWorld.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
+#include "gameobjects/PhysXWorld.h"
+#include "gameobjects/ApexWorld.h"
 
-#include "TrueNature\skydome.h"
-#include "TrueNature\sun.h"
+#include "TrueNature/SkyDome.h"
+#include "TrueNature/Sun.h"
 
-#include "ObjectsCode\World\Building.h"
+#include "ObjectsCode/WORLD/Building.h"
 
-#include "UI\r3dMenu.h"
-#include "UI\UIimEdit.h"
-#include "UI\UIimEdit2.h"
+#include "UI/r3dMenu.h"
+#include "UI/UIimEdit.h"
+#include "UI/UIimEdit2.h"
 
-#include "UI\HUD_Base.h"
+#include "UI/HUD_Base.h"
 
 #include "LangMngr.h"
 
 #include "r3dAtmosphere.h"
 
-#include "ObjectsCode\World\Lake.h"
-#include "ObjectsCode\Nature\obj_Terrain.h"
+#include "ObjectsCode/WORLD/Lake.H"
+#include "ObjectsCode/Nature/obj_Terrain.H"
 
 extern	r3dSun		*Sun;
 extern r3dSkyDome	*SkyDome;
@@ -86,9 +86,9 @@ void LM_DrawStart();
 extern int bRenderReflection;
 extern int bRenderRefraction;
 
-#include "Rendering\DX9\RenderDX9.h"
-#include "Rendering\Deffered\RenderDeffered.h"
+#include "RENDERING/DX9/RenderDX9.h"
+#include "RENDERING/Deffered/RenderDeffered.h"
 
 #define GLOBAL_ANIM_FOLDER "data\\Animations5"
 
-#endif __GAMECOMMON_H
+#endif // __GAMECOMMON_H

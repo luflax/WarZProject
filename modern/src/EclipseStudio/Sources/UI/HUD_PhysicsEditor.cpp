@@ -1,9 +1,9 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
-#include "UI\Hud_PhysicsEditor.h"
+#include "UI/HUD_PhysicsEditor.h"
 
 #include "GameCommon.h"
 

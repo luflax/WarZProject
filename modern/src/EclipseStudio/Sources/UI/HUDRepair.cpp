@@ -1,16 +1,16 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "../../../Eternity/sf/Console/config.h"
+#include "../../../Eternity/SF/Console/Config.h"
 #include "HUDRepair.h"
 #include "LangMngr.h"
 
-#include "FrontendShared.h"
+#include "FrontEndShared.h"
 
-#include "../multiplayer/clientgamelogic.h"
+#include "../multiplayer/ClientGameLogic.h"
 #include "../ObjectsCode/AI/AI_Player.H"
-#include "../ObjectsCode/weapons/Weapon.h"
-#include "../ObjectsCode/weapons/WeaponArmory.h"
+#include "../ObjectsCode/WEAPONS/Weapon.h"
+#include "../ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../GameLevel.h"
 
 HUDRepair::HUDRepair()

@@ -5,8 +5,8 @@
 
 #include "multiplayer/P2PMessages.h"
 #include "ServerGameLogic.h"
-#include "ObjectsCode/Weapons/WeaponArmory.h"
-#include "ObjectsCode/Weapons/HeroConfig.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/HeroConfig.h"
 
 #include "sobj_Zombie.h"
 #include "sobj_ZombieSpawn.h"
@@ -1159,7 +1159,7 @@ bool obj_Zombie::CallForHelp(const GameObject* trg)
 	{
 		// Are there enough zombies around to make the call worthwhile?
 		uint32_t numZombies = 0;
-		std::tr1::unordered_set<uint32_t> PoiTypesSet;
+		std::unordered_set<uint32_t> PoiTypesSet;
 		PoiTypesSet.insert(AutodeskNavAgent::PoiZombie);
 		PoiTypesSet.insert(AutodeskNavAgent::PoiSuperZombie);
 		AutodeskNavAgent** pZombies = gAutodeskNavMesh.GetNavAgentsInAABB( GetPosition(), spawnObject->m_CFHExtents, PoiTypesSet, numZombies );
@@ -1766,7 +1766,7 @@ BOOL obj_Zombie::Update()
 				{
 					// Alert the nearby Zombies
 					uint32_t numZombies = 0;
-					std::tr1::unordered_set<uint32_t> PoiTypesSet;
+					std::unordered_set<uint32_t> PoiTypesSet;
 					PoiTypesSet.insert(AutodeskNavAgent::PoiZombie);
 					PoiTypesSet.insert(AutodeskNavAgent::PoiSuperZombie);
 					AutodeskNavAgent** pZombies = gAutodeskNavMesh.GetNavAgentsInAABB( GetPosition(), spawnObject->m_CFHExtents, PoiTypesSet, numZombies );

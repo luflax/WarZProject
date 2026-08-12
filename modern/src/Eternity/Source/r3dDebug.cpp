@@ -5,9 +5,9 @@
 #include <windows.h>
 #include <tlhelp32.h>
 
-#include "dbghelp/include/dbghelp.h"
+#include "dbghelp.h"
 #ifndef DISABLE_CRASHRPT
-#pragma comment(lib, "../External/CrashRpt/Lib/CrashRpt1301.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../External/CrashRpt/Lib/CrashRpt1301.lib")
 #include "CrashRpt/include/CrashRpt.h" 
 #endif
 //#include "errorrep.h"

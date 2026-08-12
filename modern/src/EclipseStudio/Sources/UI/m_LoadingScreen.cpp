@@ -2,9 +2,9 @@
 #include "r3d.h"
 
 #include "m_LoadingScreen.h"
-#include "GameCode\UserProfile.h"
+#include "GameCode/UserProfile.h"
 
-#include "Multiplayer\MasterServerLogic.h"
+#include "multiplayer/MasterServerLogic.h"
 
 #include "LangMngr.h"
 

@@ -4,9 +4,9 @@
 #include "Ammo.h"
 
 #include "GameCommon.h"
-#include "multiplayer\P2PMessages.h"
+#include "multiplayer/P2PMessages.h"
 
-#include "..\AI\AI_Player.H"
+#include "../AI/AI_Player.H"
 
 Ammo::Ammo(const char* ammoName)
 {

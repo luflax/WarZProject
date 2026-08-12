@@ -4,7 +4,7 @@
 #include "GameCommon.h"
 #include "obj_DamageArea.h"
 #include "../../multiplayer/ClientGameLogic.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 
 #include "Editors/ObjectManipulator3d.h"
 

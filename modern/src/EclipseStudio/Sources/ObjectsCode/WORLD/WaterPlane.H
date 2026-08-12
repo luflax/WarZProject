@@ -3,12 +3,12 @@
 #define __PWAR_OBJECT_WATER_PLANE_H
 
 #ifndef WO_SERVER
-#include "XPSObject.h"
+#include "xpsobject.h"
 #endif // WO_SERVER
 #include "water.h"
 #include "../../../../GameEngine/gameobjects/GameObj.h"
 #ifndef WO_SERVER
-#include "building.h"
+#include "Building.h"
 #endif // WO_SERVER
 
 

@@ -3,7 +3,7 @@
 
 #include "UI/UIimEdit.h"
 #include "UI/UIimEdit2.h"
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "GameLevel.h"
 #include "LevelEditor_Decorators.h"

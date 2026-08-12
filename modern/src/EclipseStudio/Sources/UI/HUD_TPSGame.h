@@ -1,7 +1,7 @@
 #ifndef __R3D_HUD_SYSTEM_H_2
 #define __R3D_HUD_SYSTEM_H_2
 
-#include "hud_base.h"
+#include "HUD_Base.h"
 
 class TPSGameHUD : public BaseHUD
 {

@@ -3,7 +3,7 @@
 #define __PWAR_OBJECT_WATER_H
 
 #ifndef WO_SERVER
-#include "XPSObject.h"
+#include "xpsobject.h"
 
 //////////////////////////////////////////////////////////////////////////
 

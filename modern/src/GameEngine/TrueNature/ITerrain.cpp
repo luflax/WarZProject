@@ -2,7 +2,7 @@
 
 #include "r3d.h"
 
-#include "ObjectsCode/world/MaterialTypes.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
 
 #include "r3dDeviceQueue.h"
 

@@ -24,8 +24,8 @@ class CAsyncApiJob
 	CAsyncApiJob(DWORD in_peerId);
 virtual	~CAsyncApiJob() { }
 	
-virtual	int		Exec() = NULL;
-virtual	void		OnSuccess() = NULL;
+virtual	int		Exec() = 0;
+virtual	void		OnSuccess() = 0;
 virtual void		OnFailure() {};
 };
 

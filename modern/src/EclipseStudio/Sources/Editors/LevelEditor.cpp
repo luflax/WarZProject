@@ -5,17 +5,17 @@
 #include <limits>
 
 #ifndef FINAL_BUILD
-#include <ShellAPI.h>
+#include <shellapi.h>
 #include <psapi.h>
-#include <Shlwapi.h>
-#pragma comment(lib,"Psapi.lib")
+#include <shlwapi.h>
+// [PORT] linking handled by CMake: #pragma comment(lib,"Psapi.lib")
 #endif
 
 #include "r3d.h"
 #include "r3dLight.h"
 #include "r3dBudgeter.h"
 #include "r3dUtils.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 
 #include "GameCommon.h"
 #include "GameLevel.h"
@@ -23,7 +23,7 @@
 
 #include "r3dProfilerRender.h"
 
-#include "ObjectsCode\World\Lamp.h"
+#include "ObjectsCode/WORLD/Lamp.H"
 
 #include "../ObjectsCode/Nature/obj_LocalColorCorrection.h"
 #include "../ObjectsCode/Nature/GrassMap.h"
@@ -32,31 +32,31 @@
 #include "../ObjectsCode/Nature/GrassEditorPlanes.h"
 #include "../ObjectsCode/WORLD/obj_EnvmapProbe.h"
 #include "../ObjectsCode/WORLD/EnvmapProbes.h"
-#include "../ObjectsCode/WORLD/WaterPlane.h"
-#include "../ObjectsCode/WORLD/obj_Group.h"
+#include "../ObjectsCode/WORLD/WaterPlane.H"
+#include "../ObjectsCode/WORLD/obj_Group.H"
 #include "../ObjectsCode/WORLD/tree.h"
-#include "../ObjectsCode/AI/AI_Player.h"
+#include "../ObjectsCode/AI/AI_Player.H"
 #include "../ObjectsCode/WORLD/obj_DebugTexture.h"
-#include "../ObjectsCode/effects/obj_ParticleSystem.h"
+#include "../ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "../ObjectsCode/Nature/wind.h"
-#include "../ui/FrontendShared.h"
-#include "../ui/m_LoadingScreen.h"
+#include "../UI/FrontEndShared.h"
+#include "../UI/m_LoadingScreen.h"
 
 #include "Particle.h"
 
-#include "rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 #include "ObjectManipulator3d.h"
 
 #include "LevelEditor.h"
-#include "ObjectsCode\WORLD\obj_Road.h"
+#include "ObjectsCode/WORLD/obj_Road.h"
 
-#include "ObjectsCode\world\DecalChief.h"
-#include "ObjectsCode\world\MaterialTypes.h"
-#include "ObjectsCode\weapons\ExplosionVisualController.h"
-#include "ObjectsCode\weapons\HeroConfig.h"
-#include "ObjectsCode\weapons\WeaponArmory.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
+#include "ObjectsCode/WEAPONS/ExplosionVisualController.h"
+#include "ObjectsCode/WEAPONS/HeroConfig.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
-#include "Rendering\Deffered\VisibilityGrid.h"
+#include "RENDERING/Deffered/VisibilityGrid.h"
 #include "SectorMaster.h"
 
 
@@ -78,7 +78,7 @@
 #include "CameraSpotsManager.h"
 #include "../ObjectsCode/WORLD/PrefabUndoActions.h"
 
-#include "TrueNature2\Terrain3.h"
+#include "TrueNature2/Terrain3.h"
 
 #include "Terrain3Editor.h"
 
@@ -95,7 +95,7 @@
 
 bool g_bEditMode = false;
 
-#include "..\rendering\Deffered\RenderDeffered.h"
+#include "../RENDERING/Deffered/RenderDeffered.h"
 extern ShadowSlice ShadowSlices[NumShadowSlices];
 
 #include "../ObjectsCode/WORLD/PrefabManager.h"
@@ -1388,7 +1388,7 @@ extern	gobjid_t	UI_TargetObjID;
 extern	r3dMaterial	*UI_TargetMaterial;
 extern char	LevelEditName[64];
 
-#include "..\..\bin\Data\Shaders\DX9_P1\system\LibSM\shadow_config.h" // shader config file
+#include "../../bin/Data/Shaders/DX9_P1/system/LibSM/shadow_config.h" // shader config file
 
 #define LEVELEDITOR_SETTINGS_FILE	"%s/EditorSettings.xml"
 

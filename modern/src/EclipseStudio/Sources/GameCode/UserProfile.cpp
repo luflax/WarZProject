@@ -11,7 +11,7 @@
 #include "UserClans.h"
 #include "UserServerRental.h"
 #include "UserSkills.h"
-#include "backend/WOBackendAPI.h"
+#include "Backend/WOBackendAPI.h"
 
 #include "ObjectsCode/WEAPONS/WeaponConfig.h"
 #include "ObjectsCode/WEAPONS/WeaponArmory.h"
@@ -710,7 +710,7 @@ void CUserProfile::DeriveGamePricesFromItems()
 #ifndef WO_SERVER
 
 class GameObject;
-#include "ObjectsCode/Weapons/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 CClientUserProfile::CClientUserProfile()
 {

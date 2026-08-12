@@ -67,7 +67,7 @@ namespace r3dTL
 		inline const_pointer address(const_reference r) { return &r; }
 
 		//    memory allocation
-		inline pointer allocate(size_type cnt, typename std::allocator<void>::const_pointer = 0) 
+		inline pointer allocate(size_type cnt, const void* = 0) 
 		{
 			pointer r = reinterpret_cast<pointer>( mArea + mPtr ) ;
 

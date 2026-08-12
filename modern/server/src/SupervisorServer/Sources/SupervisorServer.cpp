@@ -10,7 +10,7 @@
 #include "SupervisorGameServer.h"
 #include "../../MasterServer/Sources/SrvCrashHandler.h"
 
-#pragma comment(lib, "pdh.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "pdh.lib")
 
 using namespace NetPacketsServerBrowser;
 

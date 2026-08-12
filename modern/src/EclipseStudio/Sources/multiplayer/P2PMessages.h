@@ -6,7 +6,7 @@
 #endif
 
 #include "r3dNetwork.h"
-#include "GameObjects/EventTransport.h"
+#include "gameobjects/EventTransport.h"
 #include "GameCode/UserProfile.h"
 #include "GameCode/UserSkills.h"
 #include "../../../ServerNetPackets/NetPacketsGameInfo.h"

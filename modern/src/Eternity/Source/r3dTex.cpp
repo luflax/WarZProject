@@ -551,7 +551,7 @@ namespace
 	}
 }
 
-#include "D3Dcommon.h"
+#include "d3dcommon.h"
 
 void SetD3DResourcePrivateData(LPDIRECT3DRESOURCE9 res, const char* FName)
 {

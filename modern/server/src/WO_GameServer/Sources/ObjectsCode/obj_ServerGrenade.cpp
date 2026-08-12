@@ -1,4 +1,4 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "obj_ServerGrenade.h"
@@ -7,7 +7,7 @@
 
 #include "../ServerWeapons/ServerWeapon.h"
 
-#include "ObjectsCode/Weapons/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #include "Async_ServerObjects.h"
 

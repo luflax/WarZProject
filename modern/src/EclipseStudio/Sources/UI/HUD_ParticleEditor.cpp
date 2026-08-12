@@ -2,18 +2,18 @@
 #ifndef FINAL_BUILD
 
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
-#include "UI\Hud_ParticleEditor.h"
+#include "UI/HUD_ParticleEditor.h"
 
 #include "GameCommon.h"
-#include "..\..\..\GameEngine\gameobjects\obj_Dummy.h"
-#include "..\Editors\EditedValueTracker.h"
+#include "../../../GameEngine/gameobjects/obj_Dummy.h"
+#include "../Editors/EditedValueTracker.h"
 
-#include "Editors\ObjectManipulator3d.h"
+#include "Editors/ObjectManipulator3d.h"
 
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "Particle.h"
 #include "Particle_Int.h"
 

@@ -46,7 +46,7 @@ public:
 	class sGFxEICallback
 	{
 	public:
-		virtual void Execute(r3dScaleformMovie* pMovie, const Scaleform::GFx::Value* args, uint32_t argCount) const = NULL;
+		virtual void Execute(r3dScaleformMovie* pMovie, const Scaleform::GFx::Value* args, uint32_t argCount) const = 0;
 	};
 
 	// templated class for calling EI callbacks

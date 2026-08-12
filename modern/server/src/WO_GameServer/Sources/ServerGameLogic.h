@@ -137,7 +137,7 @@ public:
 
 	bool		IsAdmin(DWORD CustomerID);
 
-	typedef stdext::hash_map<DWORD, float>  TKickedPlayers;
+	typedef std::unordered_map<DWORD, float>  TKickedPlayers;
 	TKickedPlayers	kickedPlayers_;
 
 	DWORD		GetExternalIP()

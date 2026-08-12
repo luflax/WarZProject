@@ -1,7 +1,7 @@
 #ifndef	__PWAR_SKYDOME_H
 #define	__PWAR_SKYDOME_H
 
-#include "hoffmanscatter.h"
+#include "HoffmanScatter.h"
 #include "CloudPlane/CloudPlane.h"
 
 struct R3D_SKY_VERTEX

@@ -5,7 +5,7 @@
 
 #include "multiplayer/P2PMessages.h"
 #include "ServerGameLogic.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #include "sobj_DroppedItem.h"
 

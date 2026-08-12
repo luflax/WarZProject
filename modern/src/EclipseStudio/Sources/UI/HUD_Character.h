@@ -1,8 +1,8 @@
 #pragma once
 
-#include "UI\hud_base.h"
-#include "GameObjects\GameObj.h"
-#include "GameObjects\ObjManag.h"
+#include "UI/HUD_Base.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 
 typedef r3dgameVector(r3dSTLString) stringlist_t;
 

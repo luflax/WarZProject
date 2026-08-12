@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "gamecommon.h"
+#include "GameCommon.h"
 
 #include "Tool_AxisControl.h"
 

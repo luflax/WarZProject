@@ -11,7 +11,7 @@
 #pragma warning (disable: 4305)
 #pragma warning (disable: 4101)
 
-#include "cvar.h"
+#include "CVar.h"
 #include "fmod/soundsys.h"
 
 #include "APIScaleformGFX.h"
@@ -31,8 +31,8 @@
 #include "ObjectsCode/Gameplay/BasePlayerSpawnPoint.h"
 #include "ObjectsCode/Gameplay/BaseItemSpawnPoint.h"
 
-#include "UI\FrontEndWarZ.h"
-#include "UI\m_LoadingScreen.h"
+#include "UI/FrontEndWarZ.h"
+#include "UI/m_LoadingScreen.h"
 
 #include "Editors/CollectionsManager.h"
 

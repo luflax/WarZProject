@@ -131,7 +131,7 @@ public:
 	// get the NavAgents (filtered by PointsOfInterest in PoiTypesSet) inside the extents of an axis-aligned bounding box, centered around a position.
 	// list creation can be skipped if all that is wanted is the number of NavAgents.
 	// caller is responsible for deleting the list returned (use delete[]).
-	AutodeskNavAgent** GetNavAgentsInAABB(const r3dPoint3D& collectorBoxCenter, const r3dPoint3D& collectorBoxHalfExtents, std::tr1::unordered_set<uint32_t>& PoiTypesSet, uint32_t& foundNumNavAgents, bool skipListCreation = false);
+	AutodeskNavAgent** GetNavAgentsInAABB(const r3dPoint3D& collectorBoxCenter, const r3dPoint3D& collectorBoxHalfExtents, std::unordered_set<uint32_t>& PoiTypesSet, uint32_t& foundNumNavAgents, bool skipListCreation = false);
 
 	bool doDebugDraw;
 	Kaim::GeneratorParameters buildGlobalConfig;

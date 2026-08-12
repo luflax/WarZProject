@@ -7,7 +7,7 @@
 
 #include "obj_ServerBarricade.h"
 #include "ServerGameLogic.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../../GameEngine/ai/AutodeskNav/AutodeskNavMesh.h"
 #include "Async_ServerObjects.h"
 

@@ -1,9 +1,9 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "sun.h"
+#include "Sun.h"
 
-#include "../GameObjects/ObjManag.h"
+#include "../gameobjects/ObjManag.h"
 
 #include "../SF/Console/Config.h"
 

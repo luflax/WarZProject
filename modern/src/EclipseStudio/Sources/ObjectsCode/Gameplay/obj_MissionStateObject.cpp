@@ -7,7 +7,7 @@
 
 #include "obj_MissionStateObject.h"
 #include "../../multiplayer/ClientGameLogic.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 #ifndef FINAL_BUILD
 #include "../../Editors/LevelEditor.h"
 #include "GameLevel.h"
@@ -282,7 +282,7 @@ void obj_MissionStateObject::WriteSerializedData(pugi::xml_node& node)
 	objNode.append_attribute("UIMsgID") = m_ActionUI_MsgID;
 	objNode.append_attribute("UITextID") = m_ActionUI_TextID;
 	objNode.append_attribute("numMissionsSelected") = m_missionIDs.size();
-	std::tr1::unordered_set<uint32_t>::const_iterator iter = m_missionIDs.begin();
+	std::unordered_set<uint32_t>::const_iterator iter = m_missionIDs.begin();
 	for(size_t i=0; iter != m_missionIDs.end(); ++i, ++iter)
 	{
 		pugi::xml_node mNode = objNode.append_child();

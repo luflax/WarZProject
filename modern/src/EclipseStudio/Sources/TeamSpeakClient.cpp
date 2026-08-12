@@ -9,11 +9,11 @@
 #include <public_errors.h>
 #include <clientlib_publicdefinitions.h>
 #include <clientlib.h>
-#pragma comment(lib, "../external/ts3_sdk_3/lib/ts3client_win32.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../external/ts3_sdk_3/lib/ts3client_win32.lib")
 
-#include "ObjectsCode/AI/AI_Player.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "multiplayer/ClientGameLogic.h"
-#include "ui/HUDDisplay.h"
+#include "UI/HUDDisplay.h"
 
 #include "TeamSpeakClient.h"
 
@@ -774,7 +774,7 @@ void CTeamSpeakClient::Tick()
 		r3dCSHolder csC(m_csClients);
 		m_nextUpdate = r3dGetTime() + 0.1f;
 	
-		for(stdext::hash_map<int, int>::iterator it = m_ClientToPlayerIdx.begin(); it != m_ClientToPlayerIdx.end(); ++it)
+		for(std::unordered_map<int, int>::iterator it = m_ClientToPlayerIdx.begin(); it != m_ClientToPlayerIdx.end(); ++it)
 		{
 			// check if we have actual player for connected client
 			int playerIdx = it->second;
@@ -824,7 +824,7 @@ void CTeamSpeakClient::AddEvent(int clientID, int code)
 	r3dCSHolder cs1(m_csEvents);
 	r3dCSHolder csC(m_csClients);
 	
-	stdext::hash_map<int, int>::iterator it = m_ClientToPlayerIdx.find(clientID);
+	std::unordered_map<int, int>::iterator it = m_ClientToPlayerIdx.find(clientID);
 	int playerIdx = (it != m_ClientToPlayerIdx.end()) ? it->second : -1;
 		
 	evt_s evt;
@@ -902,7 +902,7 @@ int CTeamSpeakClient::OnClientAppear(int clientID)
 {
 	r3dCSHolder csC(m_csClients);
 
-	stdext::hash_map<int, int>::iterator it = m_ClientToPlayerIdx.find(clientID);
+	std::unordered_map<int, int>::iterator it = m_ClientToPlayerIdx.find(clientID);
 	if(it != m_ClientToPlayerIdx.end())
 		return it->second;
 
@@ -958,7 +958,7 @@ void CTeamSpeakClient::OnClientDissapear(bool bMainThread, int clientID)
 
 	r3dCSHolder csC(m_csClients);
 
-	stdext::hash_map<int, int>::iterator it = m_ClientToPlayerIdx.find(clientID);
+	std::unordered_map<int, int>::iterator it = m_ClientToPlayerIdx.find(clientID);
 	if(it != m_ClientToPlayerIdx.end())
 	{
 		// remove voice client id from list of players

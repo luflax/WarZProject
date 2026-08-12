@@ -4,7 +4,7 @@
 #include "GameCommon.h"
 
 #include "m_AppSelect.h"
-#include "..\UI\UIMenu.h"
+#include "../UI/UIMenu.h"
 
 int	AppSelectMode = 100;
 

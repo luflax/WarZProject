@@ -1,6 +1,6 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#pragma comment(lib, "DbgHelp.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "DbgHelp.lib")
 
 #include "r3dFileSystem.h"
 #include "r3dFSStructs.h"

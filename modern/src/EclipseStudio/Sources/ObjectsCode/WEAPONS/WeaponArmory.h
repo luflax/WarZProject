@@ -5,7 +5,7 @@ class Ammo;
 class Gear;
 class GameObject;
 
-#include "GameCode\UserProfile.h"
+#include "GameCode/UserProfile.h"
 #include "BaseItemConfig.h"
 #include "WeaponConfig.h"
 #include "GearConfig.h"

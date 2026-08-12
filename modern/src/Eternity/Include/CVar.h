@@ -8,8 +8,8 @@ class CVar
 	const char*	pComment;
   public:
 	CVar(const char* _pName, const char* _pComment = "");
-virtual	void		Get(char* buf) = NULL;
-virtual	char*		Put(char* buf) = NULL;
+virtual	void		Get(char* buf) = 0;
+virtual	char*		Put(char* buf) = 0;
 };
 
 class CVarFloat : public CVar
@@ -59,4 +59,4 @@ class CVarString : public CVar
 extern	int		cvars_Write(const char* fname, const char* prefix = "");
 extern	int		cvars_Read(const char* fname);
 
-#endif	__CVAR_H_44431124932
+#endif // __CVAR_H_44431124932

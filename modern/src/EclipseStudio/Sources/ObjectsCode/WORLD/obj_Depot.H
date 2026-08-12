@@ -1,7 +1,7 @@
 #ifndef __GO_Depot_H
 #define __GO_Depot_H
 
-#include "obj_Depot.h"
+#include "obj_Depot.H"
 
 class obj_Depot : public GameObject
 {

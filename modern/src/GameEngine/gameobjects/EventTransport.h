@@ -1,7 +1,7 @@
 #pragma once
 
 #include "r3dNetwork.h"
-#include "GameObjects\GameObj.h"	// for DefaultPacket crap
+#include "gameobjects/GameObj.h"	// for DefaultPacket crap
 
 #pragma pack(push)
 #pragma pack(1)

@@ -4,7 +4,7 @@
 
 #include "ServerGameLogic.h"
 #include "MasterServerLogic.h"
-#include "GameObjects/ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 #include "ObjectsCode/obj_ServerPlayer.h"
 #include "ObjectsCode/obj_ServerGravestone.h"
@@ -24,7 +24,7 @@
 #include "ObjectsCode/Missions/MissionTrigger.h"
 
 #include "../EclipseStudio/Sources/GameCode/UserProfile.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 #include "../EclipseStudio/Sources/ObjectsCode/Gameplay/ZombieStates.h"
 
 #include "ServerWeapons/ServerWeapon.h"
@@ -39,7 +39,7 @@
 #include "GBClient/Inc/GBClient.h"
 #include "GBClient/Inc/GBReservedEvents.h"
 
-#pragma comment(lib, "../../../server/GameBlocksSDK/Lib/vc100/Win32/GBClient.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "../../../server/GameBlocksSDK/Lib/vc100/Win32/GBClient.lib")
 
 // PunkBuster SDK
 #ifdef __WITH_PB__

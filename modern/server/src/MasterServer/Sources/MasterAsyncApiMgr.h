@@ -13,8 +13,8 @@ class CMSAsyncApiJob
 	CMSAsyncApiJob();
 virtual	~CMSAsyncApiJob() { }
 	
-virtual	int		Exec() = NULL;
-virtual	void		OnSuccess() = NULL;
+virtual	int		Exec() = 0;
+virtual	void		OnSuccess() = 0;
 };
 
 class CMSAsyncApiWorker

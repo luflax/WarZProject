@@ -174,11 +174,11 @@ public:
 	__forceinline gobjid_t() : id(invalidGameObjectID) {};
 	__forceinline gobjid_t(gobjid_e in_id) : id(in_id) {}
 	__forceinline explicit gobjid_t(DWORD in_id) : id(in_id) {}
-	__forceinline gobjid_t &gobjid_t::operator=(const gobjid_t& rhs) {
+	__forceinline gobjid_t &operator=(const gobjid_t& rhs) {
 		id = rhs.id;
 		return *this;
 	}
-	__forceinline gobjid_t &gobjid_t::operator=(const gobjid_e rhs) {
+	__forceinline gobjid_t &operator=(const gobjid_e rhs) {
 		id = rhs;
 		return *this;
 	}

@@ -2,7 +2,7 @@
 #include "r3d.h"
 
 #include "UserClans.h"
-#include "backend/WOBackendAPI.h"
+#include "Backend/WOBackendAPI.h"
 
 CUserClans::CUserClans()
 {

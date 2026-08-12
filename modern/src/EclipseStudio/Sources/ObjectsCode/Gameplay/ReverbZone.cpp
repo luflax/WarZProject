@@ -3,11 +3,11 @@
 
 #include "GameCommon.h"
 
-#include "GameObjects\GameObj.h"
-#include "GameObjects\ObjManag.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 #include "../../Editors/ObjectManipulator3d.h"
 
-#include "rendering/Deffered/DeferredHelpers.h"
+#include "RENDERING/Deffered/DeferredHelpers.h"
 
 #include "ReverbZone.h"
 

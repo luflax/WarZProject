@@ -28,25 +28,25 @@
 #undef NAMESPACE_NAME
 
 // libs
-#pragma comment(lib, "libpng.lib")
-#pragma comment(lib, "libjpeg.lib")
-#pragma comment(lib, "pcre.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libpng.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libjpeg.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "pcre.lib")
 
 #ifdef _DEBUG
-#pragma comment(lib, "libgfx_DebugOpt.lib")
-#pragma comment(lib, "libgfx_as3_DebugOpt.lib")
-#pragma comment(lib, "libgfxexpat_DebugOpt.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfx_DebugOpt.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfx_as3_DebugOpt.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfxexpat_DebugOpt.lib")
 #elif defined(FINAL_BUILD)
-#pragma comment(lib, "libgfx_Release.lib")
-#pragma comment(lib, "libgfx_as3_Release.lib")
-#pragma comment(lib, "libgfxexpat_Release.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfx_Release.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfx_as3_Release.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfxexpat_Release.lib")
 //#pragma comment(lib, "libgfx_Shipping.lib")
 //#pragma comment(lib, "libgfx_as3_Shipping.lib")
 //#pragma comment(lib, "libgfxexpat_Shipping.lib")
 #else // RELEASE
-#pragma comment(lib, "libgfx_Release.lib")
-#pragma comment(lib, "libgfx_as3_Release.lib")
-#pragma comment(lib, "libgfxexpat_Release.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfx_Release.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfx_as3_Release.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "libgfxexpat_Release.lib")
 #endif
 
 //////////////////////////////////////////////////////////////////////////

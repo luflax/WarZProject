@@ -3,12 +3,12 @@
 
 #include "menu/m_gui.h"
 #include "GameCommon.h"
-#include "multiplayer\P2PMessages.h"
-#include "ObjectsCode\AI\obj_AI_Base.h"
-#include "ObjectsCode\World\Building.h"
+#include "multiplayer/P2PMessages.h"
+#include "ObjectsCode/AI/obj_AI_Base.h"
+#include "ObjectsCode/WORLD/Building.h"
 #include "multihud.h"
 #include "Game.h"
-#include "NewLogic\SpellManager.h"
+#include "NewLogic/SpellManager.h"
 
 #pragma warning(disable:4244)
 
@@ -25,7 +25,7 @@ extern	gobjid_t	UI_SelectedObjID;
 
 extern	int		UI_bDisplayHUDText;
 
-#include "NewLogic\SpellScripts.h"
+#include "NewLogic/SpellScripts.h"
 //#include "NewLogic\SpellManager.h" 
 
 #include "menu/m_ItemShop.h"

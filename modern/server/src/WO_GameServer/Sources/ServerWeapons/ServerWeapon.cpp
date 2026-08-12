@@ -5,7 +5,7 @@
 #include "ServerWeapon.h"
 #include "../ObjectsCode/obj_ServerPlayer.h"
 #include "ServerGameLogic.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 
 ServerWeapon::ServerWeapon(const WeaponConfig* conf, obj_ServerPlayer* owner, int backpackIdx, const wiWeaponAttachment& attm)
 {

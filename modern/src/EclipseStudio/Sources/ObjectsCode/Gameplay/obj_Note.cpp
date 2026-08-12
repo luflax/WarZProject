@@ -4,7 +4,7 @@
 #include "GameCommon.h"
 #include "obj_Note.h"
 
-#include "ObjectsCode/weapons/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 IMPLEMENT_CLASS(obj_Note, "obj_Note", "Object");
 AUTOREGISTER_CLASS(obj_Note);

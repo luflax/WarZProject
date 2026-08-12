@@ -6,11 +6,11 @@
 
 #include "Editors/LevelEditor.h"
 
-#include "..\eternity/SF/script.h"
+#include "../Eternity/SF/script.h"
 #include "TrueNature/SkyDome.h"
 
-#include "GameObjects/ObjManag.h"
-#include "ObjectsCode/effects/obj_ParticleSystem.h"
+#include "gameobjects/ObjManag.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 #include "ObjectsCode/Nature/wind.h"
 
 #include "XMLHelpers.h"

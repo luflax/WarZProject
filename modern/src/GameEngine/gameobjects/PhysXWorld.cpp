@@ -24,70 +24,70 @@
 #ifndef WO_SERVER
 #ifdef VEHICLES_ENABLED
 #include "../../EclipseStudio/Sources/multiplayer/ClientGameLogic.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/ai/AI_Player.H"
+#include "../../EclipseStudio/Sources/ObjectsCode/AI/AI_Player.H"
 #include "../../GameEngine/gameobjects/obj_Vehicle.h"
 #endif
 #endif
 
 // libs
 #ifdef _DEBUG
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
-#pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
-#pragma comment(lib, "PhysX3VehicleCHECKED.lib")
-#pragma comment(lib, "RepX3CHECKED.lib")
-#pragma comment(lib, "RepXUpgrader3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3VehicleCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3CHECKED.lib")
 #elif defined(FINAL_BUILD)
-#pragma comment(lib, "PhysX3_x86.lib")
-#pragma comment(lib, "PhysX3Cooking_x86.lib")
-#pragma comment(lib, "PhysX3_x86.lib")
-#pragma comment(lib, "PhysXProfileSDK.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDK.lib")
-#pragma comment(lib, "PhysX3Common_x86.lib")
-#pragma comment(lib, "PhysX3Extensions.lib")
-#pragma comment(lib, "PhysX3Vehicle.lib")
-#pragma comment(lib, "RepX3.lib")
-#pragma comment(lib, "RepXUpgrader3.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Cooking_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDK.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDK.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Common_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Extensions.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3Vehicle.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3.lib")
 #else // RELEASE
 #ifndef WO_SERVER
-#pragma comment(lib, "PhysX3PROFILE_x86.lib")
-#pragma comment(lib, "PhysX3CookingPROFILE_x86.lib")
-#pragma comment(lib, "PhysX3PROFILE_x86.lib")
-#pragma comment(lib, "PhysXProfileSDKPROFILE.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDKPROFILE.lib")
-#pragma comment(lib, "PhysX3CommonPROFILE_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsPROFILE.lib")
-#pragma comment(lib, "PhysX3VehiclePROFILE.lib")
-#pragma comment(lib, "RepX3PROFILE.lib")
-#pragma comment(lib, "RepXUpgrader3PROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3PROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CookingPROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3PROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDKPROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDKPROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CommonPROFILE_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3ExtensionsPROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3VehiclePROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3PROFILE.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3PROFILE.lib")
 #else // WO_SERVER
 // use checked libs for server to get crash dump for nvidia
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3CHECKED_x86.lib")
-#pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
-#pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
-#pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
-#pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
-#pragma comment(lib, "PhysX3VehicleCHECKED.lib")
-#pragma comment(lib, "RepX3CHECKED.lib")
-#pragma comment(lib, "RepXUpgrader3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CookingCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXProfileSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysXVisualDebuggerSDKCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CommonCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3ExtensionsCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3VehicleCHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepX3CHECKED.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "RepXUpgrader3CHECKED.lib")
 #endif // WO_SERVER
 #endif
 
 //ptumik: for server just use already built lib for character controller, unless we will modify it
 #ifdef WO_SERVER
 #ifdef _DEBUG
-#pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
 #elif defined(FINAL_BUILD)
-#pragma comment(lib, "PhysX3CharacterKinematic_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CharacterKinematic_x86.lib")
 #else // RELEASE
 //#pragma comment(lib, "PhysX3CharacterKinematicPROFILE_x86.lib")
-#pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "PhysX3CharacterKinematicCHECKED_x86.lib")
 #endif
 #endif
 
@@ -259,7 +259,7 @@ public:
 
 	virtual void reportError(PxErrorCode::Enum code, const char* message, const char* file, int line)
 	{
-		const char* errorCode = NULL;
+		const char* errorCode = 0;
 		switch (code)
 		{
 		case PxErrorCode::eINVALID_PARAMETER:

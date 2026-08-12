@@ -1,9 +1,9 @@
 #ifndef __PWAR_SOUNDSYS_H
 #define __PWAR_SOUNDSYS_H
 
-#include "..\..\External\fmod\fmod_event.hpp"
-#include "..\..\External\fmod\fmod_event_net.hpp"
-#include "..\..\External\fmod\Fmod_errors.h"
+#include "../../External/fmod/fmod_event.hpp"
+#include "../../External/fmod/fmod_event_net.hpp"
+#include "../../External/fmod/Fmod_errors.h"
 
 #define MAX_SOUND_SAMPLES	2048
 

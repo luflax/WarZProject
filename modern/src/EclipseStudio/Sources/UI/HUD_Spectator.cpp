@@ -1,15 +1,15 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
 #include "../SF/Console/Config.h"
-#include "UI\Hud_spectator.h"
-#include "Editors\LevelEditor.h"
+#include "UI/HUD_Spectator.h"
+#include "Editors/LevelEditor.h"
 
-#include "ObjectsCode\Gameplay\obj_ZombieDummy.h"
-#include "ObjectsCode\Gameplay\obj_DeerDummy.h"
-#include "..\Editors\LevelEditor_Collections.h"
+#include "ObjectsCode/Gameplay/obj_ZombieDummy.h"
+#include "ObjectsCode/Gameplay/obj_DeerDummy.h"
+#include "../Editors/LevelEditor_Collections.h"
 
 #include "GameCommon.h"
 #include "GameLevel.h"
@@ -29,7 +29,7 @@ float GameFOV = VIEW_FOV;
 
 static int enablemouselook = 1;
 
-#include "Editors\LevelEditor.h"
+#include "Editors/LevelEditor.h"
 
 
 BaseHUD  		*Hud = NULL;

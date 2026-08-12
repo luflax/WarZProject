@@ -103,8 +103,8 @@ public:
 public:
 	uint32_t	m_objType;
 	uint32_t	m_amount;
-	std::tr1::unordered_set< uint32_t >	m_weaponIDRestrictions;
-	std::tr1::unordered_set< uint32_t >	m_objTypeIDRestrictions;
+	std::unordered_set< uint32_t >	m_weaponIDRestrictions;
+	std::unordered_set< uint32_t >	m_objTypeIDRestrictions;
 };
 
 //-------------------------------------------------------------------------

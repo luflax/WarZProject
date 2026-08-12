@@ -1,14 +1,14 @@
 #include "r3dPCH.h"
 #include "r3d.h"
-#include "d3dfont.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
+#include "d3dFont.h"
 
-#include "ObjectsCode/AI/AI_Player.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "ObjectsCode/AI/AI_PlayerAnim.h"
-#include "UI/Hud_Character.h"
+#include "UI/HUD_Character.h"
 
-#include "../rendering/Deffered/CommonPostFX.h"
-#include "../rendering/Deffered/PostFXChief.h"
+#include "../RENDERING/Deffered/CommonPostFX.h"
+#include "../RENDERING/Deffered/PostFXChief.h"
 
 extern bool g_bEditMode;
 

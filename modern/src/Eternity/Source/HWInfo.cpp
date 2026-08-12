@@ -1,9 +1,9 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 #include <intrin.h>
-#include <IPTypes.h>
+#include <iptypes.h>
 #include <iphlpapi.h>
-#pragma comment(lib, "Iphlpapi.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "Iphlpapi.lib")
 
 #include "HWInfo.h"
 

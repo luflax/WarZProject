@@ -6,7 +6,7 @@
 
 #include "GameCommon.h"
 
-#include "ObjectsCode\World\Lamp.h"
+#include "ObjectsCode/WORLD/Lamp.H"
 #include "GameStart.h"
 
 

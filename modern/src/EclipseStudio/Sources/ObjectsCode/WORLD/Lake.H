@@ -3,8 +3,8 @@
 #define __PWAR_OBJECT_LAKE_H
 
 #ifndef WO_SERVER
-#include "XPSObject.h"
-#include "building.h"
+#include "xpsobject.h"
+#include "Building.h"
 #endif // WO_SERVER
 #include "water.h"
 

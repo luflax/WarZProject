@@ -1,5 +1,5 @@
 
-#include "rendering/Deffered/CommonPostFX.h"
+#include "RENDERING/Deffered/CommonPostFX.h"
 
 #include "../SF/Console/Config.h"
 #include "../../ObjectsCode/Nature/obj_LocalColorCorrection.h"

@@ -6,7 +6,7 @@
 #include "PostFXChief.h"
 #include "PFX_StarShapeBlur.h"
 
-#include "TrueNature\Sun.h"
+#include "TrueNature/Sun.h"
 
 PFX_StarShapeBlur::PFX_StarShapeBlur()
 : Parent( this )

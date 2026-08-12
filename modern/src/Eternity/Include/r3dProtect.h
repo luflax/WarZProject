@@ -18,7 +18,7 @@
 
 
 #if USE_VMPROTECT
-  #include "..\..\..\External\VMProtect\VMProtectSDK.h"
+  #include "../../../External/VMProtect/VMProtectSDK.h"
   #define VMPROTECT_BeginMutation(XX) VMProtectBeginMutation(XX)
   #define VMPROTECT_BeginVirtualization(XX) VMProtectBeginVirtualization(XX)
   #define VMPROTECT_End() __asm {nop} VMProtectEnd()

@@ -21,7 +21,7 @@ protected:
 	const char*	m_ActionUI_Text;
 
 public:
-	std::tr1::unordered_set<uint32_t>	m_missionIDs;
+	std::unordered_set<uint32_t>	m_missionIDs;
 
 public:
 	obj_MissionStateObject();

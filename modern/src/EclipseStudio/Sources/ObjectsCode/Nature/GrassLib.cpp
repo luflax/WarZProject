@@ -5,9 +5,9 @@
 
 #include "r3dDeviceQueue.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
-#include "TSG_STL/BigEndian.h"
+#include "Tsg_stl/BigEndian.h"
 
 #include "GrassGen.h"
 #include "GrassMap.h"

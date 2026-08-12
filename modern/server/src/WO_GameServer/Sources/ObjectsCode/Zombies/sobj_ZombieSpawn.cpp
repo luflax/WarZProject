@@ -4,10 +4,21 @@
 #include "GameCommon.h"
 #include "XMLHelpers.h"
 #include "ServerGameLogic.h"
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponArmory.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #include "sobj_ZombieSpawn.h"
 #include "sobj_Zombie.h"
+
+// PORT NOTE: std::random_shuffle was removed in C++17. std::shuffle requires an
+// explicit uniform random bit generator, so provide one here. Thread-local so the
+// server's per-instance shuffling stays independent across threads.
+#include <random>
+static std::mt19937& r3dPortableRng()
+{
+    static thread_local std::mt19937 rng{ std::random_device{}() };
+    return rng;
+}
+
 
 IMPLEMENT_CLASS(obj_ZombieSpawn, "obj_ZombieSpawn", "Object");
 AUTOREGISTER_CLASS(obj_ZombieSpawn);
@@ -226,7 +237,7 @@ void obj_ZombieSpawn::GenerateNavPoints()
 	
 	// shuffle positions around
 	if(navPoints.size() > 0)
-		std::random_shuffle(navPoints.begin(), navPoints.end());
+		std::shuffle(navPoints.begin(), navPoints.end(), r3dPortableRng());
 	
 	r3dOutToLog("%d/%d valid navpoints for %d zombies at %f %f %f\n", navPoints.size(), cells * cells, maxZombieCount, GetPosition().x, GetPosition().y, GetPosition().z);
 	if(navPoints.size() == 0)

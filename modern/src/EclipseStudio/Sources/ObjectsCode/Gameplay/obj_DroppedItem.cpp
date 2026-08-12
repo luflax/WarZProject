@@ -4,10 +4,10 @@
 #include "GameCommon.h"
 #include "obj_DroppedItem.h"
 
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "../EFFECTS/obj_ParticleSystem.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "../EFFECTS/obj_ParticleSystem.H"
 #include "../../multiplayer/ClientGameLogic.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 
 extern bool g_bEditMode;
 

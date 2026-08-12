@@ -31,7 +31,7 @@ class CTeamSpeakClient
 	bool		m_pttActive;
 	
 	CRITICAL_SECTION  m_csClients;
-	stdext::hash_map<int, int> m_ClientToPlayerIdx;
+	std::unordered_map<int, int> m_ClientToPlayerIdx;
 	int		OnClientAppear(int clientID); // return playerIdx of connected player
 	void		OnClientDissapear(bool bMainThread, int clientID);
 	

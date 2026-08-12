@@ -5,7 +5,7 @@
 #include "UI/UIElements.h"
 #include "menu/m_gui.h"
 
-#include "Gamecommon.h"
+#include "GameCommon.h"
 
   #include "menu/m_LightEditor.h"
   Menu_LightEditor*    menu_LE = NULL;

@@ -10,7 +10,7 @@
 #include "r3d.h"
 #include "ParticleEditorUndoSubsystem.h"
 #include "EditedValueTracker.h"
-#include "../ObjectsCode/EFFECTS/obj_ParticleSystem.h"
+#include "../ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 
 //-------------------------------------------------------------------------
 //	Value tracker list

@@ -1,9 +1,15 @@
 #ifndef	__R3D_SKELETALANIM_H_36d6814
 #define __R3D_SKELETALANIM_H_36d6814
 
+
+// PORT NOTE: a friend declaration does not introduce the name into the enclosing
+// scope in ISO C++ -- it is only findable via ADL. MSVC injected it, so the code
+// relied on "friend class r3dAnimPool;" alone. A real forward declaration is required.
+class r3dAnimPool;
+
 #include "r3dBinFmt.h"
-#include "r3dSkeleton.h"
-#include "r3dSkin.h"
+#include "r3dSkeleton.H"
+#include "r3dSkin.H"
 #include "Tsg_stl/HashTable.h"
 
 class r3dAnimData;

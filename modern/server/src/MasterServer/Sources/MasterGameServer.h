@@ -2,7 +2,7 @@
 
 #include "r3dNetwork.h"
 #include <list>
-#include <hash_map>
+#include <unordered_map>
 
 #include "../../ServerNetPackets/NetPacketsGameInfo.h"
 #include "NetPacketsServerBrowser.h"
@@ -24,8 +24,8 @@ class CMasterGameServer : public r3dNetCallback
 	bool		shuttingDown_;
 	float		shutdownLeft_;
 
-	typedef stdext::hash_map<DWORD, CServerS*> TSupersList;
-	typedef stdext::hash_map<DWORD, CServerG*> TGamesList;
+	typedef std::unordered_map<DWORD, CServerS*> TSupersList;
+	typedef std::unordered_map<DWORD, CServerG*> TGamesList;
 	TSupersList	supers_;
 	TGamesList	games_;			// gameId<->game map
 	TGamesList	gamesByGameServerId_;	// gameServerID<->game map

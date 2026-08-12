@@ -9,9 +9,9 @@
 #include "GameCommon.h"
 #include "GameLevel.h"
 
-#include "particle.h"
-#include "particle_int.h"
-#include "obj_ParticleSystem.h"
+#include "Particle.h"
+#include "Particle_Int.h"
+#include "obj_ParticleSystem.H"
 
 
 IMPLEMENT_CLASS(obj_ParticleSystem, "obj_ParticleSystem", "Object");

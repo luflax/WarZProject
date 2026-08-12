@@ -46,7 +46,7 @@ class EZombieStates
 };
 
 /*
-#include "../ai/StateMachine.h"
+#include "../AI/StateMachine.h"
 #include "obj_Zombie.h"
 
 //////////////////////////////////////////////////////////////////////////

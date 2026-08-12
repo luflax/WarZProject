@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/GearConfig.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/GearConfig.h"
 
 class Gear
 {

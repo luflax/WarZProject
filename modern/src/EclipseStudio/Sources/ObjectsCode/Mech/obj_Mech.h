@@ -5,7 +5,7 @@
 #include "r3dProtect.h"
 #include "GameCommon.h"
 #include "GameCode/UserProfile.h"
-#include "../ai/StateMachine.h"
+#include "../AI/StateMachine.h"
 #include "obj_MechAnim.h"
 #include "obj_MechEvents.h"
 

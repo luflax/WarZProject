@@ -41,4 +41,4 @@ void LM_DrawStart();
 
 extern char CurLoadString[100];
 
-#endif __GAME_H
+#endif // __GAME_H

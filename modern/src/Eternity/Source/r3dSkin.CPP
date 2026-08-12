@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "r3dSkin.h"
+#include "r3dSkin.H"
 
 
 r3dSkinMesh::r3dSkinMesh()

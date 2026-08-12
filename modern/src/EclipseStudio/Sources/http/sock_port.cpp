@@ -9,8 +9,8 @@
 #include <math.h>
 #include <assert.h>
 
-#pragma comment( lib, "winmm.lib" )
-#pragma comment( lib, "ws2_32.lib" )
+// [PORT] linking handled by CMake: #pragma comment( lib, "winmm.lib" )
+// [PORT] linking handled by CMake: #pragma comment( lib, "ws2_32.lib" )
 
 
 namespace {

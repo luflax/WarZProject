@@ -2,7 +2,7 @@
 #ifndef __PWAR_OBJECT_LampBulb_H
 #define __PWAR_OBJECT_LampBulb_H
 
-#include "building.h"
+#include "Building.h"
 
 class obj_LampBulb : public obj_Building
 {

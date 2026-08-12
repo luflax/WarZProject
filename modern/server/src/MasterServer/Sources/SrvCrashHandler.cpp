@@ -4,7 +4,7 @@
 
 #include <windows.h>
 #include <DbgHelp.h>
-#pragma comment(lib, "DbgHelp.lib")
+// [PORT] linking handled by CMake: #pragma comment(lib, "DbgHelp.lib")
 
 extern void r3dCloseLogFile();
 

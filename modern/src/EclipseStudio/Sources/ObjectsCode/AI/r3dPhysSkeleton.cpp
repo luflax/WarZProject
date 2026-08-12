@@ -8,9 +8,9 @@
 
 #include "extensions/PxRigidBodyExt.h"
 
-#include "RepX\RepX.h"
-#include "RepX\RepXUtility.h"
-#include "extensions\PxStringTableExt.h"
+#include "RepX/RepX.h"
+#include "RepX/RepXUtility.h"
+#include "extensions/PxStringTableExt.h"
 #include "../../../../GameEngine/gameobjects/PhysXRepXHelpers.h"
 #include "r3dBackgroundTaskDispatcher.h"
 

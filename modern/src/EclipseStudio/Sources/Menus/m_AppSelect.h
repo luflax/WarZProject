@@ -1,7 +1,7 @@
 #ifndef __apps_H
 #define __apps_H
 
-#include "ui/r3dMenu.h"
+#include "UI/r3dMenu.h"
 
 class Menu_AppSelect : public MenuLayer
 {

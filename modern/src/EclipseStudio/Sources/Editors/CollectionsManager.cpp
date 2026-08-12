@@ -9,7 +9,7 @@
 #include "CollectionsManager.h"
 #include "../GameLevel.h"
 #include "../XMLHelpers.h"
-#include "../../../gameengine/TrueNature/ITerrain.h"
+#include "../../../GameEngine/TrueNature/ITerrain.h"
 #include "../ObjectsCode/Nature/wind.h"
 
 //////////////////////////////////////////////////////////////////////////

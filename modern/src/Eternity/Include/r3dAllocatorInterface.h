@@ -68,8 +68,8 @@ void operator delete[](void * ptr, r3dAllocationTypes t);
 #define r3dgameMap(key, value) std::map<key, value, std::less<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME> >
 #define r3dgameMultiMap(key, value) std::multimap<key, value, std::less<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME> >
 #define r3dgameMultiMapCmp(key, value, cmp) std::multimap<key, value, cmp, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME> >
-#define r3dgameHashMap(key, value) stdext::hash_map<key, value, stdext::hash_compare<key, std::less<key> >, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME> >
-#define r3dgameUnorderedMap(key, value) std::tr1::unordered_map<key, value, std::tr1::hash<key>, std::equal_to<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME > >
+#define r3dgameHashMap(key, value) std::unordered_map<key, value, std::hash<key>, std::equal_to<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME> >
+#define r3dgameUnorderedMap(key, value) std::unordered_map<key, value, std::hash<key>, std::equal_to<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GAME > >
 
 
 #define r3dgfxVector(type) std::vector<type, r3dSTLCustomAllocator<type, ALLOC_TYPE_GFX> >
@@ -77,8 +77,8 @@ void operator delete[](void * ptr, r3dAllocationTypes t);
 #define r3dgfxSet(type) std::set<type, std::less<type>, r3dSTLCustomAllocator<type, ALLOC_TYPE_GFX> >
 #define r3dgfxMap(key, value) std::map<key, value, std::less<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GFX> >
 #define r3dgfxMultiMap(key, value) std::multimap<key, value, std::less<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GFX> >
-#define r3dgfxHashMap(key, value) stdext::hash_map<key, value, stdext::hash_compare<key, std::less<key> >, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GFX> >
-#define r3dgfxUnorderedMap(key, value) std::tr1::unordered_map<key, value, std::tr1::hash<key>, std::equal_to<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GFX > >
+#define r3dgfxHashMap(key, value) std::unordered_map<key, value, std::hash<key>, std::equal_to<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GFX> >
+#define r3dgfxUnorderedMap(key, value) std::unordered_map<key, value, std::hash<key>, std::equal_to<key>, r3dSTLCustomAllocator<std::pair<const key, value>, ALLOC_TYPE_GFX > >
 
 typedef std::basic_string<char, std::char_traits<char>, r3dSTLCustomAllocator<char, ALLOC_TYPE_GAME> > r3dSTLString;
 
@@ -90,16 +90,16 @@ typedef std::basic_string<char, std::char_traits<char>, r3dSTLCustomAllocator<ch
 #define r3dgameMap(key, value) std::map<key, value >
 #define r3dgameMultiMap(key, value) std::multimap<key, value >
 #define r3dgameMultiMapCmp(key, value, cmp) std::multimap<key, value, cmp >
-#define r3dgameHashMap(key, value) stdext::hash_map<key, value >
-#define r3dgameUnorderedMap(key, value) std::tr1::unordered_map<key, value >
+#define r3dgameHashMap(key, value) std::unordered_map<key, value >
+#define r3dgameUnorderedMap(key, value) std::unordered_map<key, value >
 
 #define r3dgfxVector(type) std::vector<type >
 #define r3dgfxList(type) std::list<type >
 #define r3dgfxSet(type) std::set<type >
 #define r3dgfxMap(key, value) std::map<key, value >
 #define r3dgfxMultiMap(key, value) std::multimap<key, value >
-#define r3dgfxHashMap(key, value) stdext::hash_map<key, value >
-#define r3dgfxUnorderedMap(key, value) std::tr1::unordered_map<key, value >
+#define r3dgfxHashMap(key, value) std::unordered_map<key, value >
+#define r3dgfxUnorderedMap(key, value) std::unordered_map<key, value >
 
 typedef std::basic_string<char, std::char_traits<char>, std::allocator<char> > r3dSTLString;
 

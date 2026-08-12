@@ -3,7 +3,7 @@
 
 #include "Gameplay_Params.h"
 #include "GameCommon.h"
-#include "../ai/AI_Player.H"
+#include "../AI/AI_Player.H"
 
 #include "obj_ItemSpawnPoint.h"
 #include "gameobjects/obj_Mesh.h"

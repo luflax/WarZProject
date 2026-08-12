@@ -1,26 +1,26 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "APIScaleformGfx.h"
-#include "AI_Player.h"
+#include "AI_Player.H"
 #include "AI_PlayerAnim.h"
 
 #include "r3dPhysSkeleton.h"
 
-#include "ObjectsCode\Effects\obj_ParticleSystem.h"
+#include "ObjectsCode/EFFECTS/obj_ParticleSystem.H"
 
 #include "Particle.h"
 
-#include "ObjectsCode/world/DecalChief.h"
-#include "ObjectsCode/world/MaterialTypes.h"
+#include "ObjectsCode/WORLD/DecalChief.h"
+#include "ObjectsCode/WORLD/MaterialTypes.h"
 
-#include "ObjectsCode/weapons/Weapon.h"
+#include "ObjectsCode/WEAPONS/Weapon.h"
 
-#include "ObjectsCode/weapons/Gear.h"
+#include "ObjectsCode/WEAPONS/Gear.h"
 #include "ObjectsCode/WEAPONS/Ammo.h"
-#include "ObjectsCode/weapons/Grenade.h"
-#include "ObjectsCode/weapons/WeaponArmory.h"
-#include "ObjectsCode/weapons/ExplosionVisualController.h"
+#include "ObjectsCode/WEAPONS/Grenade.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/ExplosionVisualController.h"
 
 #include "ObjectsCode/Gameplay/obj_PlayerSpawnPoint.h"
 #include "ObjectsCode/Gameplay/obj_DamageArea.h"
@@ -49,18 +49,18 @@
 #include "../SF/CmdProcessor/CmdProcessor.h"
 #include "../SF/CmdProcessor/CmdConsole.h"
 
-#include "..\..\ui\HUDDisplay.h"
-#include "..\..\ui\HUD_EditorGame.h"
-#include "..\..\ui\FrontEndShared.h"
-#include "..\..\ui\HUDPause.h"
-#include "..\..\ui\HUDVault.h"
-#include "..\..\ui\HUDSafelock.h"
-#include "..\..\ui\HUDTrade.h"
-#include "..\..\ui\HUDStore.h"
-#include "..\..\ui\HUDActionUI.h"
-#include "..\..\ui\HUDAttachments.h"
-#include "..\..\ui\HUDRepair.h"
-#include "..\..\ui\HUDCrafting.h"
+#include "../../UI/HUDDisplay.h"
+#include "../../UI/HUD_EditorGame.h"
+#include "../../UI/FrontEndShared.h"
+#include "../../UI/HUDPause.h"
+#include "../../UI/HUDVault.h"
+#include "../../UI/HUDSafelock.h"
+#include "../../UI/HUDTrade.h"
+#include "../../UI/HUDStore.h"
+#include "../../UI/HUDActionUI.h"
+#include "../../UI/HUDAttachments.h"
+#include "../../UI/HUDRepair.h"
+#include "../../UI/HUDCrafting.h"
 
 extern HUDDisplay*	hudMain;
 extern HUDPause*	hudPause;
@@ -90,7 +90,7 @@ float		_ai_NetPosUpdateDelta = 1.0f / 10;	// "30"
 
 bool		g_CameraInsidePlayer = false;
 
-#include "../../rendering/Deffered/PFX_ScopeEffect.h"
+#include "../../RENDERING/Deffered/PFX_ScopeEffect.h"
 extern int g_RenderScopeEffect;
 extern PFX_ScopeEffect gPFX_ScopeEffect;
 

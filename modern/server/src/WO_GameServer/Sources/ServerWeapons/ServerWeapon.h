@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../EclipseStudio/Sources/ObjectsCode/weapons/WeaponConfig.h"
+#include "../EclipseStudio/Sources/ObjectsCode/WEAPONS/WeaponConfig.h"
 
 class Ammo;
 class GameObject;

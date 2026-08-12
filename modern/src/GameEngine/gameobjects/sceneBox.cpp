@@ -5,9 +5,9 @@
 #include "sceneBox.h"
 #include "ObjManag.h"
 
-#include "Rendering/Deffered/VisibilityGrid.h"
+#include "RENDERING/Deffered/VisibilityGrid.h"
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "JobChief.h"
 

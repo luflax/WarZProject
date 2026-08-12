@@ -1,11 +1,11 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "multiplayer/P2PMessages.h"
 
 #include "obj_Vehicle.h"
 #include "obj_VehicleSpawnPoint.h"
-#include "GameObjects/VehicleDescriptor.h"
+#include "gameobjects/VehicleDescriptor.h"
 #include "../obj_ServerPlayer.h"
 #include "../obj_ServerBarricade.h"
 #include "../../GameEngine/ai/AutodeskNav/AutodeskNavMesh.h"

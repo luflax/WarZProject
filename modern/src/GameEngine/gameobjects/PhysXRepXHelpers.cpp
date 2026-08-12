@@ -9,9 +9,9 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-#include "RepX\RepX.h"
-#include "RepX\RepXUtility.h"
-#include "extensions\PxStringTableExt.h"
+#include "RepX/RepX.h"
+#include "RepX/RepXUtility.h"
+#include "extensions/PxStringTableExt.h"
 //#include "PhysX\PxFoundation\internal\PxIOStream\public\PxFileBuf.h"
 
 #include "PhysXRepXHelpers.h"

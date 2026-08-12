@@ -6,9 +6,9 @@
 #include "CkHttp.h"
 
 #include "FrontEndShared.h"
-#include "GameCode\UserProfile.h"
-#include "GameCode\UserClans.h"
-#include "GameCode\UserServerRental.h"
+#include "GameCode/UserProfile.h"
+#include "GameCode/UserClans.h"
+#include "GameCode/UserServerRental.h"
 
 class FrontendWarZ : public UIMenu, public r3dIResource
 {
@@ -213,7 +213,7 @@ private:
 	// Async Function Calls
 	//
 	typedef void (FrontendWarZ::*fn_finish)();
-	typedef unsigned int (WINAPI *fn_thread)(void*);
+	typedef (unsigned int)(WINAPI *fn_thread)(void*);
 
 	float		lastServerReqTime_;
 	void		DelayServerRequest();

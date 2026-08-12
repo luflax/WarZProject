@@ -1,7 +1,7 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 
-#include "ObjectsCode/world/EnvmapProbes.h"
+#include "ObjectsCode/WORLD/EnvmapProbes.h"
 #include "../../RENDERING/Deffered/HUDFilters.h"
 
 #include "RENDERING/Deffered/RenderDeffered.h"

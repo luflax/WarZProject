@@ -54,9 +54,9 @@ void NormalizeYPR ( r3dVector & ypr )
 
 #ifndef FINAL_BUILD
 
-#include "ui/UIimEdit2.h"
-#include "gamecommon.h"
-#include "../ObjectsCode/WORLD/obj_Group.h"
+#include "UI/UIimEdit2.h"
+#include "GameCommon.h"
+#include "../ObjectsCode/WORLD/obj_Group.H"
 
 #include "LevelEditor.h"
 

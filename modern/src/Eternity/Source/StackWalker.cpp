@@ -25,7 +25,7 @@
  **********************************************************************/
 #include "r3dPCH.h"
 
-#pragma comment(lib, "version.lib")  // for "VerQueryValue"
+// [PORT] linking handled by CMake: #pragma comment(lib, "version.lib")  // for "VerQueryValue"
 
 #include "StackWalker.h"
 

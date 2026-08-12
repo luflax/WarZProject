@@ -3,16 +3,16 @@
 
 #include "r3dBackgroundTaskDispatcher.h"
 
-#include "d3dfont.h"
+#include "d3dFont.h"
 
 #include "GameCommon.h"
 #include "Gameplay_Params.h"
 
-#include "UI\HUD_TPSGame.h"
-#include "ObjectsCode/AI/AI_Player.h"
+#include "UI/HUD_TPSGame.h"
+#include "ObjectsCode/AI/AI_Player.H"
 #include "ObjectsCode/AI/AI_PlayerAnim.h"
 #include "ObjectsCode/Gameplay/BasePlayerSpawnPoint.h"
-#include "ObjectsCode/weapons/WeaponArmory.h"
+#include "ObjectsCode/WEAPONS/WeaponArmory.h"
 
 #include "APIScaleformGfx.h"
 
@@ -20,20 +20,20 @@
 
 #include "HUDCameraEffects.h"
 
-#include "UI\HUDDisplay.h"
-#include "UI\HUDPause.h"
-#include "UI\HUDAttachments.h"
-#include "UI\HUDVault.h"
-#include "UI\HUDStore.h"
-#include "UI\HUDActionUI.h"
-#include "UI\HUDSafelock.h"
-#include "UI\HUDTrade.h"
-#include "UI\HUDRepair.h"
-#include "UI\HUDCrafting.h"
+#include "UI/HUDDisplay.h"
+#include "UI/HUDPause.h"
+#include "UI/HUDAttachments.h"
+#include "UI/HUDVault.h"
+#include "UI/HUDStore.h"
+#include "UI/HUDActionUI.h"
+#include "UI/HUDSafelock.h"
+#include "UI/HUDTrade.h"
+#include "UI/HUDRepair.h"
+#include "UI/HUDCrafting.h"
 
-#include "..\GameEngine\gameobjects\obj_Vehicle.h"
+#include "../GameEngine/gameobjects/obj_Vehicle.h"
 
-#include "rendering/Deffered/D3DMiscFunctions.h"
+#include "RENDERING/Deffered/D3DMiscFunctions.h"
 
 extern bool g_bEditMode;
 extern float GameFOV;

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameCommon.h"
-#include "..\..\GameCode\UserProfile.h"
+#include "../../GameCode/UserProfile.h"
 
 class BaseVehicleSpawnPoint : public MeshGameObject
 {

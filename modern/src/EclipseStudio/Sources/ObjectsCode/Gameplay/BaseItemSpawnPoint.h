@@ -1,7 +1,7 @@
 #pragma once
 
 #include "GameCommon.h"
-#include "..\..\GameCode\UserProfile.h"
+#include "../../GameCode/UserProfile.h"
 
 // base class, shared for client and server
 class BaseItemSpawnPoint : public MeshGameObject

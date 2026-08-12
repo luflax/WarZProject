@@ -8,10 +8,10 @@
 #include "obj_MechEvents.h"
 #include "obj_Mech.h"
 #include "GameCommon.h"
-#include "..\EFFECTS\obj_ParticleSystem.H"
+#include "../EFFECTS/obj_ParticleSystem.H"
 #include "Particle.h"
 #include "XMLHelpers.h"
-#include <Shlwapi.h>
+#include <shlwapi.h>
 
 //////////////////////////////////////////////////////////////////////////
 

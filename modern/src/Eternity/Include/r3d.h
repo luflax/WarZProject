@@ -59,15 +59,15 @@ struct r3dCSHolderWithDeviceQueue
 };
 
 
-#include "TSG_STL\TArray.h"
-#include "TSG_STL\TLinkedArray.h"
-#include "TSG_STL\TStaticArray.h"
-#include "TSG_STL\TFixedArray.h"
-#include "TSG_STL\TTabArray.h"
-#include "TSG_STL\T2DArray.h"
-#include "TSG_STL\TFixedAllocator.h"
+#include "Tsg_stl/TArray.h"
+#include "Tsg_stl/TLinkedArray.h"
+#include "Tsg_stl/TStaticArray.h"
+#include "Tsg_stl/TFixedArray.h"
+#include "Tsg_stl/TTabArray.h"
+#include "Tsg_stl/T2DArray.h"
+#include "Tsg_stl/TFixedAllocator.h"
 
-#include "..\..\External\pugiXML\src\pugixml.hpp"
+#include "../../External/pugiXML/src/pugixml.hpp"
 
 enum r3dBudgetCategories
 {
@@ -140,7 +140,7 @@ extern void r3dUpdateArtBugs();
 #include "r3dColor.h"
 
 // some stuff there uses r3dPoint.h ...
-#include "TSG_STL\BigEndian.h"
+#include "Tsg_stl/BigEndian.h"
 
 #define R3D_ZERO_VECTOR r3dVector(0, 0, 0)
 
@@ -352,7 +352,7 @@ struct r3dTriBatch
 };
 
 #include "pShader.h"
-#include "vShader.h"
+#include "VShader.h"
 #include "r3dTex.h"
 #include "r3dMat.h"
 #include "r3dCam.h"
@@ -362,13 +362,13 @@ struct r3dTriBatch
 #include "r3dInput.h"
 #include "r3dLight.h"
 #include "d3dFont.h"
-#include "r3dBuffer.h"
+#include "r3dbuffer.h"
 #include "r3dCubeMap.h"
 #include "Pipeline.h"
 
-#include "r3dAnimation.h"
-#include "r3dSkeleton.h"
-#include "r3dSkin.h"
+#include "r3dAnimation.H"
+#include "r3dSkeleton.H"
+#include "r3dSkin.H"
 
 #include "CVar.h"
 

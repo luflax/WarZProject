@@ -8,10 +8,10 @@
 
 #include "MissionCommands.h"
 #include "GameCommon.h"
-#include "..\obj_ServerItemSpawnPoint.h"
-#include "..\sobj_SpawnedItem.h"
-#include "..\obj_ServerPlayer.h"
-#include "..\sobj_DroppedItem.h"
+#include "../obj_ServerItemSpawnPoint.h"
+#include "../sobj_SpawnedItem.h"
+#include "../obj_ServerPlayer.h"
+#include "../sobj_DroppedItem.h"
 
 //-------------------------------------------------------------------------
 

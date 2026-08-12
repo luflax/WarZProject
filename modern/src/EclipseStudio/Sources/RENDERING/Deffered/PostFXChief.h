@@ -1,6 +1,6 @@
 #pragma once
 
-#include "../sf/RenderBuffer.h"
+#include "../SF/RenderBuffer.h"
 
 #include "PostFX.h"
 

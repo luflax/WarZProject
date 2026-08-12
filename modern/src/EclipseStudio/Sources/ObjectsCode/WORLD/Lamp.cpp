@@ -2,12 +2,12 @@
 #include "r3d.h"
 
 #include "GameCommon.h"
-#include "Lamp.h"
+#include "Lamp.H"
 
 #include "GameLevel.h"
 
 #include "Editors/ObjectManipulator3d.h"
-#include "ui/UIimEdit2.h"
+#include "UI/UIimEdit2.h"
 
 
 //

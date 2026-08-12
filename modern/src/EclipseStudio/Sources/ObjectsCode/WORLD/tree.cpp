@@ -1,15 +1,15 @@
-#include "r3dpch.h"
+#include "r3dPCH.h"
 #include "r3d.h"
 
 #include "UI/UIimEdit.h"
 
 #include "Editors/LevelEditor_Collections.h"
 
-#include "GameObjects\gameobj.h"
-#include "GameObjects\objmanag.h"
+#include "gameobjects/GameObj.h"
+#include "gameobjects/ObjManag.h"
 #include "tree.h"
-#include "..\..\bin\Data\Shaders\DX9_P1\system\LibSM\shadow_config.h" // shader config file
-#include "..\..\..\..\GameEngine\TrueNature2\Terrain3.h"
+#include "../../bin/Data/Shaders/DX9_P1/system/LibSM/shadow_config.h" // shader config file
+#include "../../../../GameEngine/TrueNature2/Terrain3.h"
 #include "../../Editors/CollectionsManager.h"
 
 //

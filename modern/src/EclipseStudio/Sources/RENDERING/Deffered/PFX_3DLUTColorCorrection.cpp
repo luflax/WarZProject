@@ -3,7 +3,7 @@
 
 #include "GameCommon.h"
 #include "../../EclipseStudio/Sources/ObjectsCode/Nature/obj_LocalColorCorrection.h"
-#include "../../EclipseStudio/Sources/ObjectsCode/ai/AI_Player.H"
+#include "../../EclipseStudio/Sources/ObjectsCode/AI/AI_Player.H"
 
 #include "PostFXChief.h"
 

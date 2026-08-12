@@ -12,7 +12,7 @@
 #include "r3dProfiler.h"
 #include "../../EclipseStudio/Sources/GameLevel.h"
 
-#include <Shlwapi.h>
+#include <shlwapi.h>
 
 //////////////////////////////////////////////////////////////////////////
 

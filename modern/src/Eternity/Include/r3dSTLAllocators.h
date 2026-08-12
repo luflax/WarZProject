@@ -51,11 +51,11 @@ public:
 	/*constructors and destructor
 	*-nothing to do because the allocator has no state
 	*/
-	r3dSTLCustomAllocator() throw() {}
-	r3dSTLCustomAllocator(const r3dSTLCustomAllocator&) throw() {}
+	r3dSTLCustomAllocator() noexcept {}
+	r3dSTLCustomAllocator(const r3dSTLCustomAllocator&) noexcept {}
 	template <class U>
-	r3dSTLCustomAllocator(const r3dSTLCustomAllocator<U, AT>&) throw() {}
-	~r3dSTLCustomAllocator() throw() {}
+	r3dSTLCustomAllocator(const r3dSTLCustomAllocator<U, AT>&) noexcept {}
+	~r3dSTLCustomAllocator() noexcept {}
 
 	//return maximum number of elements that can be allocated
 	size_type max_size() const throw()
@@ -99,13 +99,13 @@ public:
 //return that all specializations of this allocator are interchangeable
 template <class T1, class T2, int AT>
 bool operator== (const r3dSTLCustomAllocator<T1, AT>&,
-	const r3dSTLCustomAllocator<T2, AT>&) throw()
+	const r3dSTLCustomAllocator<T2, AT>&) noexcept
 {
 	return true;
 }
 template <class T1, class T2, int AT>
 bool operator!= (const r3dSTLCustomAllocator<T1, AT>&,
-	const r3dSTLCustomAllocator<T2, AT>&) throw()
+	const r3dSTLCustomAllocator<T2, AT>&) noexcept
 {
 	return false;
 }

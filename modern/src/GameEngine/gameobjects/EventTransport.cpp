@@ -4,7 +4,7 @@
 
 #include "EventTransport.h"
 
-#include "GameObjects\ObjManag.h"
+#include "gameobjects/ObjManag.h"
 
 /*
 	r3dNetwork	p2pNet;

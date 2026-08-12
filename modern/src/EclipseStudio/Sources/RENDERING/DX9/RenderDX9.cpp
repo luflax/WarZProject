@@ -1,10 +1,10 @@
 #include "r3dPCH.h"
 #include "r3d.h"
 #include "r3dLight.h"
-#include "d3dfont.h"
+#include "d3dFont.h"
 
 #include "Editors/LevelEditor_Collections.h"
-#include "../../ObjectsCode/world/WaterPlane.H"
+#include "../../ObjectsCode/WORLD/WaterPlane.H"
 
 #include "GameCommon.h"
 

@@ -4,8 +4,8 @@
 #include "Safelock.h"
 #include "WeaponConfig.h"
 #include "WeaponArmory.h"
-#include "..\ai\AI_Player.H"
-#include "..\..\multiplayer\ClientGameLogic.h"
+#include "../AI/AI_Player.H"
+#include "../../multiplayer/ClientGameLogic.h"
 
 
 IMPLEMENT_CLASS(obj_Safelock, "obj_Safelock", "Object");

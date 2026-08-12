@@ -16,7 +16,7 @@ class CTeamSpeakServer
 	  DWORD		CustomerID;
 	};
 	
-	stdext::hash_map<int, client_s> m_clients;
+	std::unordered_map<int, client_s> m_clients;
 	int		m_curClients;
 	int		m_serverSlots;
 	void		AddClient(int clientID, int peerId);

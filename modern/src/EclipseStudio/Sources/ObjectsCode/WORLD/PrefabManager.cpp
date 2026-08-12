@@ -7,7 +7,7 @@
 #include "r3d.h"
 #include "PrefabManager.h"
 #include "../../../GameEngine/gameobjects/ObjManag.h"
-#include <Shlwapi.h>
+#include <shlwapi.h>
 
 //////////////////////////////////////////////////////////////////////////
 

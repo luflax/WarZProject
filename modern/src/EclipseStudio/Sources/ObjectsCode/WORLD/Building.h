@@ -1,7 +1,7 @@
 #ifndef __PWAR_OBJECT_BUILDING_H
 #define __PWAR_OBJECT_BUILDING_H
 
-#include "UI\UIimEdit.h"
+#include "UI/UIimEdit.h"
 
 class obj_ParticleSystem ;
 
