@@ -244,6 +244,47 @@ if(WARZ_BUILD_SERVER AND WARZ_GAMESERVER_TESTABLE_SOURCES)
     endif()
 endif()
 
+# ---------------------------------------------------------------------------
+# The Milestone C ladder
+#
+# PHASE1-BUILD-PLAN.md:170 states the server criterion as one sentence covering four
+# independent claims. These stages take that single bit apart, so that a failure names
+# the subsystem instead of saying "the server did not boot". Each runs the REAL
+# GameServer.exe -- not a test double -- through --selftest, which enters the same
+# initialisation the boot path does while skipping the shell that demands a
+# SupervisorServer and a backend. See ServerSelfTest.cpp.
+#
+# They are ordered, and each depends on everything before it, so ctest is told as much:
+# when `world` fails there is no information in also running `level`.
+# ---------------------------------------------------------------------------
+
+if(WARZ_BUILD_SERVER AND TARGET GameServer)
+    add_test(NAME milestone_c.config
+        COMMAND GameServer --selftest=config)
+
+    add_test(NAME milestone_c.world
+        COMMAND GameServer --selftest=world --ticks=100)
+
+    add_test(NAME milestone_c.level
+        COMMAND GameServer --selftest=level --ticks=100
+                --level=${CMAKE_CURRENT_SOURCE_DIR}/fixtures/levels/UnitTestLevel)
+
+    set_tests_properties(milestone_c.config PROPERTIES LABELS "milestone-c")
+    set_tests_properties(milestone_c.world  PROPERTIES LABELS "milestone-c" DEPENDS milestone_c.config)
+    set_tests_properties(milestone_c.level  PROPERTIES LABELS "milestone-c" DEPENDS milestone_c.world)
+
+    # The stage runner reports through r3dOutToLog, so a stage that fails part way still
+    # prints which subsystem it got to. Requiring the final line keeps a crash after a
+    # PASS from being read as success.
+    set_tests_properties(milestone_c.config milestone_c.world milestone_c.level
+        PROPERTIES PASS_REGULAR_EXPRESSION "SELFTEST PASSED")
+
+    if(NOT WARZ_EMULATOR_WORKS)
+        set_tests_properties(milestone_c.config milestone_c.world milestone_c.level
+            PROPERTIES DISABLED TRUE)
+    endif()
+endif()
+
 if(WARZ_EMULATOR_WORKS)
     set(_emu_status "${CMAKE_CROSSCOMPILING_EMULATOR} (verified: runs PE32)")
 elseif(CMAKE_CROSSCOMPILING_EMULATOR)

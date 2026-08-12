@@ -22,6 +22,7 @@
 #include "../../../../src/GameEngine/ai/AI_Brain.h"
 #include "AsyncFuncs.h"
 #include "TeamSpeakServer.h"
+#include "ServerSelfTest.h"   // [PORT] Milestone C stage runner
 
 // PunkBuster SDK
 #ifdef __WITH_PB__
@@ -369,6 +370,21 @@ int main(int argc, char* argv[])
     moveWindowToCorner();
   } 
 #endif
+
+  // [PORT] Milestone C self-test. Placed here deliberately: after the globals above,
+  // which suppress textures, materials and mesh buffers and are what let the server run
+  // headless at all, but BEFORE ParseArgs and gameServerLoop -- which demand five
+  // positional arguments from the SupervisorServer and then call r3dError if the
+  // backend does not answer. See ServerSelfTest.cpp.
+  {
+    SelfTestOptions selfTest;
+    if(SelfTest_ParseArgs(argc, argv, &selfTest))
+    {
+      extern int _r3d_bLogToConsole;
+      _r3d_bLogToConsole = 1;   // the whole point is to watch it run
+      return SelfTest_Run(selfTest);
+    }
+  }
 
   try
   {

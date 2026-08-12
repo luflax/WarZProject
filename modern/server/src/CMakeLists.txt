@@ -90,8 +90,17 @@ warz_add_server(MasterServer
 # KY_BUILD_SHIPPING is a leftover of the Kynapse integration that the source still
 # tests; Recast/Detour replaced Kynapse but the guard remains.
 # ---------------------------------------------------------------------------
+# Sources added by the PORT rather than inherited from the .vcxproj. They are listed
+# here and not in cmake/sources/WO_GameServer.cmake because that file is GENERATED from
+# the original project file by tools/gen_sources.py -- anything added to it is lost the
+# next time it is regenerated.
+set(WARZ_WO_GAMESERVER_PORT_SOURCES
+    ${WARZ_ROOT}/server/src/WO_GameServer/Sources/ServerSelfTest.cpp
+)
+
 warz_add_server(GameServer
     SOURCES  ${WARZ_WO_GAMESERVER_SOURCES} ${WARZ_WO_GAMESERVER_SHARED_SOURCES}
+             ${WARZ_WO_GAMESERVER_PORT_SOURCES}
     DEFINES  _CRT_SECURE_NO_WARNINGS KY_BUILD_SHIPPING
     INCLUDES ${WARZ_ROOT}/server/src/WO_GameServer/Sources
     LIBS     ${WARZ_RECAST_LIBS} ${WARZ_PHYSX_LIBS}
@@ -124,6 +133,7 @@ set(_gameserver_entry ${WARZ_ROOT}/server/src/WO_GameServer/Sources/ServerMain.c
 set(_gameserver_testable
     ${WARZ_WO_GAMESERVER_SOURCES}
     ${WARZ_WO_GAMESERVER_SHARED_SOURCES}
+    ${WARZ_WO_GAMESERVER_PORT_SOURCES}
 )
 list(REMOVE_ITEM _gameserver_testable ${_gameserver_entry})
 
@@ -133,8 +143,9 @@ list(REMOVE_ITEM _gameserver_testable ${_gameserver_entry})
 # still visible.
 list(LENGTH WARZ_WO_GAMESERVER_SOURCES _n_own)
 list(LENGTH WARZ_WO_GAMESERVER_SHARED_SOURCES _n_shared)
+list(LENGTH WARZ_WO_GAMESERVER_PORT_SOURCES _n_port)
 list(LENGTH _gameserver_testable _n_testable)
-math(EXPR _n_expected "${_n_own} + ${_n_shared} - 1")
+math(EXPR _n_expected "${_n_own} + ${_n_shared} + ${_n_port} - 1")
 if(NOT _n_testable EQUAL _n_expected)
     message(FATAL_ERROR
         "Failed to exclude ServerMain.cpp from the testable GameServer sources.\n"
