@@ -1,3 +1,4 @@
 .probe-failed*
 .probe-orphans
 .probe-shared*
+.objs/

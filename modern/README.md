@@ -23,8 +23,13 @@ fork is deliberately cut.
 | **server/src** (3 server binaries) | ✅ **71/71 TUs compile** |
 | Shared sources, server configuration | ✅ **48/48 TUs compile** |
 | **Milestone A — compiles** | ✅ **done** |
-| Milestone B — links | ⬜ not started |
+| Milestone B — links | 📋 **planned** — see [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) |
 | Milestone C — runs to a known point | ⬜ not started |
+
+> Milestone B reconnaissance found two gaps in the counts below, both documented in the
+> plan: ten `Eternity/SF` + `UndoHistory` sources were outside the probed directory (the
+> engine is **91** TUs, not 81), and Eternity/GameEngine have only ever been checked in
+> their *server* configuration. Both are fixed in the plan's first step.
 
 **Milestone A is complete: the whole product compiles under strict ISO C++20** — 405
 translation units plus 48 re-checked in their server configuration, no `-fpermissive`,
@@ -197,4 +202,5 @@ Full audit: [`../DEPENDENCIES.md`](../DEPENDENCIES.md).
 | [`../CLAUDE.md`](../CLAUDE.md) | Codebase architecture and conventions |
 | [`../DEPENDENCIES.md`](../DEPENDENCIES.md) | Dependency audit and replacement choices |
 | [`../PHASE1-BUILD-PLAN.md`](../PHASE1-BUILD-PLAN.md) | This phase — milestones, work breakdown, risks |
+| [`../MILESTONE-B-PLAN.md`](../MILESTONE-B-PLAN.md) | Milestone B (linking) — measured work list, ordering, risks |
 | [`../PERFORMANCE-OPTIMIZATION-PLAN.md`](../PERFORMANCE-OPTIMIZATION-PLAN.md) | The performance work this unblocks |
