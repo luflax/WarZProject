@@ -170,7 +170,11 @@ target_link_libraries(warz_tests PRIVATE
 # ---------------------------------------------------------------------------
 
 if(NOT DEFINED WARZ_EMULATOR_WORKS)
-    if(CMAKE_CROSSCOMPILING_EMULATOR)
+    if(NOT CMAKE_CROSSCOMPILING)
+        # Building ON Windows, for Windows. The binaries are native here, so there is
+        # nothing to emulate and nothing to probe -- every tier runs directly.
+        set(WARZ_EMULATOR_WORKS ON CACHE INTERNAL "native build: no emulator needed")
+    elseif(CMAKE_CROSSCOMPILING_EMULATOR)
         set(_probe "${CMAKE_CURRENT_BINARY_DIR}/emulator_probe.cpp")
         file(WRITE "${_probe}" "int main() { return 42; }\n")
 
@@ -285,7 +289,9 @@ if(WARZ_BUILD_SERVER AND TARGET GameServer)
     endif()
 endif()
 
-if(WARZ_EMULATOR_WORKS)
+if(WARZ_EMULATOR_WORKS AND NOT CMAKE_CROSSCOMPILING)
+    set(_emu_status "none needed -- native build, tests run directly")
+elseif(WARZ_EMULATOR_WORKS)
     set(_emu_status "${CMAKE_CROSSCOMPILING_EMULATOR} (verified: runs PE32)")
 elseif(CMAKE_CROSSCOMPILING_EMULATOR)
     set(_emu_status "${CMAKE_CROSSCOMPILING_EMULATOR} FOUND BUT CANNOT RUN PE32 -- warz_tests disabled")
